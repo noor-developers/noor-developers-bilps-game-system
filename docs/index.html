@@ -2514,6 +2514,29 @@
       document.getElementById('newUserConfirmPassword').value = '';
       
       addLog("Yangi foydalanuvchi qo'shildi", login);
+      
+      // Supabase-ga yuborish
+      if (USE_ONLINE_BACKUP && STATE.currentUser) {
+        const userData = {
+          username: login,
+          password: password
+        };
+        fetch(`${API_URL}/add-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            console.log('✅ Foydalanuvchi Supabase-ga qo\'shildi');
+          } else {
+            console.warn('⚠️ Supabase-ga qo\'shish muammosi:', data.error);
+          }
+        })
+        .catch(e => console.warn('Backend xatosi:', e));
+      }
+      
       saveData(); // Yangi foydalanuvchini darhol saqlash
       showNotification('✅ Yangi foydalanuvchi qo\'shildi! Sozlamalarni saqlashni unutmang!');
     }
