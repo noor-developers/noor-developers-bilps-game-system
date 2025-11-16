@@ -2,6 +2,11 @@
 
 Billiard, PlayStation, va Bar'ning joylarini boshqarish uchun to'liq tizim.
 
+## 🌐 Online Versiya
+
+**Frontend**: https://noor-developers.github.io/noor-developers-bilps-game-system/  
+**Backend**: https://noor-bilps-backend.onrender.com
+
 ## ✨ Xususiyatlari
 
 ✅ **Smena boshqaruvi** - O'z-o'zidan vaqtni hisoblash  
