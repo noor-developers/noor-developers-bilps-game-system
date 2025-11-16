@@ -8,7 +8,12 @@ const PORT = process.env.PORT || 3000;
 
 // CORS sozlash
 app.use(cors({
-  origin: ['http://localhost:8000', 'http://localhost:3000', 'file://'],
+  origin: [
+    'http://localhost:8000',
+    'http://localhost:3000',
+    'file://',
+    'https://noor-developers.github.io'
+  ],
   credentials: true
 }));
 
