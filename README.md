@@ -51,12 +51,12 @@ npm start
 ## 🔑 Default Login
 
 ```
-Username: noordev
-Password: Noor3112
+Username: 
+Password: 
 ```
 
 Yangi foydalanuvchi qo'shish uchun:
-1. ⚙️ Sozlamalar (1234)
+1. ⚙️ Sozlamalar ()
 2. "➕ Yangi Foydalanuvchi Qo'shish" formasidan qo'shing
 3. "Saqlash" bosing
 
