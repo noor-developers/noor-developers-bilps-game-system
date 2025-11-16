@@ -6,15 +6,12 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS sozlash
+// CORS sozlash - Hammasini ruxsat berish
 app.use(cors({
-  origin: [
-    'http://localhost:8000',
-    'http://localhost:3000',
-    'file://',
-    'https://noor-developers.github.io'
-  ],
-  credentials: true
+  origin: '*',
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
