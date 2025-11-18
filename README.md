@@ -1,3 +1,4 @@
+
 # NOOR Game Management System
 
 Billiard, PlayStation, va Bar'ning joylarini boshqarish uchun to'liq tizim.

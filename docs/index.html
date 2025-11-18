@@ -297,7 +297,7 @@
         <h1>Game Management System</h1>
       </div>
       <div class="login-box">
-        <div class="login-form">
+        <div class="login-form" id="loginFormDiv">
           <h2>Tizimga kirish</h2>
           <div class="input-group">
             <input type="text" id="loginUsername" placeholder="Foydalanuvchi nomi" />
@@ -306,6 +306,25 @@
             <input type="password" id="loginPassword" placeholder="Parol" />
           </div>
           <button class="login-btn" onclick="login()">Kirish</button>
+          <div style="text-align:center;margin-top:15px;color:#64748b;">
+            Akkauntingiz yo'qmi? <a href="#" onclick="showRegisterForm(); return false;" style="color:#667eea;font-weight:600;">Ro'yxatdan o'tish</a>
+          </div>
+        </div>
+        <div class="login-form" id="registerFormDiv" style="display:none;">
+          <h2>Ro'yxatdan o'tish</h2>
+          <div class="input-group">
+            <input type="text" id="registerUsername" placeholder="Foydalanuvchi nomi" />
+          </div>
+          <div class="input-group">
+            <input type="password" id="registerPassword" placeholder="Parol" />
+          </div>
+          <div class="input-group">
+            <input type="password" id="registerConfirmPassword" placeholder="Parolni tasdiqlash" />
+          </div>
+          <button class="login-btn" onclick="register()">Ro'yxatdan o'tish</button>
+          <div style="text-align:center;margin-top:15px;color:#64748b;">
+            Akkauntingiz bormi? <a href="#" onclick="showLoginForm(); return false;" style="color:#667eea;font-weight:600;">Kirish</a>
+          </div>
         </div>
         <div class="login-footer">
           <div class="clock" id="loginClock">00:00:00</div>
@@ -587,7 +606,7 @@
           </div>
           <h3 style="color:#3b82f6;margin-bottom:15px;margin-top:20px;">Foydalanuvchilar (Login - Parol)</h3>
           <div class="form-group">
-            <textarea id="usersInput" placeholder="noordev - Noor3112&#10;xodim2 - 1234"></textarea>
+            <textarea id="usersInput" placeholder="login1 - parol1&#10;login2 - parol2"></textarea>
           </div>
           
           <!-- YANGI: FOYDALANUVCHI QO'SHISH FORMASI -->
@@ -714,7 +733,7 @@
 
     // ========== STATE ==========
     const DEFAULT_STATE = {
-      users: [{ username: "noordev", pass: "Noor3112" }], // YANGI STANDART LOGIN
+      users: [], // Har kim o'z akkauntini yaratadi
       settingsPassword: "1234",
       transferCardNumber: "1234 1234 1234 1234",
       isLoggedIn: false,
@@ -861,6 +880,75 @@
     document.addEventListener('click', updateActivity);
     document.addEventListener('keypress', updateActivity);
     document.addEventListener('mousemove', updateActivity);
+
+    // ========== LOGIN ==========
+    // ========== REGISTRATION ==========
+    function showRegisterForm() {
+      document.getElementById('loginFormDiv').style.display = 'none';
+      document.getElementById('registerFormDiv').style.display = 'block';
+    }
+
+    function showLoginForm() {
+      document.getElementById('loginFormDiv').style.display = 'block';
+      document.getElementById('registerFormDiv').style.display = 'none';
+    }
+
+    async function register() {
+      const username = document.getElementById('registerUsername').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+      if (!username || !password || !confirmPassword) {
+        showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showNotification('❌ Parollar mos kelmadi!');
+        return;
+      }
+
+      if (password.length < 4) {
+        showNotification('❌ Parol kamida 4 ta belgidan iborat bo\'lishi kerak!');
+        return;
+      }
+
+      // Mavjud user tekshirish
+      if (STATE.users.find(u => u.username === username)) {
+        showNotification('❌ Bu login band! Boshqa tanlang.');
+        return;
+      }
+
+      // Yangi user qo'shish
+      STATE.users.push({ username, pass: password });
+      saveData();
+
+      // Supabase-ga yuborish
+      if (USE_ONLINE_BACKUP) {
+        try {
+          const response = await fetch(`${API_URL}/add-user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await response.json();
+          if (data.success) {
+            console.log('✅ User Supabase-ga qo\'shildi');
+          }
+        } catch (e) {
+          console.warn('Backend xatosi:', e);
+        }
+      }
+
+      showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
+      addLog('Yangi user yaratildi', username);
+      
+      // Login formaga qaytish
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('registerConfirmPassword').value = '';
+      showLoginForm();
+    }
 
     // ========== LOGIN ==========
     function login() {
