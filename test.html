@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Noor Bilps System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🧪 Backend Test Panel</h1>
+        
+        <h3>1. Health Check</h3>
+        <button onclick="testHealth()">Test Backend Health</button>
+        
+        <h3>2. Load Users</h3>
+        <button onclick="testLoadUsers()">Load All Users from Supabase</button>
+        
+        <h3>3. Register New User</h3>
+        <input type="text" id="newUsername" placeholder="Username" style="padding:10px;margin:5px;">
+        <input type="password" id="newPassword" placeholder="Password" style="padding:10px;margin:5px;">
+        <button onclick="testRegister()">Register User</button>
+        
+        <h3>4. Test Login</h3>
+        <input type="text" id="loginUsername" placeholder="Username" style="padding:10px;margin:5px;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:10px;margin:5px;">
+        <button onclick="testLogin()">Test Login</button>
+        
+        <h3>5. LocalStorage</h3>
+        <button onclick="checkLocalStorage()">Check LocalStorage</button>
+        <button onclick="clearLocalStorage()">Clear LocalStorage</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://noor-bilps-backend.onrender.com/api';
+        const resultDiv = document.getElementById('result');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            resultDiv.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+        }
+
+        async function testHealth() {
+            log('Testing backend health...', 'info');
+            try {
+                const response = await fetch('https://noor-bilps-backend.onrender.com/health');
+                const data = await response.json();
+                log('✅ Backend is healthy: ' + JSON.stringify(data), 'success');
+            } catch (error) {
+                log('❌ Health check failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testLoadUsers() {
+            log('Loading users from Supabase...', 'info');
+            try {
+                const response = await fetch(`${API_URL}/load-all-users`);
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ Loaded ${data.users.length} users:`, 'success');
+                    data.users.forEach(u => log(`  - ${u.username}`, 'info'));
+                } else {
+                    log('❌ Failed to load users', 'error');
+                }
+            } catch (error) {
+                log('❌ Load users failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testRegister() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            
+            if (!username || !password) {
+                log('❌ Username and password required', 'error');
+                return;
+            }
+            
+            log(`Registering user: ${username}...`, 'info');
+            try {
+                const response = await fetch(`${API_URL}/add-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ User registered: ${username}`, 'success');
+                } else {
+                    log(`❌ Registration failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log('❌ Registration error: ' + error.message, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                log('❌ Username and password required', 'error');
+                return;
+            }
+            
+            log(`Testing login: ${username}...`, 'info');
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ Login successful for: ${username}`, 'success');
+                } else {
+                    log(`❌ Login failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log('❌ Login error: ' + error.message, 'error');
+            }
+        }
+
+        function checkLocalStorage() {
+            log('Checking localStorage...', 'info');
+            const session = localStorage.getItem('noor_session');
+            const data = localStorage.getItem('noorData');
+            const db = localStorage.getItem('noor_gms_database');
+            
+            if (session) {
+                log('📦 noor_session: ' + session, 'success');
+            } else {
+                log('❌ No session found', 'error');
+            }
+            
+            if (data) {
+                const parsed = JSON.parse(data);
+                log(`📦 noorData: ${parsed.users?.length || 0} users`, 'success');
+            } else {
+                log('⚠️ No noorData', 'info');
+            }
+            
+            if (db) {
+                const parsed = JSON.parse(db);
+                log(`📦 noor_gms_database: ${parsed.data?.users?.length || 0} users`, 'success');
+            } else {
+                log('⚠️ No database', 'info');
+            }
+        }
+
+        function clearLocalStorage() {
+            localStorage.clear();
+            log('🗑️ LocalStorage cleared', 'success');
+        }
+    </script>
+</body>
+</html>

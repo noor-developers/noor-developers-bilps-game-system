@@ -959,19 +959,33 @@
 
     // ========== AUTO-LOGIN (SAHIFA OCHILGANDA) ==========
     function checkAutoLogin() {
+      console.log('🔐 Auto-login tekshirilmoqda...');
+      
       const session = localStorage.getItem('noor_session');
-      if (!session) return;
+      if (!session) {
+        console.log('⚠️ Session topilmadi');
+        return;
+      }
       
       try {
         const sessionData = JSON.parse(session);
+        console.log('📦 Session data:', sessionData);
+        
         const now = Date.now();
         const sessionAge = now - (sessionData.loginTime || 0);
+        const sessionDays = Math.floor(sessionAge / (24 * 60 * 60 * 1000));
+        
+        console.log(`⏰ Session yoshi: ${sessionDays} kun`);
         
         // Session 7 kundan eski bo'lsa, o'chirish
         if (sessionAge > 7 * 24 * 60 * 60 * 1000) {
+          console.warn('❌ Session eski (>7 kun), o\'chirilmoqda');
           localStorage.removeItem('noor_session');
           return;
         }
+        
+        console.log(`👤 Session user: ${sessionData.currentUser}`);
+        console.log(`📊 Mavjud users: ${STATE.users.map(u => u.username).join(', ')}`);
         
         // User hali mavjudmi tekshirish
         const user = STATE.users.find(u => u.username === sessionData.currentUser);
@@ -989,10 +1003,11 @@
           renderPage('billiard');
         } else {
           // User topilmasa, sessionni o'chirish
+          console.warn('❌ User topilmadi yoki session invalid, o\'chirilmoqda');
           localStorage.removeItem('noor_session');
         }
       } catch (e) {
-        console.error('Auto-login xatosi:', e);
+        console.error('❌ Auto-login xatosi:', e);
         localStorage.removeItem('noor_session');
       }
     }
@@ -1336,7 +1351,12 @@
 
     // YANGI: Supabase-dan users yuklash
     async function loadUsersFromSupabase() {
-      if (!USE_ONLINE_BACKUP) return;
+      if (!USE_ONLINE_BACKUP) {
+        console.log('⚠️ Online backup o\'chirilgan');
+        return;
+      }
+      
+      console.log('☁️ Supabase-dan users yuklanmoqda...');
       
       try {
         const response = await fetch(`${API_URL}/load-all-users`, {
@@ -1345,24 +1365,39 @@
         });
         
         if (!response.ok) {
-          console.warn('❌ Users yuklab bo\'lmadi:', response.statusText);
+          console.warn('❌ Users yuklab bo\'lmadi:', response.status, response.statusText);
           return;
         }
         
         const data = await response.json();
+        console.log('📥 Supabase javob:', data);
+        
         if (data.success && data.users && data.users.length > 0) {
           // Supabase-dan kelgan users bilan local users-ni birlashtirish (duplikatlarni oldini olish)
           const existingUsernames = STATE.users.map(u => u.username);
+          let addedCount = 0;
+          
           data.users.forEach(user => {
             if (!existingUsernames.includes(user.username)) {
               STATE.users.push({ username: user.username, pass: user.password });
+              addedCount++;
+              console.log(`  ➕ Yangi user qo'shildi: ${user.username}`);
+            } else {
+              console.log(`  ⏭️ User mavjud: ${user.username}`);
             }
           });
-          console.log('✅ Supabase-dan users yuklandi:', data.users.length);
-          saveData(); // localStorage-ga saqlash
+          
+          console.log(`✅ Supabase-dan ${data.users.length} user topildi, ${addedCount} yangi user qo'shildi`);
+          console.log(`📊 Jami users: ${STATE.users.length}`);
+          
+          if (addedCount > 0) {
+            saveData(); // localStorage-ga saqlash
+          }
+        } else {
+          console.warn('⚠️ Supabase-da userlar topilmadi yoki xato');
         }
       } catch (error) {
-        console.warn('⚠️ Supabase-dan users yuklashda xato:', error);
+        console.error('❌ Supabase-dan users yuklashda xato:', error);
       }
     }
 
@@ -3132,18 +3167,30 @@
 
     // ========== INIT ==========
     async function initializeApp() {
+      console.log('🚀 Dastur ishga tushmoqda...');
+      
+      // 1. Dastlabki sozlamalar
       initializeDatabase();
       initializePasswords();
       checkSeasonalFeatures();
       updateClock();
       
-      // Avval Supabase-dan users yuklash
-      await loadUsersFromSupabase();
+      // 2. localStorage-dan users yuklash
+      loadData();
+      console.log('📦 localStorage users:', STATE.users.length);
       
-      // Keyin auto-login tekshirish
+      // 3. Supabase-dan users yuklash (yangi userlar qo'shish uchun)
+      try {
+        await loadUsersFromSupabase();
+        console.log('☁️ Supabase-dan users yuklandi:', STATE.users.length);
+      } catch (e) {
+        console.warn('⚠️ Supabase-dan yuklashda xato:', e);
+      }
+      
+      // 4. Auto-login tekshirish (STATE.users tayyor bo'lgandan keyin)
       checkAutoLogin();
       
-      // Intervallarni boshlash
+      // 5. Intervallarni boshlash
       setInterval(updateClock, 1000);
       setInterval(updateActiveSessions, 5000); 
       setInterval(saveData, 30000);
@@ -3151,10 +3198,12 @@
       setInterval(cleanOldHistory, 24 * 60 * 60 * 1000);
       setInterval(cleanOldReceipts, 24 * 60 * 60 * 1000);
       setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
+      
+      console.log('✅ Dastur tayyor!');
     }
     
     // Dasturni ishga tushirish
-    initializeApp();
+    initializeApp().catch(e => console.error('❌ Init xatosi:', e));
   </script>
 </body>
 </html>
