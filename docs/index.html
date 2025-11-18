@@ -2,7 +2,9 @@
 <html lang="uz">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>NOOR Game Management System (v6 - Takomillashtirilgan)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
@@ -45,7 +47,8 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
-    body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;display:flex;flex-direction:column;position:relative;}
+    html{font-size:16px;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;}
+    body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-height:100vh;display:flex;flex-direction:column;position:relative;min-width:320px;}
     
     /* YANGI LOGIN SCREEN */
     .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s, visibility 0.5s;}
@@ -1425,11 +1428,16 @@
         
         // YANGI: Supabase'ga saqlash (opsional)
         if (USE_ONLINE_BACKUP && STATE.currentUser) {
+          console.log(`💾 saveData() - Supabase-ga saqlash uchun chaqirilmoqda. User: ${STATE.currentUser}`);
           saveToSupabase(toSave);
+        } else if (USE_ONLINE_BACKUP && !STATE.currentUser) {
+          console.log('⚠️ saveData() - currentUser yo\'q, Supabase-ga saqlanmadi');
+        } else {
+          console.log('⚠️ saveData() - Online backup o\'chirilgan');
         }
         
       } catch (e) {
-        console.error('Save error:', e);
+        console.error('❌ Save error:', e);
       }
     }
 
@@ -1487,24 +1495,45 @@
 
     // YANGI: Supabase'ga saqlash (retry logic bilan)
     async function saveToSupabase(data, retryCount = 0) {
+      console.log(`☁️ saveToSupabase() chaqirildi. Urinish: ${retryCount + 1}/3`);
+      console.log(`👤 User: ${STATE.currentUser}`);
+      
+      if (!STATE.currentUser) {
+        console.error('❌ currentUser yo\'q! Supabase-ga saqlab bo\'lmaydi.');
+        return;
+      }
+      
       try {
+        const payload = {
+          userId: STATE.currentUser,
+          data: data,
+          timestamp: new Date().toISOString()
+        };
+        
+        console.log('📤 Supabase-ga yuborilmoqda:', {
+          userId: payload.userId,
+          dataKeys: Object.keys(payload.data),
+          timestamp: payload.timestamp
+        });
+        
         const response = await fetch(`${API_URL}/save-data`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            userId: STATE.currentUser,
-            data: data,
-            timestamp: new Date().toISOString()
-          })
+          body: JSON.stringify(payload)
         });
 
+        console.log('📥 Supabase javob:', response.status, response.statusText);
+
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const result = await response.json();
+        console.log('📊 Supabase natija:', result);
+        
         if (result.success) {
           console.log('✅ Supabase backup saqlandi');
           // Oxirgi backup vaqtini yangilash
@@ -1515,12 +1544,15 @@
           throw new Error(result.error || 'Unknown error');
         }
       } catch (error) {
-        console.warn(`⚠️ Supabase backup xatosi (urinish ${retryCount + 1}/3):`, error);
+        console.error(`❌ Supabase backup xatosi (urinish ${retryCount + 1}/3):`, error);
         // 3 marta qayta urinish
         if (retryCount < 2) {
-          setTimeout(() => saveToSupabase(data, retryCount + 1), 2000 * (retryCount + 1));
+          const delay = 2000 * (retryCount + 1);
+          console.log(`🔄 ${delay}ms dan keyin qayta urinish...`);
+          setTimeout(() => saveToSupabase(data, retryCount + 1), delay);
         } else {
-          showNotification('⚠️ Ma\'lumot Supabase-ga saqlanmadi. Qayta urinib ko\'ring.');
+          console.error('❌ Supabase-ga saqlash 3 marta muvaffaqiyatsiz bo\'ldi');
+          showNotification('⚠️ Ma\'lumot Supabase-ga saqlanmadi. Internet aloqasini tekshiring.');
         }
       }
     }
