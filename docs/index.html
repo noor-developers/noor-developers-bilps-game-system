@@ -1050,9 +1050,13 @@
     }
 
     async function register() {
+      console.log('📝 register() funksiyasi chaqirildi');
+      
       const username = document.getElementById('registerUsername').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+      console.log(`👤 Ro'yxatdan o'tish: ${username}`);
 
       if (!username || !password || !confirmPassword) {
         showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
@@ -1071,16 +1075,19 @@
 
       // Mavjud user tekshirish
       if (STATE.users.find(u => u.username === username)) {
+        console.log('❌ User allaqachon mavjud');
         showNotification('❌ Bu login band! Boshqa tanlang.');
         return;
       }
 
       // Yangi user qo'shish
       STATE.users.push({ username, pass: password });
+      console.log(`✅ User STATE-ga qo'shildi. Jami: ${STATE.users.length}`);
       saveData();
 
       // Supabase-ga yuborish
       if (USE_ONLINE_BACKUP) {
+        console.log('☁️ Supabase-ga yuborilmoqda...');
         try {
           const response = await fetch(`${API_URL}/add-user`, {
             method: 'POST',
@@ -1089,15 +1096,18 @@
           });
           const data = await response.json();
           if (data.success) {
-            console.log('✅ User Supabase-ga qo\'shildi');
+            console.log('✅ User Supabase-ga qo\'shildi:', data);
+          } else {
+            console.warn('⚠️ Supabase xatosi:', data.error);
           }
         } catch (e) {
-          console.warn('Backend xatosi:', e);
+          console.error('❌ Backend xatosi:', e);
         }
       }
 
       showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
       addLog('Yangi user yaratildi', username);
+      console.log('✅ Ro\'yxatdan o\'tish muvaffaqiyatli');
       
       // Login formaga qaytish
       document.getElementById('registerUsername').value = '';
@@ -1108,8 +1118,13 @@
 
     // ========== LOGIN ==========
     function login() {
+      console.log('🔑 login() funksiyasi chaqirildi');
+      
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
+
+      console.log(`👤 Login urinish: ${username}`);
+      console.log(`📊 Mavjud users (${STATE.users.length}):`, STATE.users.map(u => u.username));
 
       if (!username || !password) {
         showNotification('⚠️ Login va parolni kiriting!');
@@ -1117,6 +1132,8 @@
       }
 
       const user = STATE.users.find(u => u.username === username && u.pass === password);
+      
+      console.log('🔍 User topildi:', user ? `✅ ${user.username}` : '❌ topilmadi');
       
       if (user) {
         STATE.isLoggedIn = true;
@@ -1217,6 +1234,8 @@
 
     // ========== DATA MANAGEMENT ==========
     function loadData() {
+      console.log('📂 loadData() chaqirildi');
+      
       // Avval yangi ma'lumotlar bazasidan urinib ko'rish
       const db = localStorage.getItem(DB_NAME);
       if (db) {
@@ -1224,6 +1243,7 @@
           const database = JSON.parse(db);
           if (database.data) {
             const data = database.data;
+            console.log('📦 Database data topildi:', Object.keys(data));
             
             const persistentKeys = Object.keys(DEFAULT_STATE).filter(k => ![
                 'settingsPassword', 'transferCardNumber', 
@@ -1231,7 +1251,12 @@
             ].includes(k));
             
             persistentKeys.forEach(key => {
-              if (data[key] !== undefined) STATE[key] = data[key];
+              if (data[key] !== undefined) {
+                STATE[key] = data[key];
+                if (key === 'users') {
+                  console.log(`👥 Users yuklandi: ${STATE.users.length} ta`);
+                }
+              }
             });
             
             // Qarz balansini yangilash
@@ -1252,14 +1277,17 @@
 
           }
         } catch (e) {
-          console.error('Database load error:', e);
+          console.error('❌ Database load error:', e);
           // Eski usul bilan yuklash
           loadLegacyData();
         }
       } else {
+        console.log('⚠️ Database topilmadi, legacy data yuklanmoqda');
         // Eski usul bilan yuklash
         loadLegacyData();
       }
+      
+      console.log(`📊 loadData() tugadi. Jami users: ${STATE.users.length}`);
       
       cleanOldHistory();
       cleanOldReceipts();
@@ -1268,10 +1296,13 @@
     }
 
     function loadLegacyData() {
+      console.log('🗂️ loadLegacyData() chaqirildi');
+      
       const saved = localStorage.getItem('noorData');
       if (saved) {
         try {
           const data = JSON.parse(saved);
+          console.log('📜 Legacy data topildi:', Object.keys(data));
           
           const persistentKeys = Object.keys(DEFAULT_STATE).filter(k => ![
               'settingsPassword', 'transferCardNumber', 
@@ -1279,7 +1310,12 @@
           ].includes(k));
           
           persistentKeys.forEach(key => {
-            if (data[key] !== undefined) STATE[key] = data[key];
+            if (data[key] !== undefined) {
+              STATE[key] = data[key];
+              if (key === 'users') {
+                console.log(`👥 Legacy users yuklandi: ${STATE.users.length} ta`);
+              }
+            }
           });
           
           // Qarz balansini yangilash
@@ -1299,10 +1335,12 @@
           }
 
         } catch (e) {
-          console.error('Legacy data load error:', e);
+          console.error('❌ Legacy data load error:', e);
           showNotification('⚠️ Ma\'lumot yuklashda xatolik yuz berdi. Dastur toza holatda ishga tushirildi.');
           STATE = JSON.parse(JSON.stringify(DEFAULT_STATE)); 
         }
+      } else {
+        console.log('⚠️ Legacy data ham topilmadi');
       }
     }
 
