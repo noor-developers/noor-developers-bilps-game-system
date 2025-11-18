@@ -1008,7 +1008,7 @@
     }
 
     // ========== AUTO-LOGIN (SAHIFA OCHILGANDA) ==========
-    function checkAutoLogin() {
+    async function checkAutoLogin() {
       console.log('🔐 Auto-login tekshirilmoqda...');
       
       const session = localStorage.getItem('noor_session');
@@ -1049,7 +1049,7 @@
           document.getElementById('logoutBtn').style.display = 'block';
           
           console.log('✅ Auto-login muvaffaqiyatli:', sessionData.currentUser);
-          loadData();
+          await loadData();
           renderPage('billiard');
         } else {
           // User topilmasa, sessionni o'chirish
@@ -1167,7 +1167,7 @@
     }
 
     // ========== LOGIN ==========
-    function login() {
+    async function login() {
       console.log('🔑 login() funksiyasi chaqirildi');
       
       const username = document.getElementById('loginUsername').value.trim();
@@ -1202,7 +1202,7 @@
         document.getElementById('logoutBtn').style.display = 'block'; // Logout tugmasini ko'rsatish
         
         addLog("Tizimga kirish", `Foydalanuvchi: ${user.username}`);
-        loadData(); 
+        await loadData(); 
         renderPage('billiard');
       } else {
         showNotification('❌ Noto\'g\'ri login yoki parol!');
@@ -1283,10 +1283,20 @@
     }
 
     // ========== DATA MANAGEMENT ==========
-    function loadData() {
+    async function loadData() {
       console.log('📂 loadData() chaqirildi');
       
-      // Avval yangi ma'lumotlar bazasidan urinib ko'rish
+      // STEP 1: Supabase-dan users yuklash (birinchi)
+      if (USE_ONLINE_BACKUP) {
+        try {
+          await loadUsersFromSupabase();
+          console.log('✅ Supabase users yuklandi');
+        } catch (e) {
+          console.warn('⚠️ Supabase users yuklanmadi:', e);
+        }
+      }
+      
+      // STEP 2: localStorage-dan ma'lumotlar yuklash
       const db = localStorage.getItem(DB_NAME);
       if (db) {
         try {
@@ -1338,7 +1348,19 @@
       }
       
       console.log(`📊 loadData() tugadi. Jami users: ${STATE.users.length}`);
-      
+      // STEP 3: Supabase-dan current user ma'lumotlarini yuklash
+      if (USE_ONLINE_BACKUP && STATE.currentUser) {
+        console.log(` ${STATE.currentUser} uchun Supabase ma'lumotlari yuklanmoqda...`);
+        try {
+          const supabaseData = await loadFromSupabase(STATE.currentUser);
+          if (supabaseData) {
+            console.log('[OK] Supabase malumotlari topildi');
+          }
+        } catch (e) {
+          console.warn('[WARN] Supabase malumotlarini yuklashda xato:', e);
+        }
+      }
+            
       cleanOldHistory();
       cleanOldReceipts();
       cleanOldLogs();
@@ -3292,20 +3314,20 @@
       checkSeasonalFeatures();
       updateClock();
       
-      // 2. localStorage-dan users yuklash
-      loadData();
-      console.log('📦 localStorage users:', STATE.users.length);
-      
-      // 3. Supabase-dan users yuklash (yangi userlar qo'shish uchun)
+      // 2. Ma'lumotlarni yuklash (Supabase + localStorage)
+      // loadData() endi async va ichida Supabase-dan yuklash bor
       try {
-        await loadUsersFromSupabase();
-        console.log('☁️ Supabase-dan users yuklandi:', STATE.users.length);
+        await loadData();
+        console.log('[OK] Barcha malumotlar yuklandi. Users:', STATE.users.length);
       } catch (e) {
-        console.warn('⚠️ Supabase-dan yuklashda xato:', e);
+        console.error('[ERROR] Malumot yuklashda xato:', e);
       }
       
-      // 4. Auto-login tekshirish (STATE.users tayyor bo'lgandan keyin)
-      checkAutoLogin();
+      // 3. Auto-login tekshirish (STATE.users to''liq tayyor)
+      await checkAutoLogin();
+      
+
+      // 4. Intervallarni boshlash
       
       // 5. Intervallarni boshlash
       setInterval(updateClock, 1000);
