@@ -289,55 +289,64 @@
     /* Planshetlar (768px - 1024px) */
     @media (max-width: 1024px) {
       .topbar{padding:10px 15px;}
+      .nav{gap:8px;}
       .nav button{padding:8px 12px;font-size:0.9rem;}
       .page-content{padding:15px;}
       .grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;}
       .stats-grid{grid-template-columns:repeat(2,1fr);}
-      .modal-content{padding:20px;max-width:90%;}
+      .modal-content{padding:20px;max-width:90%;width:90%;}
+      .input-modal{max-width:90%;width:90%;}
     }
     
     /* Mobil (480px - 768px) */
     @media (max-width: 768px) {
       body{font-size:14px;}
-      .topbar{flex-direction:column;padding:10px;gap:10px;}
+      .topbar{flex-direction:column;padding:10px;gap:10px;align-items:center;}
       .logo{font-size:1.2rem;}
       .nav{flex-wrap:wrap;width:100%;justify-content:center;gap:5px;}
-      .nav button{padding:8px 10px;font-size:0.85rem;flex:1 1 auto;min-width:80px;}
+      .nav button{padding:8px 10px;font-size:0.85rem;flex:1 1 auto;min-width:80px;max-width:120px;}
       
       .page-content{padding:10px;}
       .grid{grid-template-columns:1fr;gap:10px;}
       .stats-grid{grid-template-columns:1fr;}
       
+      .modal{padding:10px;}
       .modal-content{width:95%;max-width:95%;padding:15px;max-height:90vh;overflow-y:auto;}
-      .modal-buttons{grid-template-columns:1fr;gap:10px;}
-      .modal-close{grid-template-columns:1fr;}
+      .input-modal{width:95%;max-width:95%;padding:15px;max-height:85vh;}
+      .modal-buttons{grid-template-columns:1fr !important;gap:10px;}
+      .modal-close{grid-template-columns:1fr !important;}
       
       .table-card{padding:12px;}
       .table-header{font-size:1rem;}
       .table-status{font-size:0.85rem;}
       .table-info{font-size:0.8rem;}
       .table-buttons{flex-direction:column;gap:8px;}
-      .table-buttons button{width:100%;}
+      .table-buttons button{width:100%;min-height:40px;}
       
-      .login-box{padding:25px;max-width:90%;}
+      .login-box{padding:25px;max-width:90%;width:90%;}
       .login-header .logo{font-size:2rem;}
       .login-header h1{font-size:1.2rem;}
       
-      .sidebar{width:250px;}
+      .sidebar{width:100%;max-width:300px;position:fixed;right:-100%;transition:right 0.3s;}
+      .sidebar.active{right:0;}
       .stat-item{padding:12px;}
       .stat-value{font-size:1.3rem;}
       
       .form-group{margin-bottom:12px;}
       .form-group label{font-size:0.9rem;}
-      .form-group input,.form-group select,.form-group textarea{padding:10px;font-size:0.9rem;}
+      .form-group input,.form-group select,.form-group textarea{padding:10px;font-size:0.9rem;width:100%;box-sizing:border-box;}
+      
+      .btn{font-size:0.9rem;padding:10px 15px;min-height:40px;}
+      .login-btn{min-height:45px;font-size:1rem;}
     }
     
     /* Kichik mobil (< 480px) */
     @media (max-width: 480px) {
       body{font-size:13px;}
-      .topbar{padding:8px;}
+      .topbar{padding:8px;gap:8px;}
       .logo{font-size:1rem;}
-      .nav button{font-size:0.75rem;padding:6px 8px;min-width:70px;}
+      .nav{gap:4px;}
+      .nav button{font-size:0.75rem;padding:6px 8px;min-width:60px;max-width:100px;}
       
       .page-content{padding:8px;}
       .grid{gap:8px;}
@@ -347,17 +356,22 @@
       .table-status{font-size:0.75rem;}
       .table-info{font-size:0.7rem;}
       .table-info div{margin:3px 0;}
+      .table-buttons button{min-height:38px;font-size:0.8rem;}
       
       .modal-content{padding:12px;}
+      .input-modal{padding:12px;}
       .modal-header{font-size:1.1rem;}
       .modal-text{font-size:0.85rem;}
       
-      .btn{padding:8px 12px;font-size:0.85rem;}
-      .login-box{padding:20px;}
-      .login-btn{padding:12px;font-size:1rem;}
+      .btn{padding:8px 12px;font-size:0.85rem;min-height:38px;}
+      .login-box{padding:20px;width:95%;}
+      .login-btn{padding:12px;font-size:1rem;min-height:45px;}
       
       .stat-item{padding:10px;}
       .stat-label{font-size:0.75rem;}
+      .stat-value{font-size:1.2rem;}
+      
+      .form-group input,.form-group select,.form-group textarea{font-size:0.85rem;}
       .stat-value{font-size:1.1rem;}
       
       .sidebar{width:220px;}
@@ -943,6 +957,46 @@
       STATE.lastActivity = Date.now();
     }
 
+    // ========== AUTO-LOGIN (SAHIFA OCHILGANDA) ==========
+    function checkAutoLogin() {
+      const session = localStorage.getItem('noor_session');
+      if (!session) return;
+      
+      try {
+        const sessionData = JSON.parse(session);
+        const now = Date.now();
+        const sessionAge = now - (sessionData.loginTime || 0);
+        
+        // Session 7 kundan eski bo'lsa, o'chirish
+        if (sessionAge > 7 * 24 * 60 * 60 * 1000) {
+          localStorage.removeItem('noor_session');
+          return;
+        }
+        
+        // User hali mavjudmi tekshirish
+        const user = STATE.users.find(u => u.username === sessionData.currentUser);
+        if (user && sessionData.isLoggedIn) {
+          STATE.isLoggedIn = true;
+          STATE.currentUser = sessionData.currentUser;
+          STATE.lastActivity = now;
+          
+          document.getElementById('loginScreen').style.opacity = '0';
+          document.getElementById('loginScreen').style.visibility = 'hidden';
+          document.getElementById('logoutBtn').style.display = 'block';
+          
+          console.log('✅ Auto-login muvaffaqiyatli:', sessionData.currentUser);
+          loadData();
+          renderPage('billiard');
+        } else {
+          // User topilmasa, sessionni o'chirish
+          localStorage.removeItem('noor_session');
+        }
+      } catch (e) {
+        console.error('Auto-login xatosi:', e);
+        localStorage.removeItem('noor_session');
+      }
+    }
+
     function checkSessionTimeout() {
       const now = Date.now();
       const timeSinceLastActivity = now - STATE.lastActivity;
@@ -957,6 +1011,7 @@
       addLog("Avtomatik chiqish", "Faollik yo'qligi sababli (30 daqiqa)");
       STATE.isLoggedIn = false;
       STATE.currentUser = "";
+      localStorage.removeItem('noor_session'); // Session o'chirish
       document.getElementById('loginScreen').style.opacity = '1';
       document.getElementById('loginScreen').style.visibility = 'visible';
       showNotification('⚠️ 30 daqiqa faollik yo\'qligi sababli tizimdan chiqildi', 5000);
@@ -1053,6 +1108,13 @@
         STATE.currentUser = user.username;
         STATE.lastActivity = Date.now(); // Faollikni yangilash
         
+        // Session holatini localStorage-ga saqlash (auto-login uchun)
+        localStorage.setItem('noor_session', JSON.stringify({
+          isLoggedIn: true,
+          currentUser: user.username,
+          loginTime: Date.now()
+        }));
+        
         document.getElementById('loginScreen').style.opacity = '0';
         document.getElementById('loginScreen').style.visibility = 'hidden';
         document.getElementById('logoutBtn').style.display = 'block'; // Logout tugmasini ko'rsatish
@@ -1108,6 +1170,9 @@
     function performLogout() {
       STATE.isLoggedIn = false;
       STATE.currentUser = "";
+      
+      // Session localStorage-dan o'chirish
+      localStorage.removeItem('noor_session');
       
       addLog("Tizimdan chiqish", "");
       saveData();
@@ -1269,8 +1334,40 @@
       }
     }
 
-    // YANGI: Supabase'ga saqlash
-    async function saveToSupabase(data) {
+    // YANGI: Supabase-dan users yuklash
+    async function loadUsersFromSupabase() {
+      if (!USE_ONLINE_BACKUP) return;
+      
+      try {
+        const response = await fetch(`${API_URL}/load-all-users`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          console.warn('❌ Users yuklab bo\'lmadi:', response.statusText);
+          return;
+        }
+        
+        const data = await response.json();
+        if (data.success && data.users && data.users.length > 0) {
+          // Supabase-dan kelgan users bilan local users-ni birlashtirish (duplikatlarni oldini olish)
+          const existingUsernames = STATE.users.map(u => u.username);
+          data.users.forEach(user => {
+            if (!existingUsernames.includes(user.username)) {
+              STATE.users.push({ username: user.username, pass: user.password });
+            }
+          });
+          console.log('✅ Supabase-dan users yuklandi:', data.users.length);
+          saveData(); // localStorage-ga saqlash
+        }
+      } catch (error) {
+        console.warn('⚠️ Supabase-dan users yuklashda xato:', error);
+      }
+    }
+
+    // YANGI: Supabase'ga saqlash (retry logic bilan)
+    async function saveToSupabase(data, retryCount = 0) {
       try {
         const response = await fetch(`${API_URL}/save-data`, {
           method: 'POST',
@@ -1285,14 +1382,27 @@
         });
 
         if (!response.ok) {
-          console.error('Supabase save failed:', await response.text());
-          return;
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-
+        
         const result = await response.json();
-        console.log('Supabase saqlandi:', result);
-      } catch (e) {
-        console.error('Supabase save error:', e);
+        if (result.success) {
+          console.log('✅ Supabase backup saqlandi');
+          // Oxirgi backup vaqtini yangilash
+          const db = JSON.parse(localStorage.getItem(DB_NAME) || '{}');
+          db.lastBackup = new Date().toISOString();
+          localStorage.setItem(DB_NAME, JSON.stringify(db));
+        } else {
+          throw new Error(result.error || 'Unknown error');
+        }
+      } catch (error) {
+        console.warn(`⚠️ Supabase backup xatosi (urinish ${retryCount + 1}/3):`, error);
+        // 3 marta qayta urinish
+        if (retryCount < 2) {
+          setTimeout(() => saveToSupabase(data, retryCount + 1), 2000 * (retryCount + 1));
+        } else {
+          showNotification('⚠️ Ma\'lumot Supabase-ga saqlanmadi. Qayta urinib ko\'ring.');
+        }
       }
     }
 
@@ -3021,17 +3131,30 @@
     }
 
     // ========== INIT ==========
-    initializeDatabase();
-    initializePasswords();
-    checkSeasonalFeatures();
-    setInterval(updateClock, 1000);
-    setInterval(updateActiveSessions, 5000); 
-    setInterval(saveData, 30000);
-    setInterval(checkSessionTimeout, 60000); // Har 1 daqiqa session timeout ni tekshirish
-    setInterval(cleanOldHistory, 24 * 60 * 60 * 1000);
-    setInterval(cleanOldReceipts, 24 * 60 * 60 * 1000);
-    setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
-    updateClock();
+    async function initializeApp() {
+      initializeDatabase();
+      initializePasswords();
+      checkSeasonalFeatures();
+      updateClock();
+      
+      // Avval Supabase-dan users yuklash
+      await loadUsersFromSupabase();
+      
+      // Keyin auto-login tekshirish
+      checkAutoLogin();
+      
+      // Intervallarni boshlash
+      setInterval(updateClock, 1000);
+      setInterval(updateActiveSessions, 5000); 
+      setInterval(saveData, 30000);
+      setInterval(checkSessionTimeout, 60000);
+      setInterval(cleanOldHistory, 24 * 60 * 60 * 1000);
+      setInterval(cleanOldReceipts, 24 * 60 * 60 * 1000);
+      setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
+    }
+    
+    // Dasturni ishga tushirish
+    initializeApp();
   </script>
 </body>
 </html>

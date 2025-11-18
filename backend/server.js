@@ -187,7 +187,30 @@ app.post('/api/add-user', async (req, res) => {
   }
 });
 
-// 5. Login tekshirish
+// 5. Barcha foydalanuvchilarni yuklash (cross-device uchun)
+app.get('/api/load-all-users', async (req, res) => {
+  try {
+    const dbClient = getDbClient();
+    if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
+
+    const { data, error } = await dbClient
+      .from('users')
+      .select('username, password')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      users: data || []
+    });
+  } catch (error) {
+    console.error('Load all users error:', error);
+    res.status(500).json({ error: error.message, users: [] });
+  }
+});
+
+// 6. Login tekshirish
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
