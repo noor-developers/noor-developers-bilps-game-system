@@ -1284,19 +1284,62 @@
 
     // ========== DATA MANAGEMENT ==========
     async function loadData() {
-      console.log('📂 loadData() chaqirildi');
+      console.log('📂 loadData() chaqirildi - SUPABASE PRIMARY MODE');
       
-      // STEP 1: Supabase-dan users yuklash (birinchi)
-      if (USE_ONLINE_BACKUP) {
+      // STEP 1: Supabase-dan users yuklash (majburiy)
+      try {
+        await loadUsersFromSupabase();
+        console.log('✅ Supabase users yuklandi:', STATE.users.length);
+      } catch (e) {
+        console.error('❌ CRITICAL: Supabase users yuklanmadi:', e);
+        showNotification('❌ Server bilan aloqa yo\'q! Dasturni qayta yuklang.');
+        return; // Supabase bo'lmasa, ishlamaydi
+      }
+      
+      // STEP 2: Agar user login qilgan bo'lsa, uning ma'lumotlarini Supabase-dan yuklash
+      if (STATE.currentUser) {
+        console.log(`☁️ ${STATE.currentUser} ma'lumotlari yuklanmoqda...`);
         try {
-          await loadUsersFromSupabase();
-          console.log('✅ Supabase users yuklandi');
+          const supabaseData = await loadFromSupabase(STATE.currentUser);
+          if (supabaseData) {
+            console.log('✅ User ma\'lumotlari Supabase-dan yuklandi');
+            
+            // Supabase ma'lumotlarini STATE-ga ko'chirish
+            const persistentKeys = Object.keys(DEFAULT_STATE).filter(k => ![
+                'settingsPassword', 'transferCardNumber', 'users',
+                'isLoggedIn', 'currentUser', 'lastActivity', 'sessionTimeout'
+            ].includes(k));
+            
+            persistentKeys.forEach(key => {
+              if (supabaseData[key] !== undefined) {
+                STATE[key] = supabaseData[key];
+              }
+            });
+            
+            // Tables-ni alohida handle qilish
+            if (supabaseData.tables) {
+              Object.keys(DEFAULT_STATE.tables).forEach(key => {
+                if (supabaseData.tables[key]) {
+                  Object.assign(STATE.tables[key], supabaseData.tables[key]);
+                  STATE.tables[key].interval = null;
+                  if (STATE.tables[key].active) {
+                    startTimer(key);
+                  }
+                }
+              });
+            }
+            
+            // Qarz balansini hisoblash
+            STATE.debtBalance = STATE.debtors.reduce((sum, d) => sum + d.totalDebt, 0);
+          } else {
+            console.log('ℹ️ User ma\'lumotlari topilmadi (yangi user)');
+          }
         } catch (e) {
-          console.warn('⚠️ Supabase users yuklanmadi:', e);
+          console.warn('⚠️ User ma\'lumotlarini yuklashda xato:', e);
         }
       }
       
-      // STEP 2: localStorage-dan ma'lumotlar yuklash
+      // STEP 3: localStorage-dan fallback yuklash (faqat offline)
       const db = localStorage.getItem(DB_NAME);
       if (db) {
         try {
@@ -1342,24 +1385,10 @@
           loadLegacyData();
         }
       } else {
-        console.log('⚠️ Database topilmadi, legacy data yuklanmoqda');
-        // Eski usul bilan yuklash
-        loadLegacyData();
+        console.log('ℹ️ localStorage cache topilmadi (normal)');
       }
       
-      console.log(`📊 loadData() tugadi. Jami users: ${STATE.users.length}`);
-      // STEP 3: Supabase-dan current user ma'lumotlarini yuklash
-      if (USE_ONLINE_BACKUP && STATE.currentUser) {
-        console.log(` ${STATE.currentUser} uchun Supabase ma'lumotlari yuklanmoqda...`);
-        try {
-          const supabaseData = await loadFromSupabase(STATE.currentUser);
-          if (supabaseData) {
-            console.log('[OK] Supabase malumotlari topildi');
-          }
-        } catch (e) {
-          console.warn('[WARN] Supabase malumotlarini yuklashda xato:', e);
-        }
-      }
+      console.log(`📊 loadData() tugadi. Users: ${STATE.users.length}`);
             
       cleanOldHistory();
       cleanOldReceipts();
@@ -1416,11 +1445,8 @@
       }
     }
 
-    function saveData() {
+    async function saveData() {
       try {
-        // Yangi ma'lumotlar bazasiga saqlash (asosiy)
-        const db = JSON.parse(localStorage.getItem(DB_NAME) || '{}');
-        
         const toSave = {};
         const persistentKeys = Object.keys(DEFAULT_STATE).filter(k => ![
           'settingsPassword', 'transferCardNumber', 'isLoggedIn', 
@@ -1438,29 +1464,26 @@
             toSave.tables[key].interval = null;
         });
         
+        // PRIMARY: Supabase-ga saqlash (asosiy)
+        if (STATE.currentUser) {
+          console.log(`💾 Supabase-ga saqlash: ${STATE.currentUser}`);
+          await saveToSupabase(toSave);
+        } else {
+          console.warn('⚠️ User login qilmagan, ma\'lumot saqlanmadi!');
+          return;
+        }
+        
+        // SECONDARY: localStorage cache (fallback)
+        const db = JSON.parse(localStorage.getItem(DB_NAME) || '{}');
         db.data = toSave;
         db.lastModified = new Date().toISOString();
+        db.lastUser = STATE.currentUser;
         localStorage.setItem(DB_NAME, JSON.stringify(db));
-        
-        // Eski usul bilan ham saqlash (qayta ishlash uchun)
-        localStorage.setItem('noorData', JSON.stringify(toSave));
-        
-        // YANGI: Backup saqlash (4 soatdan keyin o'chiriladi)
-        const backupKey = 'noorData_backup_' + Math.floor(Date.now() / (4 * 60 * 60 * 1000)) * (4 * 60 * 60 * 1000);
-        localStorage.setItem(backupKey, JSON.stringify(toSave));
-        
-        // YANGI: Supabase'ga saqlash (opsional)
-        if (USE_ONLINE_BACKUP && STATE.currentUser) {
-          console.log(`💾 saveData() - Supabase-ga saqlash uchun chaqirilmoqda. User: ${STATE.currentUser}`);
-          saveToSupabase(toSave);
-        } else if (USE_ONLINE_BACKUP && !STATE.currentUser) {
-          console.log('⚠️ saveData() - currentUser yo\'q, Supabase-ga saqlanmadi');
-        } else {
-          console.log('⚠️ saveData() - Online backup o\'chirilgan');
-        }
+        console.log('📦 localStorage cache yangilandi');
         
       } catch (e) {
         console.error('❌ Save error:', e);
+        showNotification('❌ Ma\'lumot saqlanmadi! Server bilan aloqa yo\'q.');
       }
     }
 
@@ -1558,11 +1581,8 @@
         console.log('📊 Supabase natija:', result);
         
         if (result.success) {
-          console.log('✅ Supabase backup saqlandi');
-          // Oxirgi backup vaqtini yangilash
-          const db = JSON.parse(localStorage.getItem(DB_NAME) || '{}');
-          db.lastBackup = new Date().toISOString();
-          localStorage.setItem(DB_NAME, JSON.stringify(db));
+          console.log('✅ Supabase-ga saqlandi (primary storage)');
+          return true;
         } else {
           throw new Error(result.error || 'Unknown error');
         }
@@ -3327,12 +3347,12 @@
       await checkAutoLogin();
       
 
+
       // 4. Intervallarni boshlash
-      
       // 5. Intervallarni boshlash
       setInterval(updateClock, 1000);
       setInterval(updateActiveSessions, 5000); 
-      setInterval(saveData, 30000);
+      setInterval(() => saveData(), 30000); // async wrapper
       setInterval(checkSessionTimeout, 60000);
       setInterval(cleanOldHistory, 24 * 60 * 60 * 1000);
       setInterval(cleanOldReceipts, 24 * 60 * 60 * 1000);
