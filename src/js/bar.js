@@ -190,122 +190,36 @@ export function removeBarItem(tableKey, itemIdx) {
 
 // ========== BAR PRODUCT MANAGEMENT ==========
 export function openAddProductModal() {
-  document.getElementById('inputModalTitle').textContent = '➕ Yangi Mahsulot';
-  document.getElementById('inputModalValue').placeholder = 'Mahsulot nomi';
+  document.getElementById('inputModalTitle').textContent = '➕ Mahsulot nomi';
+  document.getElementById('inputModalValue').placeholder = 'Masalan: Cola';
   document.getElementById('inputModalValue').value = '';
   
   STATE.currentInputType = 'add-product-name';
   openModal('inputModal');
+}
+
+// Setup global confirmInput handler for bar products
+if (typeof window !== 'undefined') {
+  const originalConfirmInput = window.confirmInput;
   
-  const oldConfirm = window.confirmInput;
   window.confirmInput = function() {
-    if (STATE.currentInputType !== 'add-product-name') {
-      oldConfirm();
-      return;
-    }
-    
-    const name = document.getElementById('inputModalValue').value.trim();
-    if (!name) {
-      showNotification('⚠️ Mahsulot nomini kiriting!');
-      return;
-    }
-    
-    if (STATE.barItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
-      showNotification('⚠️ Bu mahsulot allaqachon mavjud!');
-      return;
-    }
-    
-    STATE.tempProductName = name;
-    
-    // Ask for price
-    document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
-    document.getElementById('inputModalValue').value = '';
-    STATE.currentInputType = 'add-product-price';
-  };
-}
-
-function continueAddProduct() {
-  const oldConfirm = window.confirmInput;
-  window.confirmInput = function() {
-    if (STATE.currentInputType !== 'add-product-price') {
-      oldConfirm();
-      return;
-    }
-    
-    const price = parseInt(document.getElementById('inputModalValue').value);
-    if (isNaN(price) || price <= 0) {
-      showNotification('⚠️ To\'g\'ri narx kiriting!');
-      return;
-    }
-    
-    STATE.tempProductPrice = price;
-    
-    // Ask for stock
-    document.getElementById('inputModalTitle').textContent = '📦 Zaxira soni';
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 50';
-    document.getElementById('inputModalValue').value = '';
-    STATE.currentInputType = 'add-product-stock';
-  };
-}
-
-function finishAddProduct() {
-  const oldConfirm = window.confirmInput;
-  window.confirmInput = function() {
-    if (STATE.currentInputType !== 'add-product-stock') {
-      oldConfirm();
-      return;
-    }
-    
-    const stock = parseInt(document.getElementById('inputModalValue').value);
-    if (isNaN(stock) || stock < 0) {
-      showNotification('⚠️ To\'g\'ri miqdor kiriting!');
-      return;
-    }
-    
-    STATE.barItems.push({
-      name: STATE.tempProductName,
-      price: STATE.tempProductPrice,
-      stock: stock
-    });
-    
-    addLog('Bar (Qo\'shish)', `${STATE.tempProductName} - ${STATE.tempProductPrice} so'm, ${stock} dona`);
-    saveData();
-    
-    delete STATE.tempProductName;
-    delete STATE.tempProductPrice;
-    
-    closeModal('inputModal');
-    window.confirmInput = oldConfirm;
-    
-    if (getCurrentPage() === 'bar') {
-      renderBarPage();
-    }
-    
-    showNotification(`✅ ${STATE.barItems[STATE.barItems.length - 1].name} qo'shildi!`);
-  };
-}
-
-// Update confirmInput flow
-const originalConfirmInput = window.confirmInput;
-window.confirmInput = function() {
-  if (STATE.currentInputType === 'add-product-name') {
-    const name = document.getElementById('inputModalValue').value.trim();
-    if (!name) {
-      showNotification('⚠️ Mahsulot nomini kiriting!');
-      return;
-    }
-    
-    if (STATE.barItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
-      showNotification('⚠️ Bu mahsulot allaqachon mavjud!');
-      return;
-    }
-    
-    STATE.tempProductName = name;
-    document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
-    document.getElementById('inputModalValue').value = '';
-    STATE.currentInputType = 'add-product-price';
+    if (STATE.currentInputType === 'add-product-name') {
+      const name = document.getElementById('inputModalValue').value.trim();
+      if (!name) {
+        showNotification('⚠️ Mahsulot nomini kiriting!');
+        return;
+      }
+      
+      if (STATE.barItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
+        showNotification('⚠️ Bu mahsulot allaqachon mavjud!');
+        return;
+      }
+      
+      STATE.tempProductName = name;
+      document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
+      document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
+      document.getElementById('inputModalValue').value = '';
+      STATE.currentInputType = 'add-product-price';
   } else if (STATE.currentInputType === 'add-product-price') {
     const price = parseInt(document.getElementById('inputModalValue').value);
     if (isNaN(price) || price <= 0) {
@@ -347,41 +261,48 @@ window.confirmInput = function() {
   } else if (originalConfirmInput) {
     originalConfirmInput();
   }
-};
+  };
+}
 
 export function openManageProductsModal() {
   const content = document.getElementById('contentArea');
   const modalHTML = `
-    <div class="modal show" id="manageProductsModal">
-      <div class="modal-content modal-wide">
-        <h2>📝 Mahsulotlarni Boshqarish</h2>
-        <div class="table-container">
-          <table class="table">
-            <thead>
+    <div class="modal show" id="manageProductsModal" style="align-items: flex-start; padding-top: 20px;">
+      <div class="modal-content" style="max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto;">
+        <h2 style="margin-bottom: 20px;">📝 Mahsulotlarni Boshqarish</h2>
+        <div style="max-height: 65vh; overflow-y: auto;">
+          <table class="table" style="width: 100%; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; background: var(--panel); z-index: 1;">
               <tr>
-                <th>Nomi</th>
-                <th>Narxi</th>
-                <th>Zaxira</th>
-                <th>Amallar</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border);">#</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border);">Nomi</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 2px solid var(--border);">Narxi</th>
+                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--border);">Zaxira</th>
+                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--border);">Amallar</th>
               </tr>
             </thead>
             <tbody>
               ${STATE.barItems.map((item, idx) => `
-                <tr>
-                  <td>${item.name}</td>
-                  <td>${item.price} so'm</td>
-                  <td>${item.stock}</td>
-                  <td>
-                    <button class="btn btn-small" onclick="window.barModule.editProduct(${idx})">✏️ Tahrirlash</button>
-                    <button class="btn btn-small modal-danger" onclick="window.barModule.deleteProduct(${idx})">🗑️ O'chirish</button>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 12px;">${idx + 1}</td>
+                  <td style="padding: 12px; font-weight: 600;">${item.name}</td>
+                  <td style="padding: 12px; text-align: right;">${item.price.toLocaleString()} so'm</td>
+                  <td style="padding: 12px; text-align: center;">
+                    <span style="padding: 4px 12px; border-radius: 12px; background: ${item.stock > 10 ? 'var(--success)' : item.stock > 0 ? 'var(--warning)' : 'var(--danger)'}; color: white; font-weight: 600;">
+                      ${item.stock}
+                    </span>
+                  </td>
+                  <td style="padding: 12px; text-align: center;">
+                    <button class="btn" style="margin: 0 5px; padding: 8px 12px; font-size: 0.85rem;" onclick="window.barModule.editProduct(${idx})">✏️ Tahrirlash</button>
+                    <button class="btn modal-danger" style="margin: 0 5px; padding: 8px 12px; font-size: 0.85rem;" onclick="window.barModule.deleteProduct(${idx})">🗑️ O'chirish</button>
                   </td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
         </div>
-        <div class="modal-buttons">
-          <button class="btn" onclick="window.barModule.closeManageModal()">Yopish</button>
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border); text-align: right;">
+          <button class="btn" style="padding: 12px 30px;" onclick="window.barModule.closeManageModal()">Yopish</button>
         </div>
       </div>
     </div>

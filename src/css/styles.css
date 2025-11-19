@@ -351,6 +351,14 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .debt-total-display { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--danger); }
 .debt-amount { font-size: 1.2rem; color: var(--danger); }
 
+/* Bar Products Management */
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 12px; text-align: left; }
+.table thead { background: var(--panel); position: sticky; top: 0; z-index: 1; }
+.table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+.table tbody tr:hover { background: var(--panel-light); }
+.btn-small { padding: 6px 12px; font-size: 0.85rem; margin: 0 3px; }
+
 /* Media Queries - Mobile Optimization */
 @media (max-width: 768px) {
   /* Tugmalar */

@@ -91,7 +91,7 @@ function setupEventListeners() {
       btn.classList.add('active');
       
       if (btn.dataset.page === 'settings') {
-        openSettingsPasswordModal();
+        openSettingsModal();
       } else {
         gameModule.renderPage(btn.dataset.page);
       }
