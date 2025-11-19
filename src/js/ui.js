@@ -184,8 +184,32 @@ export function toggleProfileMenu() {
   } else {
     updateProfileMenuBalances();
     updateProfileMenuShift();
+    updateProfileMenuSubscription();
     profileMenu.classList.remove('hidden');
     profileBtn.classList.add('active');
+  }
+}
+
+function updateProfileMenuSubscription() {
+  const subscriptionBadge = document.getElementById('subscriptionBadge');
+  const subscriptionEndDate = document.getElementById('subscriptionEndDate');
+  
+  if (subscriptionBadge) {
+    if (STATE.subscriptionActive) {
+      subscriptionBadge.textContent = '✅ Faol';
+      subscriptionBadge.classList.add('active');
+    } else {
+      subscriptionBadge.textContent = '🔒 Faol emas';
+      subscriptionBadge.classList.remove('active');
+    }
+  }
+  
+  if (subscriptionEndDate) {
+    if (STATE.subscriptionEndDate) {
+      subscriptionEndDate.textContent = new Date(STATE.subscriptionEndDate).toLocaleDateString('uz-UZ');
+    } else {
+      subscriptionEndDate.textContent = '--';
+    }
   }
 }
 
@@ -205,6 +229,34 @@ export function openSettingsFromProfile() {
     settingsBtn.classList.add('active');
     settingsBtn.click();
   }
+}
+
+export function openSubscriptionModal() {
+  openModal('subscriptionModal');
+}
+
+export function activateSubscription(days) {
+  const now = new Date();
+  const endDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+  
+  STATE.subscriptionActive = true;
+  STATE.subscriptionEndDate = endDate.toISOString();
+  STATE.subscriptionDays = days;
+  
+  // Save to storage
+  if (typeof window !== 'undefined' && window.saveData) {
+    window.saveData();
+  }
+  
+  updateProfileMenuSubscription();
+  
+  let planName = '';
+  if (days === 30) planName = 'Oylik';
+  else if (days === 90) planName = '3 oylik';
+  else if (days === 365) planName = 'Yillik';
+  
+  showNotification(`✅ ${planName} obuna faollashtirildi! Tugash sanasi: ${endDate.toLocaleDateString('uz-UZ')}`);
+  closeModal('subscriptionModal');
 }
 
 // Close profile menu when clicking outside

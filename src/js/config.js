@@ -23,6 +23,11 @@ export const DEFAULT_STATE = {
   isLoggedIn: false,
   currentUser: "",
   
+  // Subscription management
+  subscriptionActive: false,
+  subscriptionEndDate: null,
+  subscriptionDays: 0,
+  
   // Club info (user-specific)
   clubName: "",
   clubOwner: "",

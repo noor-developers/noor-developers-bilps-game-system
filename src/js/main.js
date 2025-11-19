@@ -24,7 +24,9 @@ import {
   filterReceiptsByType,
   toggleProfileMenu,
   closeProfileMenu,
-  openSettingsFromProfile
+  openSettingsFromProfile,
+  openSubscriptionModal,
+  activateSubscription
 } from './ui.js';
 import * as gameModule from './game.js';
 import * as barModule from './bar.js';
@@ -218,6 +220,10 @@ function exposeGlobals() {
   window.toggleProfileMenu = toggleProfileMenu;
   window.closeProfileMenu = closeProfileMenu;
   window.openSettingsFromProfile = openSettingsFromProfile;
+  
+  // Subscription functions
+  window.openSubscriptionModal = openSubscriptionModal;
+  window.activateSubscription = activateSubscription;
   
   window.gameModule = gameModule;
   window.barModule = barModule;

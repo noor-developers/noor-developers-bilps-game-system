@@ -143,6 +143,24 @@
           
           <div class="profile-menu-divider"></div>
           
+          <!-- Obuna -->
+          <div class="profile-menu-section">
+            <div class="profile-menu-title">⭐ Obuna</div>
+            <div class="subscription-info" id="subscriptionInfo">
+              <div class="subscription-status">
+                <span class="subscription-badge" id="subscriptionBadge">🔒 Faol emas</span>
+              </div>
+              <div class="subscription-details" id="subscriptionDetails">
+                <small>Obuna tugash sanasi: <strong id="subscriptionEndDate">--</strong></small>
+              </div>
+            </div>
+            <button class="profile-menu-btn" onclick="openSubscriptionModal(); closeProfileMenu()">
+              <span>💎</span> Obunani uzaytirish
+            </button>
+          </div>
+          
+          <div class="profile-menu-divider"></div>
+          
           <!-- Amallar -->
           <button class="profile-menu-btn" onclick="openSettingsFromProfile(); closeProfileMenu()">
             <span>⚙️</span> Sozlamalar
@@ -471,6 +489,64 @@
       <div class="modal-close">
         <button class="btn btn-success" onclick="confirmLogExport()">Eksport</button>
         <button class="btn btn-danger" onclick="closeModal('exportLogPasswordModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Modal -->
+  <div id="subscriptionModal" class="modal">
+    <div class="modal-content">
+      <h3>⭐ Obuna boshqaruvi</h3>
+      <p>Obunangizni faollashtiring yoki uzaytiring</p>
+      
+      <div class="subscription-plans">
+        <div class="plan-card">
+          <div class="plan-header">
+            <h4>📅 Oylik</h4>
+            <div class="plan-price">150,000 so'm</div>
+          </div>
+          <ul class="plan-features">
+            <li>✅ 30 kun obuna</li>
+            <li>✅ Barcha funksiyalar</li>
+            <li>✅ Texnik yordam</li>
+          </ul>
+          <button class="btn btn-primary full-width" onclick="activateSubscription(30)">Sotib olish</button>
+        </div>
+        
+        <div class="plan-card plan-popular">
+          <div class="plan-badge">⭐ Ommabop</div>
+          <div class="plan-header">
+            <h4>📅 3 oylik</h4>
+            <div class="plan-price">400,000 so'm</div>
+            <div class="plan-discount">11% tejash</div>
+          </div>
+          <ul class="plan-features">
+            <li>✅ 90 kun obuna</li>
+            <li>✅ Barcha funksiyalar</li>
+            <li>✅ Texnik yordam</li>
+            <li>✅ Maxsus bonuslar</li>
+          </ul>
+          <button class="btn btn-success full-width" onclick="activateSubscription(90)">Sotib olish</button>
+        </div>
+        
+        <div class="plan-card">
+          <div class="plan-header">
+            <h4>📅 Yillik</h4>
+            <div class="plan-price">1,500,000 so'm</div>
+            <div class="plan-discount">17% tejash</div>
+          </div>
+          <ul class="plan-features">
+            <li>✅ 365 kun obuna</li>
+            <li>✅ Barcha funksiyalar</li>
+            <li>✅ Maxsus texnik yordam</li>
+            <li>✅ Premium bonuslar</li>
+          </ul>
+          <button class="btn btn-primary full-width" onclick="activateSubscription(365)">Sotib olish</button>
+        </div>
+      </div>
+      
+      <div class="modal-footer-center">
+        <button class="btn btn-secondary" onclick="closeModal('subscriptionModal')">Yopish</button>
       </div>
     </div>
   </div>
