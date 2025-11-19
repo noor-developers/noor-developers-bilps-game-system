@@ -8,9 +8,9 @@ import { saveGameDataToFirestore } from './database.js';
 
 // ========== DATA LOADING ==========
 export async function loadData() {
-  console.log(' loadData() - FIREBASE ONLY MODE');
-  console.log('ℹ Barcha malumotlar Firebase Firestore dan avtomatik yuklanadi');
-  console.log(' localStorage ishlatilmaydi - faqat Firebase');
+  console.log('loadData() - FIREBASE ONLY MODE');
+  console.log('Barcha malumotlar Firebase Firestore dan avtomatik yuklanadi');
+  console.log('localStorage ishlatilmaydi - faqat Firebase');
   
   return true;
 }
@@ -18,17 +18,17 @@ export async function loadData() {
 // ========== DATA SAVING ==========
 export async function saveData() {
   if (!STATE.userId || !STATE.isLoggedIn) {
-    console.warn(' User login qilmagan, malumot saqlanmadi!');
+    console.warn('User login qilmagan, malumot saqlanmadi!');
     return;
   }
   
   try {
-    console.log(` Firebase Firestore ga saqlash: ${STATE.currentUser} (${STATE.userId})`);
+    console.log(`Firebase Firestore ga saqlash: ${STATE.currentUser} (${STATE.userId})`);
     await saveGameDataToFirestore(STATE.userId);
-    console.log(' Barcha malumotlar Firebase ga saqlandi');
+    console.log('Barcha malumotlar Firebase ga saqlandi');
   } catch (e) {
-    console.error(' Firebase save error:', e);
-    showNotification(' Malumot saqlanmadi! Internet aloqasini tekshiring.');
+    console.error('Firebase save error:', e);
+    showNotification('Malumot saqlanmadi! Internet aloqasini tekshiring.');
     throw e;
   }
 }
