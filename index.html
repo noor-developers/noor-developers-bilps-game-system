@@ -32,7 +32,8 @@
           <div class="input-group">
             <input type="password" id="loginPassword" placeholder="Parol" />
           </div>
-          <button class="login-btn" onclick="login()">Kirish</button>
+          <button id="loginButton" class="login-btn" onclick="login()">Kirish</button>
+          <div id="loginStatus" class="login-status"></div>
           <div class="text-center mt-15 text-muted">
             Akkauntingiz yo'qmi? <a href="#" onclick="showRegisterForm(); return false;" class="link-accent">Ro'yxatdan o'tish</a>
           </div>
@@ -393,70 +394,6 @@
     </div>
   </div>
   
-  <div class="modal" id="settingsModal">
-    <div class="modal-content modal-wide">
-      <div class="modal-header">⚙️ Sozlamalar</div>
-      <div class="grid-2col-lg">
-        <div>
-          <h3 class="text-warning mb-15">Xavfsizlik & Xodim</h3>
-          <div class="form-group">
-            <label>Sozlamalar paroli (Admin):</label>
-            <input type="password" id="settingsPassword" placeholder="Yangi parol (bo'sh qoldiring o'zgartirilmasin)">
-          </div>
-          <div class="form-group">
-            <label>O'tkazma (Transfer) Karta Raqami:</label>
-            <input type="text" id="settingsTransferCard" placeholder="1234 1234 1234 1234">
-          </div>
-          <h3 class="color-blue mb-15 mt-20">Foydalanuvchilar (Login - Parol)</h3>
-          <div class="form-group">
-            <textarea id="usersInput" placeholder="login1 - parol1&#10;login2 - parol2"></textarea>
-          </div>
-          
-          <!-- YANGI: FOYDALANUVCHI QO'SHISH FORMASI -->
-          <div id="addUserForm"></div>
-          
-        </div>
-        <div>
-          <h3 class="text-success mb-15">Narxlar (so'm/soat)</h3>
-          <div class="form-group">
-            <label>Billiard-1:</label>
-            <input type="number" id="priceB1" value="40000" title="Billiard 1 narxi" placeholder="40000">
-          </div>
-          <div class="form-group">
-            <label>Billiard-2:</label>
-            <input type="number" id="priceB2" value="40000" title="Billiard 2 narxi" placeholder="40000">
-          </div>
-          <div class="form-group">
-            <label>PlayStation 4 Pro:</label>
-            <input type="number" id="pricePS4" value="15000" title="PlayStation 4 narxi" placeholder="15000">
-          </div>
-          <div class="form-group">
-            <label>PlayStation 5 Slim:</label>
-            <input type="number" id="pricePS5" value="20000" title="PlayStation 5 narxi" placeholder="20000">
-          </div>
-        </div>
-      </div>
-      
-      <h3 class="text-primary mb-15">Bar mahsulotlari (Nomi - Narxi - Zaxira)</h3>
-      <div class="form-group">
-        <label>Har bir mahsulotni yangi qatordan kiriting:</label>
-        <textarea id="barItemsInput" placeholder="Pepsi - 8000 - 50&#10;Fanta - 8000 - 30&#10;Choy - 5000 - 100"></textarea>
-      </div>
-      
-        <h3 class="color-danger mb-15 mt-30">Ma'lumotlar boshqaruvi</h3>
-        <div class="grid-2col-tight">
-          <button class="btn btn-primary" onclick="exportData()">💾 Ma'lumotlarni Eksport qilish</button>
-          <input type="file" id="importFileInput" class="hidden" title="Ma'lumotlarni import qilish" onchange="handleImportFile(event)">
-          <button class="btn btn-warning" onclick="document.getElementById('importFileInput').click()">📥 Ma'lumotlarni Import qilish</button>
-      </div>
-      
-      <div class="modal-close">
-        <button class="btn btn-success" onclick="saveSettings()">Saqlash</button>
-        <button class="btn btn-danger" onclick="closeModal('settingsModal')">Yopish</button>
-      </div>
-    </div>
-  </div>
-  
   <div class="modal" id="payDebtModal">
     <div class="modal-content">
       <div class="modal-header">💰 Qarzni to'lash</div>
@@ -563,17 +500,37 @@
       </div>
       
       <div class="modal-body">
-        <!-- Club ma'lumotlari -->
+        <!-- Profil ma'lumotlari -->
         <div class="settings-section">
-          <h3 class="section-title">🏢 Club ma'lumotlari</h3>
+          <h3 class="section-title">👤 Profil ma'lumotlari</h3>
+          <div class="input-group">
+            <label>Foydalanuvchi nomi</label>
+            <input type="text" id="settingsUsername" class="modal-input" readonly title="Foydalanuvchi" placeholder="Foydalanuvchi" />
+          </div>
           <div class="input-group">
             <label>Club nomi</label>
             <input type="text" id="settingsClubName" class="modal-input" readonly title="Club nomi" placeholder="Club nomi" />
           </div>
+        </div>
+
+        <!-- Parol o'zgartirish -->
+        <div class="settings-section">
+          <h3 class="section-title">🔒 Xavfsizlik</h3>
           <div class="input-group">
-            <label>Foydalanuvchi</label>
-            <input type="text" id="settingsUsername" class="modal-input" readonly title="Foydalanuvchi" placeholder="Foydalanuvchi" />
+            <label>Joriy parol</label>
+            <input type="password" id="settingsCurrentPassword" class="modal-input" placeholder="Joriy parolni kiriting" />
           </div>
+          <div class="input-group">
+            <label>Yangi parol</label>
+            <input type="password" id="settingsNewPassword" class="modal-input" placeholder="Yangi parol" />
+          </div>
+          <div class="input-group">
+            <label>Yangi parolni tasdiqlash</label>
+            <input type="password" id="settingsConfirmPassword" class="modal-input" placeholder="Yangi parolni qayta kiriting" />
+          </div>
+          <button class="btn btn-warning full-width" onclick="changePassword()">
+            <span>🔐</span> Parolni o'zgartirish
+          </button>
         </div>
 
         <!-- Narxlar sozlamalari -->
@@ -629,7 +586,33 @@
     </div>
   </div>
 
-    <script type="module" src="src/js/main.js"></script>
+    <script>
+      // Login screen clock updater
+      console.log('🕒 Login clock init');
+      
+      function updateLoginClock() {
+        const now = new Date();
+        const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+        const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+
+        const loginClockEl = document.getElementById('loginClock');
+        if (loginClockEl) {
+          loginClockEl.textContent = now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        const loginDateEl = document.getElementById('loginDate');
+        if (loginDateEl) {
+          loginDateEl.textContent = `${days[now.getDay()]}, ${day}.${month}.${now.getFullYear()}`;
+        }
+      }
+
+      setInterval(updateLoginClock, 1000);
+      updateLoginClock();
+    </script>
+
+    <script type="module" src="src/js/main.js?v=2"></script>
 
 </body>
 </html>

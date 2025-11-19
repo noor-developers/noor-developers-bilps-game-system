@@ -362,3 +362,74 @@ function performLogout() {
   if (typeof updateUI === 'function') updateUI();
   showNotification('✅ Tizimdan chiqtingiz!', 2000);
 }
+
+// ========== PASSWORD CHANGE ==========
+export async function changePassword() {
+  const currentPassword = document.getElementById('settingsCurrentPassword').value;
+  const newPassword = document.getElementById('settingsNewPassword').value;
+  const confirmPassword = document.getElementById('settingsConfirmPassword').value;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
+    return;
+  }
+
+  // Joriy parolni tekshirish
+  const currentUser = STATE.users.find(u => u.username === STATE.currentUser);
+  if (!currentUser || currentUser.pass !== currentPassword) {
+    showNotification('❌ Joriy parol noto\'g\'ri!');
+    return;
+  }
+
+  // Yangi parolni tekshirish
+  if (newPassword.length < 4) {
+    showNotification('❌ Parol kamida 4 ta belgidan iborat bo\'lishi kerak!');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showNotification('❌ Yangi parollar mos kelmadi!');
+    return;
+  }
+
+  // Parolni o'zgartirish
+  currentUser.pass = newPassword;
+  
+  // Supabase-ga yangilash
+  if (USE_ONLINE_BACKUP) {
+    try {
+      const response = await fetch(`${API_URL}/update-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          username: STATE.currentUser, 
+          newPassword: newPassword
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        showNotification('✅ Parol muvaffaqiyatli o\'zgartirildi!');
+        addLog('Parol o\'zgartirildi', STATE.currentUser);
+        
+        // Clear password fields
+        document.getElementById('settingsCurrentPassword').value = '';
+        document.getElementById('settingsNewPassword').value = '';
+        document.getElementById('settingsConfirmPassword').value = '';
+      } else {
+        showNotification('❌ Server xatosi! Qayta urinib ko\'ring.');
+      }
+    } catch (e) {
+      console.error('❌ Password update xatosi:', e);
+      showNotification('❌ Server bilan aloqa yo\'q!');
+    }
+  } else {
+    await saveData();
+    showNotification('✅ Parol muvaffaqiyatli o\'zgartirildi!');
+    addLog('Parol o\'zgartirildi', STATE.currentUser);
+    
+    document.getElementById('settingsCurrentPassword').value = '';
+    document.getElementById('settingsNewPassword').value = '';
+    document.getElementById('settingsConfirmPassword').value = '';
+  }
+}

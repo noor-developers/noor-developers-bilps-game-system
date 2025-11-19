@@ -228,16 +228,6 @@ export function closeProfileMenu() {
   if (profileBtn) profileBtn.classList.remove('active');
 }
 
-export function openSettingsFromProfile() {
-  // Open settings page
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  const settingsBtn = document.querySelector('.nav button[data-page="settings"]');
-  if (settingsBtn) {
-    settingsBtn.classList.add('active');
-    settingsBtn.click();
-  }
-}
-
 export function openSubscriptionModal() {
   openModal('subscriptionModal');
 }

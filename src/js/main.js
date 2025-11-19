@@ -11,7 +11,8 @@ import {
   showLoginForm,
   showRegisterForm,
   updateActivity,
-  checkInactivity
+  checkInactivity,
+  changePassword
 } from './auth.js';
 import {
   updateUI,
@@ -36,6 +37,15 @@ import * as historyModule from './history.js';
 import { toggleShift } from './shift.js';
 import { decrypt, printReceipt } from './utils.js';
 import { saveNotes, syncNotesArea } from './notes.js';
+
+// ========== IMMEDIATE GLOBAL EXPOSURE (for onclick handlers) ==========
+// These must be available immediately when HTML loads
+window.login = login;
+window.register = register;
+window.logout = logout;
+window.showLoginForm = showLoginForm;
+window.showRegisterForm = showRegisterForm;
+window.changePassword = changePassword;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {

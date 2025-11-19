@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Test</title>
+</head>
+<body>
+  <h1>Login Test</h1>
+  <div id="result"></div>
+  
+  <script type="module">
+    const API_URL = 'https://noor-bilps-backend.onrender.com/api';
+    const result = document.getElementById('result');
+    
+    result.innerHTML = '⏳ Loading users...';
+    
+    try {
+      const response = await fetch(`${API_URL}/load-all-users`);
+      const data = await response.json();
+      
+      if (data.success && data.users) {
+        result.innerHTML = `
+          <h2>✅ Backend ishlayapti!</h2>
+          <p>Users: ${data.users.length} ta</p>
+          <ul>
+            ${data.users.map(u => `<li>${u.username} / ${u.password}</li>`).join('')}
+          </ul>
+        `;
+      } else {
+        result.innerHTML = '❌ Backend xato: ' + JSON.stringify(data);
+      }
+    } catch (error) {
+      result.innerHTML = '❌ Fetch xato: ' + error.message;
+    }
+  </script>
+</body>
+</html>
