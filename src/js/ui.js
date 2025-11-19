@@ -557,6 +557,12 @@ export function openSettingsFromProfile() {
   const settingsModal = document.getElementById('settingsModal');
   if (!settingsModal) return;
   
+  // Unique ID ni ko'rsatish
+  const uniqueIdInput = document.getElementById('settingsUniqueId');
+  if (uniqueIdInput) {
+    uniqueIdInput.value = STATE.uniqueId || 'Yuklanmagan';
+  }
+  
   // Club ma'lumotlarini ko'rsatish
   document.getElementById('settingsClubName').value = STATE.clubName || '';
   document.getElementById('settingsUsername').value = STATE.currentUser || '';

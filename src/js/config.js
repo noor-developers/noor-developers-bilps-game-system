@@ -24,6 +24,7 @@ export const DEFAULT_STATE = {
   isLoggedIn: false,
   currentUser: "",
   userId: null, // Firebase User ID
+  uniqueId: null, // Noyob 14-belgilik ID (o'zgarmas)
   
   // Subscription management
   subscriptionActive: false,

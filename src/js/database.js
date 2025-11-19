@@ -50,11 +50,17 @@ export async function loadUserDataFromFirestore(userId) {
       console.log('✅ Firestore dan ma\'lumotlar yuklandi:', data);
       
       // Profile ma'lumotlarini STATE ga yuklash
+      if (data.uniqueId) STATE.uniqueId = data.uniqueId;
       if (data.clubName) STATE.clubName = data.clubName;
       if (data.ownerName) STATE.clubOwner = data.ownerName;
       if (data.phone) STATE.clubPhone = data.phone;
       if (data.email) STATE.userEmail = data.email;
       if (data.address) STATE.clubAddress = data.address;
+      
+      // Unique ID ni console da ko'rsatish
+      if (data.uniqueId) {
+        console.log('🆔 User Unique ID:', data.uniqueId);
+      }
       
       // Game data-ni yuklash
       const gameDocRef = doc(db, 'users', userId, 'gameData', 'current');
@@ -281,6 +287,7 @@ export function clearUserData() {
   STATE.clubPhone = '';
   STATE.userEmail = '';
   STATE.clubAddress = '';
+  STATE.uniqueId = null;
   
   console.log('🗑️ User ma\'lumotlari tozalandi');
 }

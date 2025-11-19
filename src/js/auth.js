@@ -13,7 +13,7 @@ import {
 import { STATE } from './config.js';
 import { loadData, saveData } from './storage.js';
 import { showNotification, openModal, closeModal, showConfirm, updateUI } from './ui.js';
-import { addLog } from './utils.js';
+import { addLog, generateUniqueId } from './utils.js';
 import { renderPage, clearSessionState } from './game.js';
 import { syncNotesArea } from './notes.js';
 import { loadUserDataFromFirestore, startRealtimeSync, stopRealtimeSync } from './database.js';
@@ -169,6 +169,10 @@ export async function register() {
   }
 
   try {
+    // Noyob 14-belgilik ID yaratish
+    const uniqueId = generateUniqueId();
+    console.log('🆔 Noyob ID yaratildi:', uniqueId);
+    
     // Firebase da yangi user yaratish
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -180,19 +184,24 @@ export async function register() {
     
     console.log('✅ Firebase user yaratildi:', user.uid);
     
-    // Firestore da user ma'lumotlarini saqlash
+    // Firestore da user ma'lumotlarini saqlash (uniqueId bilan)
     const { saveUserProfileToFirestore } = await import('./database.js');
     await saveUserProfileToFirestore(user.uid, {
-      clubName,
-      ownerName,
-      phone,
-      email,
-      address,
+      uniqueId,        // Noyob 14-belgilik ID
+      username,        // Username
+      clubName,        // Klub nomi
+      ownerName,       // Egasi
+      phone,           // Telefon
+      email,           // Email
+      address,         // Manzil
       createdAt: new Date().toISOString()
     });
     
-    showNotification('✅ Ro\'yxatdan o\'tdingiz! Xush kelibsiz! 🎉');
-    addLog('Yangi user yaratildi', `${clubName} (${phone})`);
+    // STATE ga ham saqlash
+    STATE.uniqueId = uniqueId;
+    
+    showNotification(`✅ Ro'yxatdan o'tdingiz! ID: ${uniqueId} 🎉`);
+    addLog('Yangi user yaratildi', `${clubName} (ID: ${uniqueId})`);
     
     // Form tozalash
     clearRegisterForm();

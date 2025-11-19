@@ -15,6 +15,36 @@ function formatDateTimeUz(date) {
   return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
 }
 
+// ========== UNIQUE ID GENERATION ==========
+/**
+ * Generate unique 14-character ID (uppercase, lowercase, numbers)
+ * Format: XXxxXXxxXXxxXX (random mix)
+ * Example: Ab3Cd5Ef7Gh9Ij
+ */
+export function generateUniqueId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  
+  for (let i = 0; i < 14; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    id += chars[randomIndex];
+  }
+  
+  // Add timestamp-based uniqueness (last 2 chars from timestamp)
+  const timestamp = Date.now().toString(36).slice(-2);
+  id = id.slice(0, 12) + timestamp;
+  
+  return id;
+}
+
+/**
+ * Validate unique ID format
+ */
+export function isValidUniqueId(id) {
+  if (!id || id.length !== 14) return false;
+  return /^[A-Za-z0-9]{14}$/.test(id);
+}
+
 // ========== ENCRYPTION ==========
 export function encrypt(text) {
   return CryptoJS.AES.encrypt(text, "noor-secret-key-2024").toString();
