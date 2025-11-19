@@ -40,7 +40,7 @@ function loadNotesList() {
   }
   
   notesList.innerHTML = STATE.notesList.map((note, index) => `
-    <div class="note-item ${currentNoteId === note.id ? 'active' : ''}" onclick="window.notesModule.loadNote(${index})">
+    <div class="note-item ${currentNoteId === note.id ? 'active' : ''}" onclick="loadNote(${index})">
       <div class="note-item-title">${note.title || 'Sarlavasiz'}</div>
       <div class="note-item-preview">${note.content.substring(0, 50)}...</div>
       <div class="note-item-date">${note.date}</div>
