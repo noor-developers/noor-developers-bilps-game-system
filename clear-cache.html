@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Tozalash - NOOR Game System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 NOOR Game System - Cache Tozalash</h1>
+        
+        <div class="info">
+            <h3>📋 Muammo:</h3>
+            <p>Sizning kompyuteringizda login qila olmayapsiz, lekin boshqa qurilmalarda ishlamoqda.</p>
+            
+            <h3>💡 Yechim:</h3>
+            <p>Bu localStorage'da eski ma'lumotlar tiqilib qolgan bo'lishi mumkin. Quyidagi tugmani bosing:</p>
+        </div>
+
+        <button class="btn btn-danger" onclick="clearAll()">
+            🗑️ Barcha Cache'ni Tozalash
+        </button>
+
+        <button class="btn btn-success" onclick="goToMain()">
+            🚀 Asosiy Sahifaga O'tish
+        </button>
+
+        <div id="result"></div>
+
+        <div class="info" style="margin-top: 30px;">
+            <h3>📝 Qadamlar:</h3>
+            <ol style="text-align: left;">
+                <li>🗑️ "Barcha Cache'ni Tozalash" tugmasini bosing</li>
+                <li>⏳ Sahifa avtomatik yangilanadi</li>
+                <li>🚀 "Asosiy Sahifaga O'tish" tugmasini bosing</li>
+                <li>🔑 Login qiling</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function clearAll() {
+            const result = document.getElementById('result');
+            
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                
+                // Clear cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                result.className = 'success';
+                result.style.display = 'block';
+                result.innerHTML = '✅ Barcha cache tozalandi! Sahifa 2 sekundda yangilanadi...';
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } catch (e) {
+                result.className = 'error';
+                result.style.display = 'block';
+                result.innerHTML = '❌ Xato: ' + e.message;
+            }
+        }
+
+        function goToMain() {
+            window.location.href = '/';
+        }
+
+        // Show current state
+        window.addEventListener('load', () => {
+            console.log('📊 Current localStorage:', localStorage);
+            console.log('📊 Current sessionStorage:', sessionStorage);
+        });
+    </script>
+</body>
+</html>

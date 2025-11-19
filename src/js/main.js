@@ -78,7 +78,15 @@ export async function initializeApp() {
   // Start activity checker
   setInterval(checkInactivity, 60000); // har 1 daqiqada
   
-  // Start UI updates
+  // Start clock updates (always running, even on login screen)
+  setInterval(() => {
+    const updateClocks = window.uiModule?.updateClocks;
+    if (typeof updateClocks === 'function') {
+      updateClocks();
+    }
+  }, 1000);
+  
+  // Start UI updates (only when logged in)
   setInterval(() => {
     if (STATE.isLoggedIn) {
       updateUI();

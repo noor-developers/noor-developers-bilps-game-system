@@ -90,6 +90,7 @@ if (typeof window !== 'undefined') {
   window.uiModule = window.uiModule || {};
   window.uiModule.updateUI = updateUI;
   window.uiModule.updateReceipts = updateReceipts;
+  window.uiModule.updateClocks = updateClocks;
 }
 
 export function updateTopbar() {
@@ -276,12 +277,19 @@ if (typeof window !== 'undefined') {
 function updateClocks() {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateStr = now.toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' });
   
   const loginClock = document.getElementById('loginClock');
   if (loginClock) loginClock.textContent = timeStr;
   
+  const loginDate = document.getElementById('loginDate');
+  if (loginDate) loginDate.textContent = dateStr;
+  
   const mainClock = document.getElementById('mainClock');
   if (mainClock) mainClock.textContent = timeStr;
+  
+  const currentDate = document.getElementById('currentDate');
+  if (currentDate) currentDate.textContent = dateStr;
 }
 
 function updateShiftTimerUI() {
