@@ -462,6 +462,8 @@
         </div>
         <div class="login-form" id="registerFormDiv" style="display:none;">
           <h2>Ro'yxatdan o'tish</h2>
+          
+          <h3 style="color:#667eea;font-size:1rem;margin:15px 0 10px 0;">👤 Akkaunt ma'lumotlari</h3>
           <div class="input-group">
             <input type="text" id="registerUsername" placeholder="Foydalanuvchi nomi" />
           </div>
@@ -471,6 +473,21 @@
           <div class="input-group">
             <input type="password" id="registerConfirmPassword" placeholder="Parolni tasdiqlash" />
           </div>
+          
+          <h3 style="color:#667eea;font-size:1rem;margin:15px 0 10px 0;">🏢 Klub ma'lumotlari</h3>
+          <div class="input-group">
+            <input type="text" id="registerClubName" placeholder="Klub nomi (masalan: NOOR Game Club)" />
+          </div>
+          <div class="input-group">
+            <input type="text" id="registerOwnerName" placeholder="Egasi ismi" />
+          </div>
+          <div class="input-group">
+            <input type="tel" id="registerPhone" placeholder="Telefon raqami (+998 90 123 45 67)" />
+          </div>
+          <div class="input-group">
+            <input type="text" id="registerAddress" placeholder="Manzil (ixtiyoriy)" />
+          </div>
+          
           <button class="login-btn" onclick="register()">Ro'yxatdan o'tish</button>
           <div style="text-align:center;margin-top:15px;color:#64748b;">
             Akkauntingiz bormi? <a href="#" onclick="showLoginForm(); return false;" style="color:#667eea;font-weight:600;">Kirish</a>
@@ -487,7 +504,10 @@
   <div id="newYearBanner"></div>
 
   <div class="topbar">
-    <div class="logo">🎱 NOOR</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="logo">🎱 NOOR</div>
+      <div id="clubInfo" style="font-size:0.85rem;color:var(--warning);font-weight:600;display:none;"></div>
+    </div>
     <nav class="nav">
       <button class="active" data-page="billiard">Billiard</button>
       <button data-page="playstation">PlayStation</button>
@@ -888,6 +908,13 @@
       transferCardNumber: "1234 1234 1234 1234",
       isLoggedIn: false,
       currentUser: "",
+      
+      // Club info (user-specific, saved with user data)
+      clubName: "",
+      clubOwner: "",
+      clubPhone: "",
+      clubAddress: "",
+      
       shiftOpen: false,
       shiftStartTime: null,
       currentShiftId: null,
@@ -1105,11 +1132,16 @@
       const username = document.getElementById('registerUsername').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const clubName = document.getElementById('registerClubName').value.trim();
+      const ownerName = document.getElementById('registerOwnerName').value.trim();
+      const phone = document.getElementById('registerPhone').value.trim();
+      const address = document.getElementById('registerAddress').value.trim();
 
-      console.log(`👤 Ro'yxatdan o'tish: ${username}`);
+      console.log(`👤 Ro'yxatdan o'tish: ${username}, Klub: ${clubName}`);
 
+      // Validate account fields
       if (!username || !password || !confirmPassword) {
-        showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
+        showNotification('⚠️ Login va parol maydonlarini to\'ldiring!');
         return;
       }
 
@@ -1123,6 +1155,12 @@
         return;
       }
 
+      // Validate club fields
+      if (!clubName || !ownerName || !phone) {
+        showNotification('⚠️ Klub nomi, egasi va telefon raqamini kiriting!');
+        return;
+      }
+
       // Mavjud user tekshirish
       if (STATE.users.find(u => u.username === username)) {
         console.log('❌ User allaqachon mavjud');
@@ -1130,33 +1168,56 @@
         return;
       }
 
-      // Yangi user qo'shish
+      // Yangi user qo'shish (STATE.users ga club ma'lumotlarisiz)
       STATE.users.push({ username, pass: password });
       console.log(`✅ User STATE-ga qo'shildi. Jami: ${STATE.users.length}`);
-      saveData();
 
-      // Supabase-ga yuborish
+      // Supabase-ga yuborish (club ma'lumotlari bilan)
       if (USE_ONLINE_BACKUP) {
         console.log('☁️ Supabase-ga yuborilmoqda...');
         try {
           const response = await fetch(`${API_URL}/add-user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ 
+              username, 
+              password,
+              clubName,
+              ownerName,
+              phone,
+              address
+            })
           });
           const data = await response.json();
           if (data.success) {
-            console.log('✅ User Supabase-ga qo\'shildi:', data);
+            console.log('✅ User va klub ma\'lumotlari Supabase-ga qo\'shildi:', data);
+            showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
+            addLog('Yangi user yaratildi', `${username} (${clubName})`);
+            
+            // Clear form and switch to login
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerConfirmPassword').value = '';
+            document.getElementById('registerClubName').value = '';
+            document.getElementById('registerOwnerName').value = '';
+            document.getElementById('registerPhone').value = '';
+            document.getElementById('registerAddress').value = '';
+            showLoginForm();
           } else {
             console.warn('⚠️ Supabase xatosi:', data.error);
+            showNotification('❌ Server xatosi! Qayta urinib ko\'ring.');
           }
         } catch (e) {
           console.error('❌ Backend xatosi:', e);
+          showNotification('❌ Server bilan aloqa yo\'q!');
         }
+      } else {
+        // Offline mode
+        await saveData();
+        showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
+        addLog('Yangi user yaratildi', username);
       }
 
-      showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
-      addLog('Yangi user yaratildi', username);
       console.log('✅ Ro\'yxatdan o\'tish muvaffaqiyatli');
       
       // Login formaga qaytish
@@ -1202,7 +1263,11 @@
         document.getElementById('logoutBtn').style.display = 'block'; // Logout tugmasini ko'rsatish
         
         addLog("Tizimga kirish", `Foydalanuvchi: ${user.username}`);
-        await loadData(); 
+        await loadData();
+        
+        // Club ma'lumotlarini ko'rsatish
+        await loadAndDisplayClubInfo(user.username);
+        
         renderPage('billiard');
       } else {
         showNotification('❌ Noto\'g\'ri login yoki parol!');
@@ -1595,6 +1660,45 @@
       } catch (e) {
         console.error('Supabase load error:', e);
         return null;
+      }
+    }
+
+    // Club ma'lumotlarini yuklash va UI da ko'rsatish
+    async function loadAndDisplayClubInfo(username) {
+      console.log(`🏢 ${username} klub ma'lumotlari yuklanmoqda...`);
+      
+      try {
+        const response = await fetch(`${API_URL}/load-all-users`);
+        if (!response.ok) {
+          console.warn('❌ Club info yuklab bo\'lmadi');
+          return;
+        }
+        
+        const data = await response.json();
+        if (data.success && data.users) {
+          const userInfo = data.users.find(u => u.username === username);
+          
+          if (userInfo && userInfo.clubname) {
+            console.log('✅ Club ma\'lumotlari topildi:', userInfo);
+            
+            // STATE ga saqlash
+            STATE.clubName = userInfo.clubname || '';
+            STATE.clubOwner = userInfo.ownername || '';
+            STATE.clubPhone = userInfo.phone || '';
+            STATE.clubAddress = userInfo.address || '';
+            
+            // UI da ko'rsatish
+            const clubInfoEl = document.getElementById('clubInfo');
+            if (clubInfoEl) {
+              clubInfoEl.textContent = `🏢 ${userInfo.clubname}`;
+              clubInfoEl.style.display = 'block';
+            }
+          } else {
+            console.log('ℹ️ Club ma\'lumotlari topilmadi (eski user)');
+          }
+        }
+      } catch (e) {
+        console.error('❌ Club info yuklashda xato:', e);
       }
     }
 
