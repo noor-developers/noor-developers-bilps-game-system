@@ -462,3 +462,12 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
   input,select,textarea{min-height:44px;font-size:16px !important;}
 }
 
+/* Settings Modal */
+.settings-section{margin-bottom:25px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.settings-section:last-child{border-bottom:none;margin-bottom:0;}
+.settings-section h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:15px;display:flex;align-items:center;gap:8px;}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;}
+.settings-actions{display:flex;flex-direction:column;gap:10px;}
+.version-info{text-align:center;padding:15px;background:var(--bg);border-radius:8px;color:var(--text-dim);}
+.version-info small{font-size:0.85rem;}
+

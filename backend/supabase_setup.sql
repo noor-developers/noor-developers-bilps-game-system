@@ -8,6 +8,18 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
   club_name TEXT,
+  email TEXT,
+  phone TEXT,
+  settings JSONB DEFAULT '{
+    "priceB1": 40000,
+    "priceB2": 40000,
+    "pricePS4": 15000,
+    "pricePS5": 20000,
+    "theme": "dark",
+    "language": "uz",
+    "notifications": true,
+    "autoSave": true
+  }'::jsonb,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

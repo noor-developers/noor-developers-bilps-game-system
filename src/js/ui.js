@@ -537,3 +537,127 @@ export function filterReceiptsByType(type, activeBtn) {
   const activeFilter = document.querySelector('.receipt-filters .filter-btn.active[data-filter]')?.dataset.filter || 'today';
   filterReceipts(activeFilter, document.querySelector(`[data-filter="${activeFilter}"]`), type);
 }
+
+// ========== SETTINGS FUNCTIONS ==========
+export function openSettingsFromProfile() {
+  const settingsModal = document.getElementById('settingsModal');
+  if (!settingsModal) return;
+  
+  // Club ma'lumotlarini ko'rsatish
+  document.getElementById('settingsClubName').value = STATE.clubName || '';
+  document.getElementById('settingsUsername').value = STATE.currentUser || '';
+  
+  // Narxlarni ko'rsatish
+  document.getElementById('settingsPriceB1').value = STATE.priceB1;
+  document.getElementById('settingsPriceB2').value = STATE.priceB2;
+  document.getElementById('settingsPricePS4').value = STATE.pricePS4;
+  document.getElementById('settingsPricePS5').value = STATE.pricePS5;
+  
+  openModal('settingsModal');
+}
+
+export async function saveSettings() {
+  // Narxlarni saqlash
+  STATE.priceB1 = parseInt(document.getElementById('settingsPriceB1').value) || 40000;
+  STATE.priceB2 = parseInt(document.getElementById('settingsPriceB2').value) || 40000;
+  STATE.pricePS4 = parseInt(document.getElementById('settingsPricePS4').value) || 15000;
+  STATE.pricePS5 = parseInt(document.getElementById('settingsPricePS5').value) || 20000;
+  
+  // Backend-ga user settings-ni saqlash
+  const { API_URL, USE_ONLINE_BACKUP } = await import('./config.js');
+  
+  if (USE_ONLINE_BACKUP && STATE.currentUser) {
+    try {
+      const settingsData = {
+        priceB1: STATE.priceB1,
+        priceB2: STATE.priceB2,
+        pricePS4: STATE.pricePS4,
+        pricePS5: STATE.pricePS5,
+        theme: 'dark',
+        language: 'uz',
+        notifications: true,
+        autoSave: true
+      };
+      
+      const response = await fetch(`${API_URL}/update-user-settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: STATE.currentUser,
+          settings: settingsData
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        console.log('✅ User settings backend-ga saqlandi');
+      }
+    } catch (e) {
+      console.error('❌ Settings saqlashda xato:', e);
+    }
+  }
+  
+  // Local ma'lumotlarni saqlash
+  if (window.storageModule && window.storageModule.saveData) {
+    window.storageModule.saveData();
+  }
+  
+  showNotification('✅ Sozlamalar saqlandi!', 2000);
+  closeModal('settingsModal');
+  updateUI();
+}
+
+export function exportData() {
+  const data = {
+    clubName: STATE.clubName,
+    currentUser: STATE.currentUser,
+    tables: STATE.tables,
+    barItems: STATE.barItems,
+    debtors: STATE.debtors,
+    history: STATE.history,
+    cashBalance: STATE.cashBalance,
+    transferBalance: STATE.transferBalance,
+    debtBalance: STATE.debtBalance,
+    prices: {
+      B1: STATE.priceB1,
+      B2: STATE.priceB2,
+      PS4: STATE.pricePS4,
+      PS5: STATE.pricePS5
+    },
+    subscription: {
+      active: STATE.subscriptionActive,
+      endDate: STATE.subscriptionEndDate,
+      days: STATE.subscriptionDays
+    },
+    exportDate: new Date().toISOString()
+  };
+  
+  const dataStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `noor-gms-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('✅ Ma\'lumotlar yuklandi!', 2000);
+}
+
+export function clearLocalStorage() {
+  showConfirm('⚠️ Haqiqatan ham keshni tozalamoqchimisiz?<br><small>Bu amalni qaytarib bo\'lmaydi!</small>', () => {
+    localStorage.clear();
+    showNotification('✅ Kesh tozalandi! Sahifa yangilanmoqda...', 2000);
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
+  });
+}
+
+// Global functions
+if (typeof window !== 'undefined') {
+  window.openSettingsFromProfile = openSettingsFromProfile;
+  window.saveSettings = saveSettings;
+  window.exportData = exportData;
+  window.clearLocalStorage = clearLocalStorage;
+}

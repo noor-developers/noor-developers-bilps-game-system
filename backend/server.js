@@ -297,6 +297,39 @@ app.post('/api/save-history', async (req, res) => {
   }
 });
 
+// 8. User settings-ni yangilash
+app.post('/api/update-user-settings', async (req, res) => {
+  try {
+    const { username, settings } = req.body;
+    if (!username || !settings) {
+      return res.status(400).json({ error: 'username va settings kerak' });
+    }
+
+    const dbClient = getDbClient();
+    if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
+
+    const { data, error } = await dbClient
+      .from('users')
+      .update({ 
+        settings: settings,
+        updated_at: new Date().toISOString()
+      })
+      .eq('username', username)
+      .select();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'User sozlamalari yangilandi',
+      data: data
+    });
+  } catch (error) {
+    console.error('Update settings error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server ishga tushgan' });

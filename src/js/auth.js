@@ -252,23 +252,44 @@ async function loadAndDisplayClubInfo(username) {
     if (data.success && data.users) {
       const userInfo = data.users.find(u => u.username === username);
       
-      if (userInfo && userInfo.clubname) {
-        console.log('✅ Club ma\'lumotlari topildi:', userInfo);
+      if (userInfo) {
+        console.log('✅ User ma\'lumotlari topildi:', userInfo);
         
-        // STATE ga saqlash
-        STATE.clubName = userInfo.clubname || '';
+        // STATE ga club ma'lumotlarini saqlash
+        STATE.clubName = userInfo.clubname || userInfo.club_name || '';
         STATE.clubOwner = userInfo.ownername || '';
         STATE.clubPhone = userInfo.phone || '';
         STATE.clubAddress = userInfo.address || '';
+        STATE.userEmail = userInfo.email || '';
+        
+        // User settings-ni yuklash (agar mavjud bo'lsa)
+        if (userInfo.settings) {
+          const settings = typeof userInfo.settings === 'string' 
+            ? JSON.parse(userInfo.settings) 
+            : userInfo.settings;
+          
+          STATE.priceB1 = settings.priceB1 || STATE.priceB1;
+          STATE.priceB2 = settings.priceB2 || STATE.priceB2;
+          STATE.pricePS4 = settings.pricePS4 || STATE.pricePS4;
+          STATE.pricePS5 = settings.pricePS5 || STATE.pricePS5;
+          
+          console.log('✅ User sozlamalari yuklandi:', settings);
+        }
         
         // UI da ko'rsatish
         const clubInfoEl = document.getElementById('clubInfo');
-        if (clubInfoEl) {
-          clubInfoEl.textContent = `🏢 ${userInfo.clubname}`;
+        if (clubInfoEl && STATE.clubName) {
+          clubInfoEl.textContent = `🏢 ${STATE.clubName}`;
           clubInfoEl.style.display = 'block';
         }
+        
+        // Topbar club name-ni yangilash
+        const clubNameDisplay = document.getElementById('clubNameDisplay');
+        if (clubNameDisplay && STATE.clubName) {
+          clubNameDisplay.textContent = STATE.clubName;
+        }
       } else {
-        console.log('ℹ️ Club ma\'lumotlari topilmadi (eski user)');
+        console.log('ℹ️ User ma\'lumotlari topilmadi');
       }
     }
   } catch (e) {
