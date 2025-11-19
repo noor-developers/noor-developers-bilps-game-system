@@ -665,13 +665,8 @@ export function exportData() {
 }
 
 export function clearLocalStorage() {
-  showConfirm('⚠️ Haqiqatan ham keshni tozalamoqchimisiz?<br><small>Bu amalni qaytarib bo\'lmaydi!</small>', () => {
-    localStorage.clear();
-    showNotification('✅ Kesh tozalandi! Sahifa yangilanmoqda...', 2000);
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
-  });
+  // localStorage YO'Q - Firebase faqat ishlatiladi
+  showNotification('ℹ️ Barcha ma\'lumotlar Firebase da saqlanadi. localStorage ishlatilmaydi.', 3000);
 }
 
 // Global functions

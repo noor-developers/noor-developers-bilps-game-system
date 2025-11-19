@@ -69,15 +69,8 @@ window.removeFromQueue = removeFromQueue;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
-  const savedSettingsPassword = localStorage.getItem('noorSettingsPassword');
-  const savedTransferCard = localStorage.getItem('noorTransferCard');
-  
-  if (savedSettingsPassword) {
-    try {
-      STATE.settingsPassword = decrypt(savedSettingsPassword);
-    } catch (e) {
-      console.warn('Sozlamalar parolini o\'qib bo\'lmadi');
-    }
+  // localStorage YO'Q - Firebase user profile dan yuklanadi
+  console.log('ℹ️ Parollar Firebase dan avtomatik yuklanadi');
   }
   
   if (savedTransferCard) {
@@ -174,18 +167,18 @@ function openSettingsModal() {
 }
 
 async function saveSettings() {
-  const { encrypt, addLog } = await import('./utils.js');
+  const { addLog } = await import('./utils.js');
   
   const newPassword = document.getElementById('settingsPassword').value.trim();
   if (newPassword) {
     STATE.settingsPassword = newPassword;
-    localStorage.setItem('noorSettingsPassword', encrypt(newPassword));
+    // localStorage YO'Q - Firebase ga saveData() orqali saqlanadi
   }
   
   const newTransferCard = document.getElementById('settingsTransferCard').value.trim();
   if (newTransferCard) {
     STATE.transferCardNumber = newTransferCard;
-    localStorage.setItem('noorTransferCard', encrypt(newTransferCard));
+    // localStorage YO'Q - Firebase ga saveData() orqali saqlanadi
   }
   
   // Update prices

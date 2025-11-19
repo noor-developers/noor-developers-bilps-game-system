@@ -116,7 +116,7 @@ function logoutDueToInactivity() {
   addLog("Avtomatik chiqish", "Faollik yo'qligi sababli (30 daqiqa)");
   STATE.isLoggedIn = false;
   STATE.currentUser = "";
-  localStorage.removeItem('noor_session');
+  // localStorage YO'Q - Firebase faqat
   document.getElementById('loginScreen').style.opacity = '1';
   document.getElementById('loginScreen').style.visibility = 'visible';
   const notesArea = document.getElementById('notesArea');
