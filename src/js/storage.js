@@ -83,6 +83,7 @@ export async function loadData() {
             'isLoggedIn', 'tables', 'currentUser', 'lastActivity', 'sessionTimeout',
             'users' // NEVER overwrite users from localStorage - Supabase is primary source
         ].includes(k));
+        // receipts is now persistent - will be saved and loaded
         
         persistentKeys.forEach(key => {
           if (data[key] !== undefined) {

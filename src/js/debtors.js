@@ -3,6 +3,17 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
+
+// Helper function for consistent Uzbek date/time formatting
+function formatDateTimeUz(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
+}
 import { showNotification, openModal, closeModal, showConfirm, updateUI } from './ui.js';
 import { addLog, addReceipt } from './utils.js';
 import { clearSessionState, getCurrentPage, renderPage } from './game.js';
@@ -98,7 +109,7 @@ export function confirmDebtName(name) {
   
   debtor.debts.push({
       ...data,
-      endTime: new Date().toLocaleString('uz-UZ'),
+      endTime: formatDateTimeUz(new Date()),
       timestamp: Date.now()
   });
   
@@ -109,7 +120,7 @@ export function confirmDebtName(name) {
       name: debtorName,
       table: data.table,
       total: data.total,
-      time: new Date().toLocaleString('uz-UZ'),
+      time: formatDateTimeUz(new Date()),
   });
   
   addLog("Qarzga yozildi", `${data.table}: ${data.total} so'm -> ${debtorName}`);

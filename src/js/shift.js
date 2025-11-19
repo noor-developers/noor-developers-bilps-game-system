@@ -3,6 +3,17 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
+
+// Helper function for consistent Uzbek date/time formatting
+function formatDateTimeUz(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
+}
 import { showNotification, showConfirm, updateUI } from './ui.js';
 import { addLog } from './utils.js';
 import { clearSessionState, getCurrentPage, renderPage } from './game.js';
@@ -15,7 +26,7 @@ export async function toggleShift() {
         return;
     }
     STATE.shiftOpen = true;
-    STATE.shiftStartTime = new Date().toLocaleString('uz-UZ');
+    STATE.shiftStartTime = formatDateTimeUz(new Date());
     STATE.currentShiftId = Date.now();
     STATE.cashBalance = 0;
     STATE.transferBalance = 0;
@@ -32,7 +43,7 @@ export async function toggleShift() {
         shiftId: STATE.currentShiftId,
         employeeName: STATE.currentUser,
         startTime: STATE.shiftStartTime,
-        endTime: new Date().toLocaleString('uz-UZ'),
+        endTime: formatDateTimeUz(new Date()),
         cashBalance: STATE.cashBalance,
         transferBalance: STATE.transferBalance,
         debtBalance: STATE.debtBalance,

@@ -3,6 +3,17 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
+
+// Helper function for consistent Uzbek date/time formatting
+function formatDateTimeUz(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
+}
 import { showNotification, closeModal, openModal, closePaymentModal, updateUI } from './ui.js';
 import { addLog, addReceipt } from './utils.js';
 import { clearSessionState, getCurrentPage, renderPage } from './game.js';
@@ -57,7 +68,7 @@ export async function finalizePayment(type) {
           type: 'game',
           table: data.table,
           startTime: data.startTime,
-          endTime: new Date().toLocaleString('uz-UZ'),
+          endTime: formatDateTimeUz(new Date()),
           duration: data.duration,
           gameCost: data.gameCost,
           barItems: data.barItems,
@@ -84,7 +95,7 @@ export async function finalizePayment(type) {
           quantity: data.qty,
           price: data.barItem.price,
           total: totalAmount,
-          time: new Date().toLocaleString('uz-UZ'),
+          time: formatDateTimeUz(new Date()),
           paymentType: type
       });
       

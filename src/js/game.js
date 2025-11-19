@@ -166,7 +166,7 @@ export function confirmInput() {
     STATE.tables[key].running = true;
     STATE.tables[key].remainingSeconds = secondsToAdd;
     STATE.tables[key].initialSeconds = secondsToAdd;
-    STATE.tables[key].startTime = new Date().toLocaleString('uz-UZ');
+    STATE.tables[key].startTime = formatDateTimeUz(new Date());
     STATE.tables[key].startTimestamp = Date.now();
     STATE.tables[key].alarmed = false;
     

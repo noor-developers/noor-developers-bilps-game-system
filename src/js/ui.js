@@ -39,7 +39,7 @@ export function closePaymentModal(isCancelled = false) {
           type: 'cancelled',
           total: 0,
           details: details,
-          time: new Date().toLocaleString('uz-UZ'),
+          time: formatDateTimeUz(new Date()),
       });
   }
   
@@ -272,8 +272,17 @@ if (typeof window !== 'undefined') {
 
 function updateClocks() {
   const now = new Date();
-  const timeStr = now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const dateStr = now.toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+  const timeStr = `${hours}:${minutes}:${seconds}`;
+  
+  const day = now.getDate().toString().padStart(2, '0');
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const year = now.getFullYear();
+  const dayName = days[now.getDay()];
+  const dateStr = `${dayName}, ${day}.${month}.${year}`;
   
   const loginClock = document.getElementById('loginClock');
   if (loginClock) loginClock.textContent = timeStr;
