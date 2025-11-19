@@ -104,6 +104,12 @@ export function updateTopbar() {
     shiftBtn.classList.toggle('active', !!STATE.shiftOpen);
   }
 
+  // Update club name in topbar
+  const clubNameDisplay = document.getElementById('clubNameDisplay');
+  if (clubNameDisplay && STATE.clubName) {
+    clubNameDisplay.textContent = STATE.clubName;
+  }
+
   updateUserProfile();
   updateShiftTimerUI();
   updateClocks();

@@ -122,7 +122,9 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 
 /* Topbar */
 .topbar{background:var(--panel);padding:15px 25px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--border);box-shadow:var(--shadow);position:relative;z-index:100;}
-.logo{font-size:1.8rem;font-weight:900;color:var(--primary);letter-spacing:3px;text-shadow:0 0 5px rgba(99, 102, 241, 0.5);animation: logo-glow 2s infinite alternate;}
+.topbar-brand{display:flex;flex-direction:column;gap:2px;}
+.club-name{font-size:1.5rem;font-weight:900;color:var(--primary);text-transform:uppercase;text-shadow:0 0 5px rgba(99, 102, 241, 0.5);animation: logo-glow 2s infinite alternate;}
+.brand-subtitle{font-size:0.7rem;color:var(--text-dim);font-weight:400;}
 .nav{display:flex;gap:10px;}
 .nav button{background:transparent;border:none;color:var(--text);padding:10px 18px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s ease-in-out;}
 .nav button:hover{background:var(--panel-light);transform:scale(1.05);}
