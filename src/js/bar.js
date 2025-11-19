@@ -193,9 +193,11 @@ let tempBarProductData = {};
 
 export function openAddProductModal() {
   tempBarProductData = {};
+  const inputElement = document.getElementById('inputModalValue');
+  inputElement.type = 'text'; // Text input for product name
   document.getElementById('inputModalTitle').textContent = '➕ Mahsulot nomi';
-  document.getElementById('inputModalValue').placeholder = 'Masalan: Cola';
-  document.getElementById('inputModalValue').value = '';
+  inputElement.placeholder = 'Masalan: Cola';
+  inputElement.value = '';
   
   STATE.currentInputType = 'add-product-name';
   openModal('inputModal');
@@ -216,10 +218,12 @@ export function openAddProductModal() {
       }
       
       tempBarProductData.name = name;
+      const inputElement = document.getElementById('inputModalValue');
+      inputElement.type = 'number'; // Number input for price
       document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
-      document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
-      document.getElementById('inputModalValue').value = '';
-      document.getElementById('inputModalValue').focus();
+      inputElement.placeholder = 'Masalan: 5000';
+      inputElement.value = '';
+      inputElement.focus();
       STATE.currentInputType = 'add-product-price';
       
     } else if (STATE.currentInputType === 'add-product-price') {

@@ -118,18 +118,21 @@ export function selectInputType(type) {
   
   const key = STATE.currentTableKey;
   const isNewSession = !STATE.tables[key].active;
+  
+  const inputElement = document.getElementById('inputModalValue');
+  inputElement.type = 'number'; // Number input for time/money
 
   if (type === 'time') {
     document.getElementById('inputModalTitle').textContent = `⏰ ${isNewSession ? 'Boshlang\'ich' : 'Qo\'shimcha'} Vaqt kiriting (daqiqa)`;
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 60';
+    inputElement.placeholder = 'Masalan: 60';
   } else {
     document.getElementById('inputModalTitle').textContent = `💰 ${isNewSession ? 'Boshlang\'ich' : 'Qo\'shimcha'} Pul kiriting (so\'m)`;
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 20000';
+    inputElement.placeholder = 'Masalan: 20000';
   }
   
-  document.getElementById('inputModalValue').value = '';
+  inputElement.value = '';
   openModal('inputModal');
-  setTimeout(() => document.getElementById('inputModalValue').focus(), 300);
+  setTimeout(() => inputElement.focus(), 300);
 }
 
 export function confirmInput() {
