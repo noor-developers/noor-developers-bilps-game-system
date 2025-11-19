@@ -211,12 +211,12 @@ export async function register() {
   } catch (error) {
     console.error('❌ Registration xatosi:', error);
     
-    let errorMessage = 'Ro\'yxatdan o\'tishda xatolik!';
+    let errorMessage = 'Royxatdan otishda xatolik!';
     
     if (error.code === 'auth/email-already-in-use') {
-      errorMessage = 'Bu telefon raqami allaqachon ro\'yxatdan o\'tgan!';
+      errorMessage = `Bu username (${username}) allaqachon band! Boshqa username tanlang.`;
     } else if (error.code === 'auth/invalid-email') {
-      errorMessage = 'Noto\'g\'ri email formati!';
+      errorMessage = 'Notogri email formati!';
     } else if (error.code === 'auth/weak-password') {
       errorMessage = 'Parol juda zaif!';
     } else if (error.message) {
