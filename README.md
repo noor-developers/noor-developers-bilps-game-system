@@ -18,27 +18,48 @@ Billiard, PlayStation, va Bar'ning joylarini boshqarish uchun to'liq tizim.
 ✅ **Supabase backup** - Bulutli saqlash (opsional)  
 ✅ **30 daqiqa timeout** - Avtomatik logout  
 
-## 📦 Fayllar
+## 📦 Fayl Strukturasi
 
 ```
 bilps/
+├── index.html .................. GitHub Pages asosiy fayl (modular)
+├── docs/
+│   └── index.html .............. Docs deployment versiyasi (modular)
 ├── real/
-│   ├── indexps.html ........... Asosiy dastur
-│   └── *.html ................. Eski versiyalar
+│   ├── index_modul.html ........ Modular versiya (ishlab chiqish)
+│   └── archive/
+│       └── indexps.html ........ Eski 3000+ qatorli versiya
+├── src/
+│   ├── css/
+│   │   ├── styles.css .......... Asosiy stillar
+│   │   └── responsive.css ...... Responsive dizayn
+│   └── js/
+│       ├── main.js ............. Entry point
+│       ├── config.js ........... Konfiguratsiya
+│       ├── auth.js ............. Autentifikatsiya
+│       ├── ui.js ............... UI boshqaruvi
+│       ├── game.js ............. O'yin boshqaruvi
+│       ├── bar.js .............. Bar inventari
+│       ├── payment.js .......... To'lovlar
+│       ├── debtors.js .......... Qarzdorlar
+│       ├── history.js .......... Tarix
+│       ├── shift.js ............ Smena boshqaruvi
+│       ├── notes.js ............ Eslatmalar
+│       ├── utils.js ............ Yordamchi funksiyalar
+│       └── storage.js .......... LocalStorage
 └── backend/
-    ├── server.js .............. Express server
-    ├── package.json ........... Dependencies
-    ├── .env.example ........... Environment template
-    └── supabase_setup.sql ..... Database setup
+    ├── server.js ............... Express server
+    ├── package.json ............ Dependencies
+    ├── .env.example ............ Environment template
+    └── supabase_setup.sql ...... Database setup
 ```
 
 ## 🚀 Ishga Tushirish
 
 ### Frontend (Local):
 ```bash
-cd real
 python -m http.server 8000
-# Browser: http://localhost:8000/indexps.html
+# Browser: http://localhost:8000
 ```
 
 ### Backend (Optional - Supabase'ga saqlash uchun):
