@@ -71,15 +71,6 @@ window.removeFromQueue = removeFromQueue;
 export function initializePasswords() {
   // localStorage YO'Q - Firebase user profile dan yuklanadi
   console.log('ℹ️ Parollar Firebase dan avtomatik yuklanadi');
-  }
-  
-  if (savedTransferCard) {
-    try {
-      STATE.transferCardNumber = decrypt(savedTransferCard);
-    } catch (e) {
-      console.warn('O\'tkazma karta raqamini o\'qib bo\'lmadi');
-    }
-  }
 }
 
 export async function initializeApp() {
