@@ -117,7 +117,18 @@
       
       <div class="shift-indicator" id="shiftStatus">Smena yopiq</div>
       <button class="btn btn-warning" onclick="toggleShift()" id="shiftBtn">Smena ochish</button>
-      <button class="btn btn-danger hidden" onclick="logout()" id="logoutBtn">Chiqish</button>
+      
+      <!-- User Profile -->
+      <div class="user-profile hidden" id="userProfile">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">User</div>
+          <div class="user-role">Xodim</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="logout()" title="Chiqish">
+          <span class="logout-icon">🚪</span>
+        </button>
+      </div>
     </div>
   </div>
 

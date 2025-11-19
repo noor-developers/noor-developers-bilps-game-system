@@ -103,8 +103,36 @@ export function updateTopbar() {
     shiftBtn.classList.toggle('active', !!STATE.shiftOpen);
   }
 
+  updateUserProfile();
   updateShiftTimerUI();
   updateClocks();
+}
+
+function updateUserProfile() {
+  const userProfile = document.getElementById('userProfile');
+  const userName = document.getElementById('userName');
+  const userAvatar = document.getElementById('userAvatar');
+  
+  if (!userProfile) return;
+  
+  if (STATE.isLoggedIn && STATE.currentUser) {
+    userProfile.classList.remove('hidden');
+    if (userName) userName.textContent = STATE.currentUser;
+    
+    // Set avatar emoji based on first letter
+    if (userAvatar) {
+      const firstLetter = STATE.currentUser.charAt(0).toUpperCase();
+      const avatarEmojis = {
+        A: '🅰️', B: '🅱️', C: '🌊', D: '💎', E: '🌟', F: '🔥', G: '💚', H: '🏠',
+        I: 'ℹ️', J: '🎵', K: '👑', L: '💡', M: '🌙', N: '🔔', O: '⭕', P: '🎨',
+        Q: '👸', R: '🌈', S: '⭐', T: '🎯', U: '🦄', V: '✌️', W: '🌊', X: '❌',
+        Y: '✨', Z: '⚡'
+      };
+      userAvatar.textContent = avatarEmojis[firstLetter] || '👤';
+    }
+  } else {
+    userProfile.classList.add('hidden');
+  }
 }
 
 function updateClocks() {

@@ -25,12 +25,12 @@ export function autoLoginIfActive() {
         
         document.getElementById('loginScreen').style.opacity = '0';
         document.getElementById('loginScreen').style.visibility = 'hidden';
-        document.getElementById('logoutBtn').style.display = 'block';
         
         console.log(`✅ Auto-login: ${STATE.currentUser}`);
         loadData().then(() => {
           renderPage('billiard');
           syncNotesArea();
+          updateUI();
         });
       } else {
         localStorage.removeItem('noor_session');
@@ -215,11 +215,11 @@ export async function login() {
     
     document.getElementById('loginScreen').style.opacity = '0';
     document.getElementById('loginScreen').style.visibility = 'hidden';
-    document.getElementById('logoutBtn').style.display = 'block';
     
     addLog("Tizimga kirish", `Foydalanuvchi: ${user.username}`);
     await loadData();
     syncNotesArea();
+    updateUI();
     
     // Club ma'lumotlarini ko'rsatish
     await loadAndDisplayClubInfo(user.username);
@@ -323,7 +323,7 @@ function performLogout() {
   addLog("Tizimdan chiqish", "");
   saveData();
   
-  document.getElementById('logoutBtn').style.display = 'none';
+  updateUI();
   document.getElementById('loginScreen').style.opacity = '1';
   document.getElementById('loginScreen').style.visibility = 'visible';
   
