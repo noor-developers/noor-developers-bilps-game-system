@@ -21,7 +21,10 @@ import {
   closeModal,
   closePaymentModal,
   filterReceipts,
-  filterReceiptsByType
+  filterReceiptsByType,
+  toggleProfileMenu,
+  closeProfileMenu,
+  openSettingsFromProfile
 } from './ui.js';
 import * as gameModule from './game.js';
 import * as barModule from './bar.js';
@@ -210,6 +213,11 @@ function exposeGlobals() {
   window.closeManageModal = barModule.closeManageModal;
   window.editProduct = barModule.editProduct;
   window.deleteProduct = barModule.deleteProduct;
+  
+  // Profile menu functions
+  window.toggleProfileMenu = toggleProfileMenu;
+  window.closeProfileMenu = closeProfileMenu;
+  window.openSettingsFromProfile = openSettingsFromProfile;
   
   window.gameModule = gameModule;
   window.barModule = barModule;

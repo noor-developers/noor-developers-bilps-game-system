@@ -130,9 +130,95 @@ function updateUserProfile() {
       };
       userAvatar.textContent = avatarEmojis[firstLetter] || '👤';
     }
+    
+    // Update profile menu balances
+    updateProfileMenuBalances();
+    updateProfileMenuShift();
   } else {
     userProfile.classList.add('hidden');
   }
+}
+
+function updateProfileMenuBalances() {
+  setAmountText('profileCashBalance', STATE.cashBalance);
+  setAmountText('profileTransferBalance', STATE.transferBalance);
+  setAmountText('profileDebtBalance', STATE.debtBalance);
+}
+
+function updateProfileMenuShift() {
+  const profileShiftStatus = document.getElementById('profileShiftStatus');
+  const profileShiftBtn = document.getElementById('profileShiftBtn');
+  
+  if (profileShiftStatus) {
+    const indicator = profileShiftStatus.querySelector('.shift-indicator-small');
+    if (indicator) {
+      if (STATE.shiftOpen) {
+        indicator.textContent = '🟢 Ochiq';
+        indicator.classList.add('active');
+      } else {
+        indicator.textContent = '⚫ Yopiq';
+        indicator.classList.remove('active');
+      }
+    }
+  }
+  
+  if (profileShiftBtn) {
+    const icon = STATE.shiftOpen ? '🔒' : '🔄';
+    const text = STATE.shiftOpen ? 'Smenani yopish' : 'Smena ochish';
+    profileShiftBtn.innerHTML = `<span>${icon}</span> ${text}`;
+  }
+}
+
+// Profile menu toggle
+export function toggleProfileMenu() {
+  const profileBtn = document.getElementById('profileBtn');
+  const profileMenu = document.getElementById('profileMenu');
+  
+  if (!profileBtn || !profileMenu) return;
+  
+  const isOpen = !profileMenu.classList.contains('hidden');
+  
+  if (isOpen) {
+    profileMenu.classList.add('hidden');
+    profileBtn.classList.remove('active');
+  } else {
+    updateProfileMenuBalances();
+    updateProfileMenuShift();
+    profileMenu.classList.remove('hidden');
+    profileBtn.classList.add('active');
+  }
+}
+
+export function closeProfileMenu() {
+  const profileBtn = document.getElementById('profileBtn');
+  const profileMenu = document.getElementById('profileMenu');
+  
+  if (profileMenu) profileMenu.classList.add('hidden');
+  if (profileBtn) profileBtn.classList.remove('active');
+}
+
+export function openSettingsFromProfile() {
+  // Open settings page
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  const settingsBtn = document.querySelector('.nav button[data-page="settings"]');
+  if (settingsBtn) {
+    settingsBtn.classList.add('active');
+    settingsBtn.click();
+  }
+}
+
+// Close profile menu when clicking outside
+if (typeof window !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const profileDropdown = document.getElementById('userProfile');
+    const profileMenu = document.getElementById('profileMenu');
+    
+    if (profileDropdown && profileMenu && !profileMenu.classList.contains('hidden')) {
+      if (!profileDropdown.contains(e.target)) {
+        closeProfileMenu();
+      }
+    }
+  });
 }
 
 function updateClocks() {

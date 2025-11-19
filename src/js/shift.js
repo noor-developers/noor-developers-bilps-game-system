@@ -24,6 +24,7 @@ export async function toggleShift() {
     
     addLog("Smena ochildi", `Xodim: ${STATE.currentUser}`);
     showNotification(`✅ Smena muvaffaqiyatli ochildi! (Xodim: ${STATE.currentUser})`);
+    updateUI();
     await saveData();
   } else {
     showConfirm('Smenani yopishni tasdiqlaysizmi? Faol sessiyalar avtomatik to\'xtatiladi.', async () => {

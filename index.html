@@ -115,19 +115,59 @@
         </div>
       </div>
       
-      <div class="shift-indicator" id="shiftStatus">Smena yopiq</div>
-      <button class="btn btn-warning" onclick="toggleShift()" id="shiftBtn">Smena ochish</button>
-      
-      <!-- User Profile -->
-      <div class="user-profile hidden" id="userProfile">
-        <div class="user-avatar" id="userAvatar">👤</div>
-        <div class="user-info">
-          <div class="user-name" id="userName">User</div>
-          <div class="user-role">Xodim</div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="logout()" title="Chiqish">
-          <span class="logout-icon">🚪</span>
+      <!-- User Profile Dropdown -->
+      <div class="profile-dropdown hidden" id="userProfile">
+        <button class="profile-btn" onclick="toggleProfileMenu()" id="profileBtn">
+          <div class="user-avatar" id="userAvatar">👤</div>
+          <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-role">Xodim</div>
+          </div>
+          <span class="dropdown-arrow">▼</span>
         </button>
+        
+        <div class="profile-menu hidden" id="profileMenu">
+          <!-- Balanslar -->
+          <div class="profile-menu-section">
+            <div class="profile-menu-title">💰 Balanslar</div>
+            <div class="balance-item">
+              <span>💵 Naqd:</span>
+              <strong id="profileCashBalance">0 so'm</strong>
+            </div>
+            <div class="balance-item">
+              <span>💳 O'tkazma:</span>
+              <strong id="profileTransferBalance">0 so'm</strong>
+            </div>
+            <div class="balance-item">
+              <span>🔴 Qarzlar:</span>
+              <strong id="profileDebtBalance">0 so'm</strong>
+            </div>
+          </div>
+          
+          <div class="profile-menu-divider"></div>
+          
+          <!-- Smena -->
+          <div class="profile-menu-section">
+            <div class="profile-menu-title">⏰ Smena</div>
+            <div class="shift-status-item" id="profileShiftStatus">
+              <span class="shift-indicator-small">⚫ Yopiq</span>
+            </div>
+            <button class="profile-menu-btn" onclick="toggleShift(); closeProfileMenu()" id="profileShiftBtn">
+              <span>🔄</span> Smena ochish
+            </button>
+          </div>
+          
+          <div class="profile-menu-divider"></div>
+          
+          <!-- Amallar -->
+          <button class="profile-menu-btn" onclick="openSettingsFromProfile(); closeProfileMenu()">
+            <span>⚙️</span> Sozlamalar
+          </button>
+          
+          <button class="profile-menu-btn profile-menu-logout" onclick="logout(); closeProfileMenu()">
+            <span>🚪</span> Chiqish
+          </button>
+        </div>
       </div>
     </div>
   </div>
