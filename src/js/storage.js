@@ -13,6 +13,7 @@ export async function loadData() {
   try {
     await loadUsersFromSupabase();
     console.log('✅ Supabase users yuklandi:', STATE.users.length);
+    console.log('📋 Users list:', STATE.users);
     
     if (STATE.users.length === 0) {
       console.error('❌ CRITICAL: Supabase-da userlar yo\'q!');
