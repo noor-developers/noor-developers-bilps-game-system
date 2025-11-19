@@ -9,10 +9,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>NOOR Game Management System (v12.2 - Avatar va modal tuzatilgan)</title>
+  <title>NOOR Game Management System (v13 - Dinamik stol boshqaruvi)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <link rel="stylesheet" href="src/css/styles.css?v=12.2" />
-  <link rel="stylesheet" href="src/css/responsive.css?v=12.2" />
+  <link rel="stylesheet" href="src/css/styles.css?v=13" />
+  <link rel="stylesheet" href="src/css/responsive.css?v=13" />
   
 </head>
 <body>
@@ -622,6 +622,15 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               Keshni tozalash
             </button>
+            <button class="btn btn-primary full-width" onclick="openTableManagementModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+              Stollarni boshqarish
+            </button>
               </div>
             </div>
 
@@ -670,7 +679,57 @@
       updateLoginClock();
     </script>
 
-    <script type="module" src="src/js/main.js?v=12.2"></script>
+    <!-- Table Management Modal -->
+    <div class="modal" id="tableManagementModal">
+      <div class="modal-content table-management-modal">
+        <div class="modal-header">
+          <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            Stollarni boshqarish
+          </h2>
+          <button class="close-btn" onclick="closeModal('tableManagementModal')">×</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Add New Table Section -->
+          <div class="add-table-section">
+            <h3 class="section-subtitle">➕ Yangi stol qo'shish</h3>
+            <div class="add-table-form">
+              <select id="newTableType" class="modal-input">
+                <option value="billiard">🎱 Billiard</option>
+                <option value="ps4">🎮 PlayStation 4</option>
+                <option value="ps5">🎮 PlayStation 5</option>
+              </select>
+              <input type="text" id="newTableName" class="modal-input" placeholder="Nom (ixtiyoriy)" />
+              <button class="btn btn-success" onclick="addTableFromModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Qo'shish
+              </button>
+            </div>
+          </div>
+
+          <!-- Tables List -->
+          <div class="tables-list-section">
+            <h3 class="section-subtitle">📋 Mavjud stollar</h3>
+            <div id="tablesListContainer" class="tables-list"></div>
+          </div>
+        </div>
+        
+        <div class="modal-footer-center">
+          <button class="btn btn-secondary" onclick="closeModal('tableManagementModal')">Yopish</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="src/js/main.js?v=13"></script>
 
 </body>
 </html>

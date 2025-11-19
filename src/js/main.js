@@ -38,6 +38,7 @@ import * as historyModule from './history.js';
 import { toggleShift } from './shift.js';
 import { decrypt, printReceipt } from './utils.js';
 import { saveNotes, syncNotesArea, openNotesModal, saveNote, clearNoteEditor, loadNote } from './notes.js';
+import { openTableManagementModal, addTableFromModal, renderTablesList, editTableName, confirmRemoveTable } from './tables.js';
 
 // ========== IMMEDIATE GLOBAL EXPOSURE (for onclick handlers) ==========
 // These must be available immediately when HTML loads
@@ -54,6 +55,10 @@ window.loadNote = loadNote;
 window.applyReceiptFilters = applyReceiptFilters;
 window.filterReceipts = filterReceipts;
 window.filterReceiptsByType = filterReceiptsByType;
+window.openTableManagementModal = openTableManagementModal;
+window.addTableFromModal = addTableFromModal;
+window.editTableName = editTableName;
+window.confirmRemoveTable = confirmRemoveTable;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
@@ -222,6 +227,10 @@ function exposeGlobals() {
   window.filterReceipts = filterReceipts;
   window.filterReceiptsByType = filterReceiptsByType;
   window.applyReceiptFilters = applyReceiptFilters;
+  window.openTableManagementModal = openTableManagementModal;
+  window.addTableFromModal = addTableFromModal;
+  window.editTableName = editTableName;
+  window.confirmRemoveTable = confirmRemoveTable;
   window.selectInputType = gameModule.selectInputType;
   window.confirmInput = gameModule.confirmInput;
   window.openModal = openModal;

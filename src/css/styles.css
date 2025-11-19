@@ -500,3 +500,29 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .receipt-date-input{flex:1;padding:6px 10px;border:2px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:0.8rem;transition:border-color .3s;}
 .receipt-date-input:focus{border-color:var(--primary);outline:none;}
 
+/* Table Management Modal */
+.table-management-modal{max-width:700px;width:90vw;}
+.add-table-section{background:var(--panel-light);padding:15px;border-radius:8px;margin-bottom:20px;}
+.section-subtitle{font-size:0.9rem;font-weight:700;color:var(--primary);margin-bottom:12px;}
+.add-table-form{display:grid;grid-template-columns:1fr 1.5fr auto;gap:10px;align-items:center;}
+.tables-list-section{background:var(--panel-light);padding:15px;border-radius:8px;}
+.tables-list{display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;}
+.table-management-item{background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;transition:all 0.3s;}
+.table-management-item:hover{border-color:var(--primary);transform:translateX(4px);}
+.table-management-item.active{border-color:var(--success);background:rgba(16,185,129,0.05);}
+.table-management-item.running{border-color:var(--warning);background:rgba(245,158,11,0.05);}
+.table-info{flex:1;}
+.table-name{font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.table-details{display:flex;gap:8px;align-items:center;}
+.table-id{font-size:0.75rem;color:var(--text-dim);font-family:monospace;}
+.badge{padding:2px 8px;border-radius:4px;font-size:0.65rem;font-weight:600;}
+.badge-success{background:var(--success);color:#fff;}
+.badge-warning{background:var(--warning);color:#000;}
+.table-actions{display:flex;gap:6px;}
+.btn-icon{background:var(--panel-light);border:1px solid var(--border);padding:6px;border-radius:6px;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;}
+.btn-icon:hover:not(:disabled){background:var(--primary);border-color:var(--primary);}
+.btn-icon:hover:not(:disabled) svg{stroke:#fff;}
+.btn-icon.btn-danger{border-color:var(--danger);}
+.btn-icon.btn-danger:hover:not(:disabled){background:var(--danger);}
+.btn-icon:disabled{opacity:0.5;cursor:not-allowed;}
+
