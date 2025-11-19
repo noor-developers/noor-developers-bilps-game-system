@@ -23,6 +23,7 @@ export const DEFAULT_STATE = {
   // User session
   isLoggedIn: false,
   currentUser: "",
+  userId: null, // Firebase User ID
   
   // Subscription management
   subscriptionActive: false,

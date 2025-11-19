@@ -1,9 +1,10 @@
-// ========== MAIN MODULE ==========
-// Application Initialization and Global Functions
+// ========== MAIN MODULE (FIREBASE INTEGRATED) ==========
+// Application Initialization and Global Functions with Firebase
 
 import { STATE } from './config.js';
-import { loadData, saveData, exportData, handleImportFile, loadUsersFromSupabase } from './storage.js';
+import { loadData, saveData, exportData, handleImportFile } from './storage.js';
 import {
+  initAuth,
   autoLoginIfActive,
   login,
   register,
@@ -89,20 +90,14 @@ export function initializePasswords() {
 }
 
 export async function initializeApp() {
-  console.log('🚀 Dastur ishga tushirilmoqda...');
+  console.log('🚀 Firebase integratsiyasi bilan dastur ishga tushmoqda...');
   
   // Initialize passwords
   initializePasswords();
   
-  // Load users from Supabase FIRST
-  await loadUsersFromSupabase();
-  
-  // Load data
-  await loadData();
-  syncNotesArea();
-  
-  // Auto-login if session exists
-  autoLoginIfActive();
+  // PRIORITY 1: Firebase Authentication-ni initialize qilish
+  console.log('🔐 Firebase auth ishga tushirilmoqda...');
+  await initAuth(); // Bu avtomatik login yoki login screen-ni ko'rsatadi
   
   // Setup event listeners
   setupEventListeners();
@@ -125,7 +120,7 @@ export async function initializeApp() {
     }
   }, 1000);
   
-  console.log('✅ Dastur tayyor!');
+  console.log('✅ Firebase + Dastur tayyor!');
 }
 
 function setupEventListeners() {

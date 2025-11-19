@@ -1,45 +1,99 @@
-// ========== AUTHENTICATION MODULE ==========
-// Login, Registration, Logout va Session Management
+// ========== AUTHENTICATION MODULE (FIREBASE) ==========
+// Firebase Authentication bilan Login, Registration, Logout
 
-import { STATE, API_URL, USE_ONLINE_BACKUP } from './config.js';
-import { saveData, loadData } from './storage.js';
+import { auth } from './firebase-config.js';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+import { STATE } from './config.js';
+import { loadData, saveData } from './storage.js';
 import { showNotification, openModal, closeModal, showConfirm, updateUI } from './ui.js';
 import { addLog } from './utils.js';
 import { renderPage, clearSessionState } from './game.js';
 import { syncNotesArea } from './notes.js';
+import { loadUserDataFromFirestore, startRealtimeSync, stopRealtimeSync } from './database.js';
 
-// ========== AUTO-LOGIN (Session Restore) ==========
-export function autoLoginIfActive() {
-  const session = localStorage.getItem('noor_session');
-  if (session) {
-    try {
-      const sessionData = JSON.parse(session);
-      const loginTime = sessionData.loginTime || 0;
-      const elapsed = Date.now() - loginTime;
-      const maxSessionTime = STATE.sessionTimeout;
+// ========== FIREBASE AUTH STATE LISTENER ==========
+// Firebase avtomatik session restore qiladi
+let currentUser = null;
 
-      if (sessionData.isLoggedIn && elapsed < maxSessionTime) {
+export function initAuth() {
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        console.log('✅ Firebase auto-login:', user.email);
+        
+        // STATE-ni yangilash
         STATE.isLoggedIn = true;
-        STATE.currentUser = sessionData.currentUser;
+        STATE.currentUser = user.displayName || user.email;
+        STATE.userId = user.uid; // Firebase user ID
         STATE.lastActivity = Date.now();
         
+        // Login screen yashirish
         document.getElementById('loginScreen').style.opacity = '0';
         document.getElementById('loginScreen').style.visibility = 'hidden';
         
-        console.log(`✅ Auto-login: ${STATE.currentUser}`);
-        loadData().then(() => {
-          renderPage('billiard');
-          syncNotesArea();
-          updateUI();
-        });
+        // Firestore dan ma'lumotlarni yuklash
+        await loadUserDataFromFirestore(user.uid);
+        
+        // Real-time sinxronizatsiyani boshlash
+        startRealtimeSync(user.uid);
+        
+        // UI ni yangilash
+        renderPage('billiard');
+        syncNotesArea();
+        updateUI();
+        
+        // Club info ko'rsatish
+        displayUserInfo(user);
+        
+        resolve(user);
       } else {
-        localStorage.removeItem('noor_session');
+        currentUser = null;
+        console.log('❌ Foydalanuvchi tizimdan chiqdi');
+        
+        // STATE-ni tozalash
+        STATE.isLoggedIn = false;
+        STATE.currentUser = "";
+        STATE.userId = null;
+        
+        // Real-time sinxronizatsiyani to'xtatish
+        stopRealtimeSync();
+        
+        // Login screen ko'rsatish
+        document.getElementById('loginScreen').style.opacity = '1';
+        document.getElementById('loginScreen').style.visibility = 'visible';
+        
+        resolve(null);
       }
-    } catch (e) {
-      console.error('Auto-login xatosi:', e);
-      localStorage.removeItem('noor_session');
-    }
+    });
+  });
+}
+
+// User ma'lumotlarini UI da ko'rsatish
+function displayUserInfo(user) {
+  const clubInfoEl = document.getElementById('clubInfo');
+  if (clubInfoEl && STATE.clubName) {
+    clubInfoEl.textContent = `🏢 ${STATE.clubName}`;
+    clubInfoEl.style.display = 'block';
   }
+  
+  const clubNameDisplay = document.getElementById('clubNameDisplay');
+  if (clubNameDisplay && STATE.clubName) {
+    clubNameDisplay.textContent = STATE.clubName;
+  }
+}
+
+// Deprecated - Firebase o'zi session restore qiladi
+export function autoLoginIfActive() {
+  // Firebase onAuthStateChanged ichida amalga oshiriladi
+  console.log('ℹ️ Firebase auth state checking...');
 }
 
 // ========== SESSION ACTIVITY TRACKING ==========
@@ -70,7 +124,7 @@ function logoutDueToInactivity() {
   showNotification('⚠️ 30 daqiqa faollik yo\'qligi sababli tizimdan chiqildi', 5000);
 }
 
-// ========== REGISTRATION ==========
+// ========== REGISTRATION (FIREBASE) ==========
 export function showRegisterForm() {
   document.getElementById('loginFormDiv').style.display = 'none';
   document.getElementById('registerFormDiv').style.display = 'block';
@@ -82,21 +136,24 @@ export function showLoginForm() {
 }
 
 export async function register() {
-  console.log('📝 register() funksiyasi chaqirildi');
+  console.log('📝 Firebase registration boshlandi');
   
-  const username = document.getElementById('registerUsername').value.trim();
-  const password = document.getElementById('registerPassword').value;
-  const confirmPassword = document.getElementById('registerConfirmPassword').value;
   const clubName = document.getElementById('registerClubName').value.trim();
   const ownerName = document.getElementById('registerOwnerName').value.trim();
   const phone = document.getElementById('registerPhone').value.trim();
+  const email = document.getElementById('registerEmail')?.value.trim() || `${phone}@noor-gms.uz`;
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('registerConfirmPassword').value;
   const address = document.getElementById('registerAddress').value.trim();
 
-  console.log(`👤 Ro'yxatdan o'tish: ${username}, Klub: ${clubName}`);
+  // Validate
+  if (!clubName || !ownerName || !phone) {
+    showNotification('⚠️ Klub nomi, egasi va telefon raqamini kiriting!');
+    return;
+  }
 
-  // Validate account fields
-  if (!username || !password || !confirmPassword) {
-    showNotification('⚠️ Login va parol maydonlarini to\'ldiring!');
+  if (!password || !confirmPassword) {
+    showNotification('⚠️ Parol maydonlarini to\'ldiring!');
     return;
   }
 
@@ -105,208 +162,131 @@ export async function register() {
     return;
   }
 
-  if (password.length < 4) {
-    showNotification('❌ Parol kamida 4 ta belgidan iborat bo\'lishi kerak!');
+  if (password.length < 6) {
+    showNotification('❌ Parol kamida 6 ta belgidan iborat bo\'lishi kerak!');
     return;
   }
 
-  // Validate club fields
-  if (!clubName || !ownerName || !phone) {
-    showNotification('⚠️ Klub nomi, egasi va telefon raqamini kiriting!');
-    return;
-  }
-
-  // Mavjud user tekshirish
-  if (STATE.users.find(u => u.username === username)) {
-    console.log('❌ User allaqachon mavjud');
-    showNotification('❌ Bu login band! Boshqa tanlang.');
-    return;
-  }
-
-  // Yangi user qo'shish (STATE.users ga club ma'lumotlarisiz)
-  STATE.users.push({ username, pass: password });
-  console.log(`✅ User STATE-ga qo'shildi. Jami: ${STATE.users.length}`);
-
-  // Supabase-ga yuborish (club ma'lumotlari bilan)
-  if (USE_ONLINE_BACKUP) {
-    console.log('☁️ Supabase-ga yuborilmoqda...');
-    try {
-      const response = await fetch(`${API_URL}/add-user`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username, 
-          password,
-          clubName,
-          ownerName,
-          phone,
-          address
-        })
-      });
-      const data = await response.json();
-      if (data.success) {
-        console.log('✅ User va klub ma\'lumotlari Supabase-ga qo\'shildi:', data);
-        showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
-        addLog('Yangi user yaratildi', `${username} (${clubName})`);
-        
-        // Clear form and switch to login
-        clearRegisterForm();
-        showLoginForm();
-      } else {
-        console.warn('⚠️ Supabase xatosi:', data.error);
-        showNotification('❌ Server xatosi! Qayta urinib ko\'ring.');
-      }
-    } catch (e) {
-      console.error('❌ Backend xatosi:', e);
-      showNotification('❌ Server bilan aloqa yo\'q!');
-    }
-  } else {
-    // Offline mode
-    await saveData();
-    showNotification('✅ Ro\'yxatdan o\'tdingiz! Endi kirish mumkin.');
-    addLog('Yangi user yaratildi', username);
+  try {
+    // Firebase da yangi user yaratish
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Display name o'rnatish
+    await updateProfile(user, {
+      displayName: clubName
+    });
+    
+    console.log('✅ Firebase user yaratildi:', user.uid);
+    
+    // Firestore da user ma'lumotlarini saqlash
+    const { saveUserProfileToFirestore } = await import('./database.js');
+    await saveUserProfileToFirestore(user.uid, {
+      clubName,
+      ownerName,
+      phone,
+      email,
+      address,
+      createdAt: new Date().toISOString()
+    });
+    
+    showNotification('✅ Ro\'yxatdan o\'tdingiz! Xush kelibsiz! 🎉');
+    addLog('Yangi user yaratildi', `${clubName} (${phone})`);
+    
+    // Form tozalash
     clearRegisterForm();
-    showLoginForm();
+    
+    // Firebase avtomatik login qiladi
+    
+  } catch (error) {
+    console.error('❌ Registration xatosi:', error);
+    
+    let errorMessage = 'Ro\'yxatdan o\'tishda xatolik!';
+    
+    if (error.code === 'auth/email-already-in-use') {
+      errorMessage = 'Bu telefon raqami allaqachon ro\'yxatdan o\'tgan!';
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage = 'Noto\'g\'ri email formati!';
+    } else if (error.code === 'auth/weak-password') {
+      errorMessage = 'Parol juda zaif!';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showNotification(errorMessage);
   }
-
-  console.log('✅ Ro\'yxatdan o\'tish muvaffaqiyatli');
 }
 
 function clearRegisterForm() {
-  document.getElementById('registerUsername').value = '';
+  document.getElementById('registerClubName').value = '';
   document.getElementById('registerPassword').value = '';
   document.getElementById('registerConfirmPassword').value = '';
-  document.getElementById('registerClubName').value = '';
   document.getElementById('registerOwnerName').value = '';
   document.getElementById('registerPhone').value = '';
+  if (document.getElementById('registerEmail')) {
+    document.getElementById('registerEmail').value = '';
+  }
   document.getElementById('registerAddress').value = '';
 }
 
-// ========== LOGIN ==========
+// ========== LOGIN (FIREBASE) ==========
 export async function login() {
-  console.log('🔑 login() funksiyasi chaqirildi');
+  console.log('🔑 Firebase login boshlandi');
   
-  const username = document.getElementById('loginUsername').value.trim();
+  const phone = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
+  
+  // Email formatini yaratish (telefon raqamidan)
+  const email = phone.includes('@') ? phone : `${phone}@noor-gms.uz`;
 
-  console.log(`👤 Login urinish: ${username}`);
-  console.log(`📊 Mavjud users (${STATE.users.length}):`, STATE.users.map(u => u.username));
-  console.log(`🔐 Kiritilgan parol uzunligi: ${password.length}`);
-
-  if (!username || !password) {
-    showNotification('⚠️ Login va parolni kiriting!');
+  if (!phone || !password) {
+    showNotification('⚠️ Telefon va parolni kiriting!');
     return;
   }
 
-  // Debug: har bir userni tekshirish
-  STATE.users.forEach(u => {
-    console.log(`🔍 Tekshirish: ${u.username} | pass: "${u.pass}" | match: ${u.username === username && u.pass === password}`);
-  });
-
-  const user = STATE.users.find(u => u.username === username && u.pass === password);
-  
-  console.log('🔍 User topildi:', user ? `✅ ${user.username}` : '❌ topilmadi');
-  
-  if (user) {
-    STATE.isLoggedIn = true;
-    STATE.currentUser = user.username;
-    STATE.lastActivity = Date.now();
-    
-    // Session holatini localStorage-ga saqlash
-    localStorage.setItem('noor_session', JSON.stringify({
-      isLoggedIn: true,
-      currentUser: user.username,
-      loginTime: Date.now()
-    }));
-    
-    document.getElementById('loginScreen').style.opacity = '0';
-    document.getElementById('loginScreen').style.visibility = 'hidden';
-    
-    addLog("Tizimga kirish", `Foydalanuvchi: ${user.username}`);
-    await loadData();
-    syncNotesArea();
-    updateUI();
-    
-    // Club ma'lumotlarini ko'rsatish
-    await loadAndDisplayClubInfo(user.username);
-    
-    renderPage('billiard');
-  } else {
-    showNotification('❌ Noto\'g\'ri login yoki parol!');
-    addLog("Kirishda xatolik", `Login: ${username}`);
-  }
-}
-
-// Club ma'lumotlarini yuklash va UI da ko'rsatish
-async function loadAndDisplayClubInfo(username) {
-  console.log(`🏢 ${username} klub ma'lumotlari yuklanmoqda...`);
-  
   try {
-    const response = await fetch(`${API_URL}/load-all-users`);
-    if (!response.ok) {
-      console.warn('❌ Club info yuklab bo\'lmadi');
-      return;
+    // Firebase login
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    console.log('✅ Firebase login muvaffaqiyatli:', user.uid);
+    showNotification(`✅ Xush kelibsiz, ${user.displayName || 'Foydalanuvchi'}! 👋`);
+    addLog("Tizimga kirish", `User: ${user.displayName || user.email}`);
+    
+    // Firebase onAuthStateChanged avtomatik ishga tushadi
+    
+  } catch (error) {
+    console.error('❌ Login xatosi:', error);
+    
+    let errorMessage = 'Tizimga kirishda xatolik!';
+    
+    if (error.code === 'auth/user-not-found') {
+      errorMessage = 'Foydalanuvchi topilmadi!';
+    } else if (error.code === 'auth/wrong-password') {
+      errorMessage = 'Noto\'g\'ri parol!';
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage = 'Noto\'g\'ri telefon formati!';
+    } else if (error.code === 'auth/invalid-credential') {
+      errorMessage = 'Telefon yoki parol noto\'g\'ri!';
+    } else if (error.message) {
+      errorMessage = error.message;
     }
     
-    const data = await response.json();
-    if (data.success && data.users) {
-      const userInfo = data.users.find(u => u.username === username);
-      
-      if (userInfo) {
-        console.log('✅ User ma\'lumotlari topildi:', userInfo);
-        
-        // STATE ga club ma'lumotlarini saqlash
-        STATE.clubName = userInfo.club_name || '';
-        STATE.userEmail = userInfo.email || '';
-        STATE.clubPhone = userInfo.phone || '';
-        
-        // User settings-ni yuklash (agar mavjud bo'lsa)
-        if (userInfo.settings) {
-          const settings = typeof userInfo.settings === 'string' 
-            ? JSON.parse(userInfo.settings) 
-            : userInfo.settings;
-          
-          STATE.priceB1 = settings.priceB1 || STATE.priceB1;
-          STATE.priceB2 = settings.priceB2 || STATE.priceB2;
-          STATE.pricePS4 = settings.pricePS4 || STATE.pricePS4;
-          STATE.pricePS5 = settings.pricePS5 || STATE.pricePS5;
-          STATE.clubOwner = settings.ownerName || '';
-          STATE.clubAddress = settings.address || '';
-          
-          console.log('✅ User sozlamalari yuklandi:', settings);
-        }
-        
-        // UI da ko'rsatish
-        const clubInfoEl = document.getElementById('clubInfo');
-        if (clubInfoEl && STATE.clubName) {
-          clubInfoEl.textContent = `🏢 ${STATE.clubName}`;
-          clubInfoEl.style.display = 'block';
-        }
-        
-        // Topbar club name-ni yangilash
-        const clubNameDisplay = document.getElementById('clubNameDisplay');
-        if (clubNameDisplay && STATE.clubName) {
-          clubNameDisplay.textContent = STATE.clubName;
-        }
-      } else {
-        console.log('ℹ️ User ma\'lumotlari topilmadi');
-      }
-    }
-  } catch (e) {
-    console.error('❌ Club info yuklashda xato:', e);
+    showNotification(errorMessage);
+    addLog("Kirishda xatolik", `Phone: ${phone}`);
   }
 }
 
-// ========== LOGOUT ==========
+// ========== LOGOUT (FIREBASE) ==========
 export function logout() {
   showConfirm('Tizimdan chiqishni tasdiqlaysizmi?', async () => {
     if (STATE.shiftOpen) {
       showConfirm('⚠️ Smena hali ochiq! Uni yopib chiqishni tasdiqlaysizmi?', async () => {
         await closeShiftBeforeLogout();
-        performLogout();
+        await performLogout();
       });
     } else {
-      performLogout();
+      await performLogout();
     }
   });
 }
@@ -341,29 +321,40 @@ async function closeShiftBeforeLogout() {
   await saveData();
 }
 
-function performLogout() {
-  STATE.isLoggedIn = false;
-  STATE.currentUser = "";
-  
-  localStorage.removeItem('noor_session');
-  
-  addLog("Tizimdan chiqish", "");
-  saveData();
-  
-  updateUI();
-  document.getElementById('loginScreen').style.opacity = '1';
-  document.getElementById('loginScreen').style.visibility = 'visible';
-  
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPassword').value = '';
-  const notesArea = document.getElementById('notesArea');
-  if (notesArea) notesArea.value = '';
-  
-  if (typeof updateUI === 'function') updateUI();
-  showNotification('✅ Tizimdan chiqtingiz!', 2000);
+async function performLogout() {
+  try {
+    // Firebase logout
+    await signOut(auth);
+    
+    console.log('✅ Firebase logout muvaffaqiyatli');
+    
+    // STATE tozalash
+    STATE.isLoggedIn = false;
+    STATE.currentUser = "";
+    STATE.userId = null;
+    
+    addLog("Tizimdan chiqish", "");
+    
+    // UI tozalash
+    document.getElementById('loginScreen').style.opacity = '1';
+    document.getElementById('loginScreen').style.visibility = 'visible';
+    
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    
+    const notesArea = document.getElementById('notesArea');
+    if (notesArea) notesArea.value = '';
+    
+    updateUI();
+    showNotification('✅ Tizimdan chiqtingiz!', 2000);
+    
+  } catch (error) {
+    console.error('❌ Logout xatosi:', error);
+    showNotification('❌ Tizimdan chiqishda xatolik!');
+  }
 }
 
-// ========== PASSWORD CHANGE ==========
+// ========== PASSWORD CHANGE (FIREBASE) ==========
 export async function changePassword() {
   const currentPassword = document.getElementById('settingsCurrentPassword').value;
   const newPassword = document.getElementById('settingsNewPassword').value;
@@ -374,16 +365,9 @@ export async function changePassword() {
     return;
   }
 
-  // Joriy parolni tekshirish
-  const currentUser = STATE.users.find(u => u.username === STATE.currentUser);
-  if (!currentUser || currentUser.pass !== currentPassword) {
-    showNotification('❌ Joriy parol noto\'g\'ri!');
-    return;
-  }
-
   // Yangi parolni tekshirish
-  if (newPassword.length < 4) {
-    showNotification('❌ Parol kamida 4 ta belgidan iborat bo\'lishi kerak!');
+  if (newPassword.length < 6) {
+    showNotification('❌ Parol kamida 6 ta belgidan iborat bo\'lishi kerak!');
     return;
   }
 
@@ -392,44 +376,52 @@ export async function changePassword() {
     return;
   }
 
-  // Parolni o'zgartirish
-  currentUser.pass = newPassword;
-  
-  // Supabase-ga yangilash
-  if (USE_ONLINE_BACKUP) {
-    try {
-      const response = await fetch(`${API_URL}/update-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username: STATE.currentUser, 
-          newPassword: newPassword
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        showNotification('✅ Parol muvaffaqiyatli o\'zgartirildi!');
-        addLog('Parol o\'zgartirildi', STATE.currentUser);
-        
-        // Clear password fields
-        document.getElementById('settingsCurrentPassword').value = '';
-        document.getElementById('settingsNewPassword').value = '';
-        document.getElementById('settingsConfirmPassword').value = '';
-      } else {
-        showNotification('❌ Server xatosi! Qayta urinib ko\'ring.');
-      }
-    } catch (e) {
-      console.error('❌ Password update xatosi:', e);
-      showNotification('❌ Server bilan aloqa yo\'q!');
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      showNotification('❌ Tizimga kirilmagan!');
+      return;
     }
-  } else {
-    await saveData();
+    
+    // Re-authenticate user with current password
+    const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    
+    // Update password
+    await updatePassword(user, newPassword);
+    
     showNotification('✅ Parol muvaffaqiyatli o\'zgartirildi!');
     addLog('Parol o\'zgartirildi', STATE.currentUser);
     
+    // Clear password fields
     document.getElementById('settingsCurrentPassword').value = '';
     document.getElementById('settingsNewPassword').value = '';
     document.getElementById('settingsConfirmPassword').value = '';
+    
+  } catch (error) {
+    console.error('❌ Password update xatosi:', error);
+    
+    let errorMessage = 'Parol o\'zgartirishda xatolik!';
+    
+    if (error.code === 'auth/wrong-password') {
+      errorMessage = 'Joriy parol noto\'g\'ri!';
+    } else if (error.code === 'auth/weak-password') {
+      errorMessage = 'Yangi parol juda zaif!';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showNotification(errorMessage);
   }
+}
+
+// ========== HELPER FUNCTIONS ==========
+export function getCurrentUser() {
+  return currentUser;
+}
+
+export function isLoggedIn() {
+  return STATE.isLoggedIn && currentUser !== null;
 }

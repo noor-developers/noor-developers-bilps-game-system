@@ -1,9 +1,10 @@
-// ========== STORAGE MODULE ==========
-// Data Loading, Saving, Export/Import
+// ========== STORAGE MODULE (FIREBASE INTEGRATED) ==========
+// Data Loading, Saving, Export/Import with Firestore sync
 
 import { STATE, DEFAULT_STATE, DB_NAME, API_URL, USE_ONLINE_BACKUP } from './config.js';
 import { showNotification, showConfirm, closeModal } from './ui.js';
 import { addLog, encrypt } from './utils.js';
+import { saveGameDataToFirestore } from './database.js';
 
 // ========== DATA MANAGEMENT ==========
 export async function loadData() {
@@ -181,7 +182,7 @@ export async function saveData() {
       'settingsPassword', 'transferCardNumber', 'isLoggedIn', 
       'currentTableKey', 'currentInputType', 'currentDebtData', 'currentDebtorToDelete', 
       'currentDebtorToPay', 'confirmCallback', 'selectedProduct', 'currentPaymentType', 'currentUser',
-      'lastActivity', 'sessionTimeout'
+      'lastActivity', 'sessionTimeout', 'userId'
     ].includes(k));
     
     persistentKeys.forEach(key => {
@@ -193,16 +194,15 @@ export async function saveData() {
         toSave.tables[key].interval = null;
     });
     
-    // PRIMARY: Supabase-ga saqlash (asosiy)
-    if (STATE.currentUser) {
-      console.log(`💾 Supabase-ga saqlash: ${STATE.currentUser}`);
-      await saveToSupabase(toSave);
+    // PRIMARY: Firebase Firestore ga saqlash (real-time sync)
+    if (STATE.userId && STATE.isLoggedIn) {
+      console.log(`💾 Firebase Firestore ga saqlash: ${STATE.currentUser} (${STATE.userId})`);
+      await saveGameDataToFirestore(STATE.userId);
     } else {
-      console.warn('⚠️ User login qilmagan, ma\'lumot saqlanmadi!');
-      return;
+      console.warn('⚠️ User login qilmagan, Firebase ga saqlanmadi!');
     }
     
-    // SECONDARY: localStorage cache (fallback)
+    // SECONDARY: localStorage cache (fallback & offline mode)
     const db = JSON.parse(localStorage.getItem(DB_NAME) || '{}');
     db.data = toSave;
     db.lastModified = new Date().toISOString();
