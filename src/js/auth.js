@@ -191,11 +191,17 @@ export async function login() {
 
   console.log(`👤 Login urinish: ${username}`);
   console.log(`📊 Mavjud users (${STATE.users.length}):`, STATE.users.map(u => u.username));
+  console.log(`🔐 Kiritilgan parol uzunligi: ${password.length}`);
 
   if (!username || !password) {
     showNotification('⚠️ Login va parolni kiriting!');
     return;
   }
+
+  // Debug: har bir userni tekshirish
+  STATE.users.forEach(u => {
+    console.log(`🔍 Tekshirish: ${u.username} | pass: "${u.pass}" | match: ${u.username === username && u.pass === password}`);
+  });
 
   const user = STATE.users.find(u => u.username === username && u.pass === password);
   
