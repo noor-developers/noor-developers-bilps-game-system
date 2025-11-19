@@ -3,7 +3,7 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
-import { showNotification } from './ui.js';
+import { showNotification, openModal, closeModal } from './ui.js';
 import { renderPage, getCurrentPage } from './game.js';
 
 // Helper function for date/time formatting
@@ -241,10 +241,11 @@ export function getTablesList() {
 
 // Open table management modal
 export function openTableManagementModal() {
-  const modal = document.getElementById('tableManagementModal');
-  if (!modal) return;
-
-  modal.classList.add('active');
+  if (!STATE.isLoggedIn) {
+    showNotification('⚠️ Avval tizimga kiring!');
+    return;
+  }
+  openModal('tableManagementModal');
   renderTablesList();
 }
 

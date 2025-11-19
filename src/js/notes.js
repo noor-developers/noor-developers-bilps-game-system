@@ -3,7 +3,7 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
-import { showNotification } from './ui.js';
+import { showNotification, openModal, closeModal } from './ui.js';
 
 // Helper function for date/time formatting
 function formatDateTimeUz(date) {
@@ -23,7 +23,7 @@ export function openNotesModal() {
     showNotification('⚠️ Avval tizimga kiring!');
     return;
   }
-  document.getElementById('notesModal').classList.add('active');
+  openModal('notesModal');
   loadNotesList();
 }
 
