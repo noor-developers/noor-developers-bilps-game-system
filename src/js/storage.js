@@ -242,8 +242,13 @@ async function loadUsersFromSupabase() {
     
     if (data.success && data.users && data.users.length > 0) {
       // Supabase is the source of truth for users
-      STATE.users = data.users.map(u => ({ username: u.username, pass: u.password }));
+      // Backward compatible: support both 'pass' and 'password' fields
+      STATE.users = data.users.map(u => ({ 
+        username: u.username, 
+        pass: u.password || u.pass  // Backend qaytargan password-ni pass ga o'zlashtirish
+      }));
       console.log(`✅ ${STATE.users.length} ta user Supabase-dan yuklandi`);
+      console.log('👥 Users:', STATE.users.map(u => `${u.username} (${u.pass ? 'OK' : 'NO PASS'})`).join(', '));
     } else {
       console.error('❌ CRITICAL: Supabase-da userlar topilmadi yoki xato');
     }
