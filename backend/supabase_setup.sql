@@ -155,6 +155,10 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Eski trigger-larni o'chirish (agar mavjud bo'lsa)
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON subscriptions;
+
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     
