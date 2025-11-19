@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>NOOR Game Management System (v6 - Takomillashtirilgan)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <link rel="stylesheet" href="../src/css/styles.css" />
+  <link rel="stylesheet" href="../src/css/responsive.css" />
+  
+</head>
+<body>
+  
+  <div id="snowfallContainer"></div>
+
+  <!-- YANGI LOGIN DIZAYNI -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-container">
+      <div class="login-header">
+        <div class="logo">🎱 NOOR</div>
+        <h1>Game Management System</h1>
+      </div>
+      <div class="login-box">
+        <div class="login-form" id="loginFormDiv">
+          <h2>Tizimga kirish</h2>
+          <div class="input-group">
+            <input type="text" id="loginUsername" placeholder="Foydalanuvchi nomi" />
+          </div>
+          <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Parol" />
+          </div>
+          <button class="login-btn" onclick="login()">Kirish</button>
+          <div class="text-center mt-15 text-muted">
+            Akkauntingiz yo'qmi? <a href="#" onclick="showRegisterForm(); return false;" class="link-accent">Ro'yxatdan o'tish</a>
+          </div>
+        </div>
+        <div class="login-form hidden" id="registerFormDiv">
+          <h2>Ro'yxatdan o'tish</h2>
+          
+          <h3 class="section-subtitle">👤 Akkaunt ma'lumotlari</h3>
+          <div class="input-group">
+            <input type="text" id="registerUsername" placeholder="Foydalanuvchi nomi" />
+          </div>
+          <div class="input-group">
+            <input type="password" id="registerPassword" placeholder="Parol" />
+          </div>
+          <div class="input-group">
+            <input type="password" id="registerConfirmPassword" placeholder="Parolni tasdiqlash" />
+          </div>
+          
+          <h3 class="section-subtitle">🏢 Klub ma'lumotlari</h3>
+          <div class="input-group">
+            <input type="text" id="registerClubName" placeholder="Klub nomi (masalan: NOOR Game Club)" />
+          </div>
+          <div class="input-group">
+            <input type="text" id="registerOwnerName" placeholder="Egasi ismi" />
+          </div>
+          <div class="input-group">
+            <input type="tel" id="registerPhone" placeholder="Telefon raqami (+998 90 123 45 67)" />
+          </div>
+          <div class="input-group">
+            <input type="text" id="registerAddress" placeholder="Manzil (ixtiyoriy)" />
+          </div>
+          
+          <button class="login-btn" onclick="register()">Ro'yxatdan o'tish</button>
+          <div class="text-center mt-15 text-muted">
+            Akkauntingiz bormi? <a href="#" onclick="showLoginForm(); return false;" class="link-accent">Kirish</a>
+          </div>
+        </div>
+        <div class="login-footer">
+          <div class="clock" id="loginClock">00:00:00</div>
+          <div class="date" id="loginDate">Yakshanba, 01.01.2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="newYearBanner"></div>
+
+  <div class="topbar">
+    <div class="flex-column-5">
+      <div class="logo">🎱 NOOR</div>
+      <div id="clubInfo" class="club-info-banner hidden"></div>
+    </div>
+    <nav class="nav">
+      <button class="active" data-page="billiard">Billiard</button>
+      <button data-page="playstation">PlayStation</button>
+      <button data-page="bar">Bar</button>
+      <button data-page="debtors">Qarzdorlar</button>
+      <button data-page="history">Tarix</button>
+      <button data-page="log">Log</button>
+      <button data-page="settings">⚙️ Sozlamalar</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="clock-container">
+        <div class="clock" id="mainClock">00:00:00</div>
+        <div class="date" id="currentDate"></div>
+      </div>
+      
+      <div class="balance-group">
+        <div class="balance-box balance-cash">
+            <div>💵 NAQD</div>
+            <div id="cashBalance">0 so'm</div>
+        </div>
+        <div class="balance-box balance-transfer">
+            <div>💳 O'TKAZMA</div>
+            <div id="transferBalance">0 so'm</div>
+        </div>
+        <div class="balance-box balance-debt">
+            <div>🔴 QARZLAR</div>
+            <div id="debtBalance">0 so'm</div>
+        </div>
+      </div>
+      
+      <div class="shift-indicator" id="shiftStatus">Smena yopiq</div>
+      <button class="btn btn-warning" onclick="toggleShift()" id="shiftBtn">Smena ochish</button>
+      <button class="btn btn-danger hidden" onclick="logout()" id="logoutBtn">Chiqish</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="left-panel">
+      <div class="notes-section">
+        <div class="section-title">📝 Zametka</div>
+        <textarea id="notesArea" placeholder="Muhim eslatmalar..."></textarea>
+        <button class="btn btn-primary full-width mt-8" onclick="saveNotes()">Saqlash</button>
+      </div>
+      
+      <div class="stats-section">
+        <div class="section-title">📊 Faol sessiyalar</div>
+        <div class="active-sessions" id="activeSessions">
+          <div class="text-center color-dim">Faol sessiya yo'q</div>
+        </div>
+      </div>
+      
+      <div class="stats-section">
+        <div class="section-title">💵 Smenada (Jami Tushum)</div>
+        <div class="stat-item">
+          <span>Billiard-1:</span>
+          <span class="stat-value" id="statB1">0 so'm</span>
+        </div>
+        <div class="stat-item">
+          <span>Billiard-2:</span>
+          <span class="stat-value" id="statB2">0 so'm</span>
+        </div>
+        <div class="stat-item">
+          <span>PS4 Pro:</span>
+          <span class="stat-value" id="statPS4">0 so'm</span>
+        </div>
+        <div class="stat-item">
+          <span>PS5 Slim:</span>
+          <span class="stat-value" id="statPS5">0 so'm</span>
+        </div>
+        <div class="stat-item">
+          <span>Bar:</span>
+          <span class="stat-value" id="statBar">0 so'm</span>
+        </div>
+        <div class="stat-item stat-highlight">
+          <span class="fw-800">JAMI TUSHUM:</span>
+          <span class="stat-value" id="statTotal">0 so'm</span>
+        </div>
+      </div>
+      
+      <div class="debtors-preview">
+        <div class="section-title">🔴 Top 10 qarzdorlar</div>
+        <div id="topDebtorsList">
+          <div class="text-center color-dim">Qarzdor yo'q</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area" id="contentArea"></div>
+
+    <div class="right-panel">
+      <div class="section-title">🧾 Cheklar</div>
+      <div class="receipt-filters">
+        <button class="filter-btn active" data-filter="today" onclick="filterReceipts('today', this)">Bugun</button>
+        <button class="filter-btn" data-filter="7days" onclick="filterReceipts('7days', this)">7 kun</button>
+        <button class="filter-btn" data-filter="all" onclick="filterReceipts('all', this)">Barchasi</button>
+      </div>
+      <div class="receipt-filters">
+        <button class="filter-btn active" data-type="all" onclick="filterReceiptsByType('all', this)">Barchasi</button>
+        <button class="filter-btn" data-type="billiard-1" onclick="filterReceiptsByType('billiard-1', this)">Billiard-1</button>
+        <button class="filter-btn" data-type="billiard-2" onclick="filterReceiptsByType('billiard-2', this)">Billiard-2</button>
+        <button class="filter-btn" data-type="ps4" onclick="filterReceiptsByType('ps4', this)">PS4</button>
+        <button class="filter-btn" data-type="ps5" onclick="filterReceiptsByType('ps5', this)">PS5</button>
+        <button class="filter-btn" data-type="bar" onclick="filterReceiptsByType('bar', this)">Bar</button>
+      </div>
+      <div id="receiptsList"></div>
+    </div>
+  </div>
+
+  <!-- Modal oynalari -->
+  <div class="modal" id="startModal">
+    <div class="modal-content">
+      <div class="modal-header">⏱️ Sessiyani boshlash</div>
+      <div class="modal-text" id="startModalTable"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="selectInputType('time')">
+          <div class="icon-xl">⏰</div>
+          <div>Vaqt bo'yicha (minut)</div>
+        </button>
+        <button class="modal-btn" onclick="selectInputType('money')">
+          <div class="icon-xl">💰</div>
+          <div>Pul bo'yicha (so'm)</div>
+        </button>
+      </div>
+      <div class="modal-close">
+        <button class="btn btn-danger" onclick="closeModal('startModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Qolgan modal oynalari -->
+  <div class="modal" id="inputModal">
+    <div class="modal-content">
+      <div class="modal-header" id="inputModalTitle"></div>
+      <input type="number" class="modal-input" id="inputModalValue" placeholder="" />
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="confirmInput()">Tasdiqlash</button>
+        <button class="btn btn-danger" onclick="closeModal('inputModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header" id="paymentModalHeader">💳 To'lov</div>
+      <div class="modal-text" id="paymentDetails"></div>
+      
+      <div class="modal-buttons modal-grid-2 mb-20">
+        <button class="modal-btn active" id="payBtnCash" onclick="selectPaymentType('cash', this)">💵 Naqd</button>
+        <button class="modal-btn" id="payBtnTransfer" onclick="selectPaymentType('transfer', this)">💳 O'tkazma</button>
+      </div>
+      
+      <div class="modal-close modal-close-grid">
+        <button class="btn btn-success grid-span-full" onclick="confirmPayment()">✅ To'lash</button>
+        <button class="btn btn-danger" id="paymentModalDebtBtn" onclick="addToDebt()">🔴 Qarzga</button>
+        <button class="btn btn-primary" onclick="closePaymentModal(true)">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="selectDebtorModal">
+    <div class="modal-content">
+      <div class="modal-header">🔴 Qarzga yozish</div>
+      <div class="modal-text">Mavjud qarzdorlardan birini tanlang yoki yangi qo'shing:</div>
+      <div class="modal-buttons scrollable-list" id="existingDebtorsList">
+        </div>
+      <button class="btn btn-primary full-width mt-15" onclick="openNewDebtorModal()">+ Yangi Qarzdor Qo'shish</button>
+      <div class="modal-close">
+        <button class="btn btn-danger" onclick="closeModal('selectDebtorModal'); openModal('paymentModal');">Orqaga</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="newDebtorModal">
+    <div class="modal-content">
+      <div class="modal-header">📝 Yangi Qarzdor Ismi</div>
+      <input type="text" class="modal-input" id="newDebtorName" placeholder="Qarzdor ismini kiriting" />
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="confirmDebtName(null)">Saqlash</button>
+        <button class="btn btn-danger" onclick="closeModal('newDebtorModal'); openModal('selectDebtorModal');">Orqaga</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <div class="modal-header">⚠️ Tasdiqlash</div>
+      <div class="modal-text" id="confirmText"></div>
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="confirmAction()">Ha</button>
+        <button class="btn btn-danger" onclick="closeModal('confirmModal')">Yo'q</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="notificationModal">
+    <div class="modal-content">
+      <div class="modal-header">ℹ️ Xabar</div>
+      <div class="modal-text" id="notificationText"></div>
+      <div class="modal-close">
+        <button class="btn btn-primary" onclick="closeModal('notificationModal')">OK</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="transferModal">
+    <div class="modal-content">
+      <div class="modal-header text-warning">💳 O'tkazma ma'lumotlari</div>
+      <div class="modal-text">
+        <div class="fw-700">Karta raqami:</div>
+        <div class="text-xl text-primary" id="transferCardNumber"></div>
+      </div>
+      <div class="modal-text color-danger fw-700">
+        Iltimos, o'tkazma summasi (<span id="transferAmountDisplay">0</span> so'm) kelib tushganiga ishonch hosil qiling!
+      </div>
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="finalizePayment('transfer')">✅ Tushunarli</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="alarmModal">
+    <div class="modal-content modal-danger">
+      <div class="modal-header text-white">🚨 VAQT TUGAYAPTI!</div>
+      <div class="modal-text text-white text-xl" id="alarmText"></div>
+      <div class="modal-close">
+        <button class="btn btn-warning" onclick="closeModal('alarmModal')">OK</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="barProductModal">
+    <div class="modal-content">
+      <div class="modal-header">🍹 Kimga sotiladi?</div>
+      <div class="modal-buttons" id="barTargetButtons"></div>
+      <button class="btn btn-success full-width mt-10" onclick="sellToCustomer()">Mijozga sotish</button>
+      <div class="modal-close">
+        <button class="btn btn-danger" onclick="closeModal('barProductModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsPasswordModal">
+    <div class="modal-content">
+      <div class="modal-header">🔒 Sozlamalar paroli</div>
+      <input type="password" class="modal-input" id="settingsPasswordInput" placeholder="Parolni kiriting" />
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="checkSettingsPassword()">Kirish</button>
+        <button class="btn btn-danger" onclick="closeModal('settingsPasswordModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="settingsModal">
+    <div class="modal-content modal-wide">
+      <div class="modal-header">⚙️ Sozlamalar</div>
+      <div class="grid-2col-lg">
+        <div>
+          <h3 class="text-warning mb-15">Xavfsizlik & Xodim</h3>
+          <div class="form-group">
+            <label>Sozlamalar paroli (Admin):</label>
+            <input type="password" id="settingsPassword" placeholder="Yangi parol (bo'sh qoldiring o'zgartirilmasin)">
+          </div>
+          <div class="form-group">
+            <label>O'tkazma (Transfer) Karta Raqami:</label>
+            <input type="text" id="settingsTransferCard" placeholder="1234 1234 1234 1234">
+          </div>
+          <h3 class="color-blue mb-15 mt-20">Foydalanuvchilar (Login - Parol)</h3>
+          <div class="form-group">
+            <textarea id="usersInput" placeholder="login1 - parol1&#10;login2 - parol2"></textarea>
+          </div>
+          
+          <!-- YANGI: FOYDALANUVCHI QO'SHISH FORMASI -->
+          <div id="addUserForm"></div>
+          
+        </div>
+        <div>
+          <h3 class="text-success mb-15">Narxlar (so'm/soat)</h3>
+          <div class="form-group">
+            <label>Billiard-1:</label>
+            <input type="number" id="priceB1" value="40000">
+          </div>
+          <div class="form-group">
+            <label>Billiard-2:</label>
+            <input type="number" id="priceB2" value="40000">
+          </div>
+          <div class="form-group">
+            <label>PlayStation 4 Pro:</label>
+            <input type="number" id="pricePS4" value="15000">
+          </div>
+          <div class="form-group">
+            <label>PlayStation 5 Slim:</label>
+            <input type="number" id="pricePS5" value="20000">
+          </div>
+        </div>
+      </div>
+      
+      <h3 class="text-primary mb-15">Bar mahsulotlari (Nomi - Narxi - Zaxira)</h3>
+      <div class="form-group">
+        <label>Har bir mahsulotni yangi qatordan kiriting:</label>
+        <textarea id="barItemsInput" placeholder="Pepsi - 8000 - 50&#10;Fanta - 8000 - 30&#10;Choy - 5000 - 100"></textarea>
+      </div>
+      
+        <h3 class="color-danger mb-15 mt-30">Ma'lumotlar boshqaruvi</h3>
+        <div class="grid-2col-tight">
+          <button class="btn btn-primary" onclick="exportData()">💾 Ma'lumotlarni Eksport qilish</button>
+          <input type="file" id="importFileInput" class="hidden" title="Ma'lumotlarni import qilish" onchange="handleImportFile(event)">
+          <button class="btn btn-warning" onclick="document.getElementById('importFileInput').click()">📥 Ma'lumotlarni Import qilish</button>
+      </div>
+      
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="saveSettings()">Saqlash</button>
+        <button class="btn btn-danger" onclick="closeModal('settingsModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="payDebtModal">
+    <div class="modal-content">
+      <div class="modal-header">💰 Qarzni to'lash</div>
+      <div class="modal-text" id="payDebtDetails"></div>
+      <input type="number" class="modal-input" id="payDebtAmount" placeholder="To'lanadigan summa" />
+      <div class="modal-buttons modal-grid-3">
+        <button class="btn btn-blue" onclick="confirmPayDebt('cash')">💵 Naqd</button>
+        <button class="btn btn-warning" onclick="confirmPayDebt('transfer')">💳 O'tkazma</button>
+      </div>
+      <div class="modal-close">
+        <button class="btn btn-danger" onclick="closeModal('payDebtModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="deleteDebtorModal">
+    <div class="modal-content">
+      <div class="modal-header">🔒 Qarzdorni o'chirish</div>
+      <div class="modal-text">Qarzdorni o'chirish uchun sozlamalar parolini kiriting:</div>
+      <input type="password" class="modal-input" id="deleteDebtorPassword" placeholder="Parolni kiriting" />
+      <div class="modal-close">
+        <button class="btn btn-danger" onclick="confirmDeleteDebtor()">O'chirish</button>
+        <button class="btn btn-primary" onclick="closeModal('deleteDebtorModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="exportLogPasswordModal">
+    <div class="modal-content">
+      <div class="modal-header">🔒 Log Eksport</div>
+      <div class="modal-text">Log faylini eksport qilish uchun Sozlamalar parolini kiriting:</div>
+      <input type="password" class="modal-input" id="exportLogPassword" placeholder="Parolni kiriting" />
+      <div class="modal-close">
+        <button class="btn btn-success" onclick="confirmLogExport()">Eksport</button>
+        <button class="btn btn-danger" onclick="closeModal('exportLogPasswordModal')">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+
+    <script type="module" src="../src/js/main.js"></script>
+
+</body>
+</html>
