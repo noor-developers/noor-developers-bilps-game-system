@@ -1212,9 +1212,9 @@
 
     // ========== LOGOUT ==========
     function logout() {
-      showConfirm('Tizimdan chiqishni tasdiqlaysizmi?', () => {
+      showConfirm('Tizimdan chiqishni tasdiqlaysizmi?', async () => {
         if (STATE.shiftOpen) {
-          showConfirm('⚠️ Smena hali ochiq! Uni yopib chiqishni tasdiqlaysizmi?', () => {
+          showConfirm('⚠️ Smena hali ochiq! Uni yopib chiqishni tasdiqlaysizmi?', async () => {
             const shiftData = {
               shiftId: STATE.currentShiftId,
               employeeName: STATE.currentUser,
@@ -1241,6 +1241,7 @@
               }
             });
             
+            await saveData();
             performLogout();
           });
         } else {
@@ -1290,10 +1291,16 @@
       try {
         await loadUsersFromSupabase();
         console.log('✅ Supabase users yuklandi:', STATE.users.length);
+        
+        if (STATE.users.length === 0) {
+          console.error('❌ CRITICAL: Supabase-da userlar yo\'q!');
+          showNotification('❌ Supabase-da foydalanuvchilar topilmadi!');
+          return false;
+        }
       } catch (e) {
         console.error('❌ CRITICAL: Supabase users yuklanmadi:', e);
         showNotification('❌ Server bilan aloqa yo\'q! Dasturni qayta yuklang.');
-        return; // Supabase bo'lmasa, ishlamaydi
+        return false;
       }
       
       // STEP 2: Agar user login qilgan bo'lsa, uning ma'lumotlarini Supabase-dan yuklash
@@ -1738,7 +1745,7 @@
     }
 
     // ========== SHIFT MANAGEMENT ==========
-    function toggleShift() {
+    async function toggleShift() {
       if (!STATE.shiftOpen) {
         if (!STATE.currentUser) {
             showNotification('⚠️ Iltimos, avval tizimga kiring!');
@@ -1754,8 +1761,9 @@
         
         addLog("Smena ochildi", `Xodim: ${STATE.currentUser}`);
         showNotification(`✅ Smena muvaffaqiyatli ochildi! (Xodim: ${STATE.currentUser})`);
+        await saveData();
       } else {
-        showConfirm('Smenani yopishni tasdiqlaysizmi? Faol sessiyalar avtomatik to\'xtatiladi.', () => {
+        showConfirm('Smenani yopishni tasdiqlaysizmi? Faol sessiyalar avtomatik to\'xtatiladi.', async () => {
           const shiftData = {
             shiftId: STATE.currentShiftId,
             employeeName: STATE.currentUser, 
@@ -1787,7 +1795,8 @@
           addLog("Smena yopildi", `Jami tushum: ${shiftData.cashBalance + shiftData.transferBalance} so'm`);
           showNotification('✅ Smena yopildi!');
           updateUI();
-          renderPage(getCurrentPage()); 
+          renderPage(getCurrentPage());
+          await saveData(); 
           saveData();
         });
       }
@@ -2157,7 +2166,7 @@
         btn.classList.add('active');
     }
 
-    function confirmPayment() {
+    async function confirmPayment() {
       const type = STATE.currentPaymentType;
       
       if (type === 'transfer') {
@@ -2165,11 +2174,11 @@
           document.getElementById('transferAmountDisplay').textContent = STATE.currentDebtData.total;
           openModal('transferModal');
       } else {
-          finalizePayment('cash');
+          await finalizePayment('cash');
       }
     }
     
-    function finalizePayment(type) {
+    async function finalizePayment(type) {
         const key = STATE.currentTableKey;
         const data = STATE.currentDebtData;
         
@@ -2238,7 +2247,7 @@
         closePaymentModal();
         renderPage(getCurrentPage());
         updateUI();
-        saveData();
+        await saveData();
         
         showNotification(`✅ To'lov qabul qilindi! (${type.toUpperCase()})`);
     }
@@ -2581,7 +2590,7 @@
       setTimeout(() => document.getElementById('payDebtAmount').focus(), 300);
     }
     
-    function confirmPayDebt(type) {
+    async function confirmPayDebt(type) {
       const amount = parseInt(document.getElementById('payDebtAmount').value);
       const name = STATE.currentDebtorToPay;
       const debtor = STATE.debtors.find(d => d.name === name);
@@ -2624,7 +2633,7 @@
       closeModal('payDebtModal');
       renderDebtorsPage();
       updateUI();
-      saveData();
+      await saveData();
       
       showNotification(`✅ Qarz to'landi: ${amount} so'm (${type.toUpperCase()})`);
     }
@@ -2635,7 +2644,7 @@
         openModal('deleteDebtorModal');
     }
 
-    function confirmDeleteDebtor() {
+    async function confirmDeleteDebtor() {
         const password = document.getElementById('deleteDebtorPassword').value;
         if (password === STATE.settingsPassword) {
             const debtorName = STATE.currentDebtorToDelete;
@@ -2646,7 +2655,7 @@
             closeModal('deleteDebtorModal');
             renderDebtorsPage();
             updateUI();
-            saveData();
+            await saveData();
             showNotification(`✅ Qarzdor (${debtorName}) muvaffaqiyatli o'chirildi!`);
         } else {
             showNotification('❌ Noto\'g\'ri parol!');
@@ -3322,10 +3331,15 @@
 
 
       // 4. Intervallarni boshlash
-      // 5. Intervallarni boshlash
       setInterval(updateClock, 1000);
       setInterval(updateActiveSessions, 5000); 
-      setInterval(() => saveData(), 30000); // async wrapper
+      setInterval(async () => {
+        try {
+          await saveData();
+        } catch (e) {
+          console.error('❌ Auto-save xatosi:', e);
+        }
+      }, 30000);
       setInterval(checkSessionTimeout, 60000);
       setInterval(cleanOldHistory, 24 * 60 * 60 * 1000);
       setInterval(cleanOldReceipts, 24 * 60 * 60 * 1000);
