@@ -114,6 +114,9 @@ export function addTable(type, customName = '') {
     time: formatDateTimeUz(new Date())
   });
 
+  // Refresh tables list in modal
+  renderTablesList();
+
   // Refresh game page if currently viewing
   const currentPage = getCurrentPage();
   if (currentPage === 'billiard' || currentPage === 'playstation') {
@@ -170,6 +173,9 @@ export function removeTable(tableId) {
     details: `Stol o'chirildi: ${tableName} (${tableId})`,
     time: formatDateTimeUz(new Date())
   });
+
+  // Refresh tables list in modal
+  renderTablesList();
 
   // Refresh game page if currently viewing
   const currentPage = getCurrentPage();

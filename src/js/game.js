@@ -17,19 +17,35 @@ export function renderPage(page) {
   content.innerHTML = '';
 
   if (page === 'billiard') {
+    // Get all billiard tables dynamically
+    const billiardTables = Object.keys(STATE.tables)
+      .filter(key => key.startsWith('b'))
+      .sort((a, b) => {
+        const numA = parseInt(a.replace('b', '')) || 0;
+        const numB = parseInt(b.replace('b', '')) || 0;
+        return numA - numB;
+      });
+    
     content.innerHTML = `
       <h2 class="page-title">🎱 Billiard</h2>
       <div class="game-grid">
-        ${renderGameCard('b1')}
-        ${renderGameCard('b2')}
+        ${billiardTables.map(tableId => renderGameCard(tableId)).join('')}
       </div>
     `;
   } else if (page === 'playstation') {
+    // Get all PlayStation tables dynamically
+    const psTables = Object.keys(STATE.tables)
+      .filter(key => key.startsWith('ps'))
+      .sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, '')) || 0;
+        const numB = parseInt(b.replace(/\D/g, '')) || 0;
+        return numA - numB;
+      });
+    
     content.innerHTML = `
       <h2 class="page-title">🎮 PlayStation</h2>
       <div class="game-grid">
-        ${renderGameCard('ps4')}
-        ${renderGameCard('ps5')}
+        ${psTables.map(tableId => renderGameCard(tableId)).join('')}
       </div>
     `;
   } else if (page === 'bar') {
