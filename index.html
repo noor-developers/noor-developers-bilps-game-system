@@ -9,10 +9,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>NOOR Game Management System (v11 - Takomillashtirilgan)</title>
+  <title>NOOR Game Management System (v12 - Kompakt dizayn)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <link rel="stylesheet" href="src/css/styles.css?v=11.1" />
-  <link rel="stylesheet" href="src/css/responsive.css?v=11.1" />
+  <link rel="stylesheet" href="src/css/styles.css?v=12" />
+  <link rel="stylesheet" href="src/css/responsive.css?v=12" />
   
 </head>
 <body>
@@ -243,16 +243,12 @@
           <option value="today" selected>Bugun</option>
           <option value="7days">7-kunlik</option>
           <option value="all">Barchasi</option>
+          <option value="bar">Bar</option>
         </select>
         <input type="date" class="receipt-date-input" id="receiptDateSearch" onchange="applyReceiptFilters()" placeholder="Sana">
       </div>
       <div class="receipt-filters">
         <button class="filter-btn active" data-type="all" onclick="filterReceiptsByType('all', this)">Barchasi</button>
-        <button class="filter-btn" data-type="billiard-1" onclick="filterReceiptsByType('billiard-1', this)">Billiard-1</button>
-        <button class="filter-btn" data-type="billiard-2" onclick="filterReceiptsByType('billiard-2', this)">Billiard-2</button>
-        <button class="filter-btn" data-type="ps4" onclick="filterReceiptsByType('ps4', this)">PS4</button>
-        <button class="filter-btn" data-type="ps5" onclick="filterReceiptsByType('ps5', this)">PS5</button>
-        <button class="filter-btn" data-type="bar" onclick="filterReceiptsByType('bar', this)">Bar</button>
       </div>
       <div id="receiptsList"></div>
     </div>
@@ -671,7 +667,7 @@
       updateLoginClock();
     </script>
 
-    <script type="module" src="src/js/main.js?v=11.1"></script>
+    <script type="module" src="src/js/main.js?v=12"></script>
 
 </body>
 </html>

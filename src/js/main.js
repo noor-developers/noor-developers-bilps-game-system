@@ -50,6 +50,7 @@ window.changePassword = changePassword;
 window.openNotesModal = openNotesModal;
 window.saveNote = saveNote;
 window.clearNoteEditor = clearNoteEditor;
+window.loadNote = loadNote;
 window.applyReceiptFilters = applyReceiptFilters;
 window.filterReceipts = filterReceipts;
 window.filterReceiptsByType = filterReceiptsByType;
@@ -216,6 +217,7 @@ function exposeGlobals() {
   window.openNotesModal = openNotesModal;
   window.saveNote = saveNote;
   window.clearNoteEditor = clearNoteEditor;
+  window.loadNote = loadNote;
   window.notesModule = { loadNote };
   window.filterReceipts = filterReceipts;
   window.filterReceiptsByType = filterReceiptsByType;

@@ -445,6 +445,9 @@ export function applyReceiptFilters() {
       const receiptDateStr = `${receiptDate.getDate().toString().padStart(2, '0')}.${(receiptDate.getMonth() + 1).toString().padStart(2, '0')}.${receiptDate.getFullYear()}`;
       return receiptDateStr === searchDateStr;
     });
+  } else if (timeFilter === 'bar') {
+    // Filter only bar receipts
+    filteredReceipts = filteredReceipts.filter(r => r.table === 'bar');
   } else if (timeFilter === 'today') {
     const today = new Date();
     const todayStr = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
@@ -458,8 +461,8 @@ export function applyReceiptFilters() {
     filteredReceipts = filteredReceipts.filter(r => r.timestamp > sevenDaysAgo);
   }
   
-  // Apply type filter
-  if (activeType !== 'all') {
+  // Apply type filter (only if timeFilter is not 'bar' since that's already filtered)
+  if (activeType !== 'all' && timeFilter !== 'bar') {
     filteredReceipts = filteredReceipts.filter(r => r.table === activeType);
   }
   
