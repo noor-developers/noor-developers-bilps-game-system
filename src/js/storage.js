@@ -1,6 +1,6 @@
 ﻿// ========== STORAGE MODULE (FIREBASE ONLY) ==========
 // Data Loading, Saving - FAQAT Firebase Firestore
-// localStorage BUTUNLAY O'CHIRILDI - Barcha ma'lumotlar faqat Firebase da
+// localStorage BUTUNLAY OCHIRILDI - Barcha malumotlar faqat Firebase da
 
 import { STATE } from './config.js';
 import { showNotification } from './ui.js';
@@ -8,9 +8,9 @@ import { saveGameDataToFirestore } from './database.js';
 
 // ========== DATA LOADING ==========
 export async function loadData() {
-  console.log('📂 loadData() - FIREBASE ONLY MODE');
-  console.log('ℹ️ Barcha ma\'lumotlar Firebase Firestore dan avtomatik yuklanadi');
-  console.log('✅ localStorage ishlatilmaydi - faqat Firebase');
+  console.log(' loadData() - FIREBASE ONLY MODE');
+  console.log('ℹ Barcha malumotlar Firebase Firestore dan avtomatik yuklanadi');
+  console.log(' localStorage ishlatilmaydi - faqat Firebase');
   
   return true;
 }
@@ -18,17 +18,17 @@ export async function loadData() {
 // ========== DATA SAVING ==========
 export async function saveData() {
   if (!STATE.userId || !STATE.isLoggedIn) {
-    console.warn('⚠️ User login qilmagan, ma\'lumot saqlanmadi!');
+    console.warn(' User login qilmagan, malumot saqlanmadi!');
     return;
   }
   
   try {
-    console.log(`💾 Firebase Firestore ga saqlash: ${STATE.currentUser} (${STATE.userId})`);
+    console.log(` Firebase Firestore ga saqlash: ${STATE.currentUser} (${STATE.userId})`);
     await saveGameDataToFirestore(STATE.userId);
-    console.log('✅ Barcha ma\'lumotlar Firebase ga saqlandi');
+    console.log(' Barcha malumotlar Firebase ga saqlandi');
   } catch (e) {
-    console.error('❌ Firebase save error:', e);
-    showNotification('❌ Ma\'lumot saqlanmadi! Internet aloqasini tekshiring.');
+    console.error(' Firebase save error:', e);
+    showNotification(' Malumot saqlanmadi! Internet aloqasini tekshiring.');
     throw e;
   }
 }
@@ -36,7 +36,7 @@ export async function saveData() {
 // ========== EXPORT (Firebase Backup) ==========
 export async function exportData() {
   if (!STATE.userId || !STATE.isLoggedIn) {
-    showNotification('⚠️ Export qilish uchun login qiling!');
+    showNotification(' Export qilish uchun login qiling!');
     return;
   }
   
@@ -71,16 +71,16 @@ export async function exportData() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showNotification('✅ Ma\'lumotlar Firebase dan export qilindi!');
+    showNotification(' Malumotlar Firebase dan export qilindi!');
   } catch (error) {
-    console.error('❌ Export error:', error);
-    showNotification('❌ Export qilishda xatolik!');
+    console.error(' Export error:', error);
+    showNotification(' Export qilishda xatolik!');
   }
 }
 
 export function handleImportFile(event) {
-  showNotification('ℹ️ Import o\'chirilgan. Firebase avtomatik sinxronizatsiya ishlatiladi.');
+  showNotification('ℹ Import ochirilgan. Firebase avtomatik sinxronizatsiya ishlatiladi.');
   event.target.value = '';
 }
 
-console.log('🚀 Storage module yuklandi: FIREBASE ONLY MODE');
+console.log(' Storage module yuklandi: FIREBASE ONLY MODE');
