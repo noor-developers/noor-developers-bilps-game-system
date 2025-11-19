@@ -80,15 +80,13 @@ export async function loadData() {
         
         const persistentKeys = Object.keys(DEFAULT_STATE).filter(k => ![
             'settingsPassword', 'transferCardNumber', 
-            'isLoggedIn', 'tables', 'currentUser', 'lastActivity', 'sessionTimeout'
+            'isLoggedIn', 'tables', 'currentUser', 'lastActivity', 'sessionTimeout',
+            'users' // NEVER overwrite users from localStorage - Supabase is primary source
         ].includes(k));
         
         persistentKeys.forEach(key => {
           if (data[key] !== undefined) {
             STATE[key] = data[key];
-            if (key === 'users') {
-              console.log(`👥 Users yuklandi: ${STATE.users.length} ta`);
-            }
           }
         });
         
