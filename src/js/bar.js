@@ -11,7 +11,7 @@ import { getCurrentPage, renderPage } from './game.js';
 export function renderBarPage() {
   const content = document.getElementById('contentArea');
   content.innerHTML = `
-      <h2 style="color:var(--primary);margin-bottom:20px;">🍹 Bar Mahsulotlari</h2>
+      <h2 class="page-title">🍹 Bar Mahsulotlari</h2>
       <div class="bar-products-grid" id="barGrid"></div>
   `;
   updateBarGrid();
@@ -22,10 +22,10 @@ export function updateBarGrid() {
   if (!grid) return;
   
   grid.innerHTML = STATE.barItems.map((item, idx) => `
-    <div class="bar-product-card" onclick="window.barModule.selectBarProduct(${idx})" style="${item.stock <= 0 ? 'background:var(--danger);opacity:0.6;cursor:not-allowed;' : ''}">
+    <div class="bar-product-card ${item.stock <= 0 ? 'out-of-stock' : ''}" onclick="window.barModule.selectBarProduct(${idx})">
       <div class="product-name">${item.name}</div>
       <div class="product-price">${item.price} so'm</div>
-      <div style="font-size:0.8rem;margin-top:5px;color:${item.stock <= 5 ? 'var(--warning)' : '#fff'};">Zaxira: ${item.stock}</div>
+      <div class="product-stock ${item.stock <= 5 ? 'low-stock' : ''}">Zaxira: ${item.stock}</div>
     </div>
   `).join('');
 }
@@ -153,8 +153,8 @@ export function sellToCustomer() {
     
     document.getElementById('paymentModalHeader').textContent = `Mijozga Sotish`;
     document.getElementById('paymentDetails').innerHTML = `
-        <div style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Mahsulot:</strong> ${product.name} x${qty}</div>
-        <div style="font-size: 1.4rem; color: var(--success);"><strong>Jami:</strong> ${total} so'm</div>
+        <div class="payment-product"><strong>Mahsulot:</strong> ${product.name} x${qty}</div>
+        <div class="payment-total-simple"><strong>Jami:</strong> ${total} so'm</div>
     `;
     
     document.getElementById('paymentModalDebtBtn').style.display = 'none';

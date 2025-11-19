@@ -10,8 +10,8 @@ export function renderHistoryPage() {
   const content = document.getElementById('contentArea');
   
   content.innerHTML = `
-    <h2 style="color:var(--primary);margin-bottom:20px;">📊 Smenalar Tarixi (Oxirgi 7 kun)</h2>
-    <div style="max-height:80vh;overflow-y:auto;">
+    <h2 class="page-title">📊 Smenalar Tarixi (Oxirgi 7 kun)</h2>
+    <div class="table-container">
         <table class="data-table">
         <thead>
             <tr>
@@ -32,8 +32,8 @@ export function renderHistoryPage() {
                 <td>${shift.startTime}</td>
                 <td>${shift.cashBalance} so'm</td>
                 <td>${shift.transferBalance} so'm</td>
-                <td style="color:var(--danger);">${shift.debtBalance} so'm</td>
-                <td><strong style="color:var(--success);">${shift.cashBalance + shift.transferBalance} so'm</strong></td>
+                <td class="text-danger">${shift.debtBalance} so'm</td>
+                <td><strong class="text-success">${shift.cashBalance + shift.transferBalance} so'm</strong></td>
             </tr>
             `).join('')}
         </tbody>
@@ -46,11 +46,11 @@ export function renderHistoryPage() {
 export function renderLogPage() {
   const content = document.getElementById('contentArea');
   content.innerHTML = `
-      <div style="display:flex; justify-content: space-between; align-items: center;">
-          <h2 style="color:var(--primary);margin-bottom:20px;">📜 Harakatlar Jurnali (Log)</h2>
+      <div class="flex-between mb-20">
+          <h2 class="page-title">📜 Harakatlar Jurnali (Log)</h2>
           <button class="btn btn-warning" onclick="window.historyModule.openLogExportModal()">Eksport qilish</button>
       </div>
-      <div style="max-height:80vh;overflow-y:auto;">
+      <div class="table-container">
           <table class="data-table">
           <thead>
               <tr>

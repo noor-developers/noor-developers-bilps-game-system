@@ -4,6 +4,18 @@
 import { STATE } from './config.js';
 import { addLog, addReceipt } from './utils.js';
 
+function formatCurrency(value) {
+  const number = Number(value) || 0;
+  return `${number.toLocaleString('uz-UZ')} so'm`;
+}
+
+function setAmountText(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = formatCurrency(value);
+  }
+}
+
 // ========== MODAL HELPERS ==========
 export function openModal(id) {
   document.getElementById(id).classList.add('show');
@@ -67,7 +79,9 @@ export function confirmAction() {
 // ========== UI UPDATE ==========
 export function updateUI() {
   updateTopbar();
+  updateStats();
   updateActiveSessions();
+  updateTopDebtors();
 }
 
 // Make functions available globally
@@ -79,48 +93,91 @@ if (typeof window !== 'undefined') {
 }
 
 export function updateTopbar() {
-  document.getElementById('currentCash').textContent = STATE.cashBalance + " so'm";
-  document.getElementById('currentTransfer').textContent = STATE.transferBalance + " so'm";
-  document.getElementById('currentDebt').textContent = STATE.debtBalance + " so'm";
-  document.getElementById('totalBalance').textContent = (STATE.cashBalance + STATE.transferBalance) + " so'm";
-  
-  if (STATE.shiftOpen) {
-    document.getElementById('shiftBtn').textContent = '🔴 Smenani Yopish';
-    document.getElementById('shiftBtn').classList.add('active');
-  } else {
-    document.getElementById('shiftBtn').textContent = '🟢 Smena Ochish';
-    document.getElementById('shiftBtn').classList.remove('active');
+  setAmountText('cashBalance', STATE.cashBalance);
+  setAmountText('transferBalance', STATE.transferBalance);
+  setAmountText('debtBalance', STATE.debtBalance);
+
+  const shiftBtn = document.getElementById('shiftBtn');
+  if (shiftBtn) {
+    shiftBtn.textContent = STATE.shiftOpen ? 'Smenani yopish' : 'Smena ochish';
+    shiftBtn.classList.toggle('active', !!STATE.shiftOpen);
   }
-  
+
   updateShiftTimerUI();
 }
 
 function updateShiftTimerUI() {
-  const timerEl = document.getElementById('shiftTimer');
-  if (!STATE.shiftOpen || !STATE.shiftStartTime) {
-    timerEl.textContent = '--:--:--';
+  const indicator = document.getElementById('shiftStatus');
+  if (!indicator) return;
+
+  if (!STATE.shiftOpen) {
+    indicator.textContent = 'Smena yopiq';
+    indicator.classList.remove('active');
     return;
   }
-  
-  const startTime = new Date(STATE.shiftStartTime.split('.').reverse().join('-') + ' ' + STATE.shiftStartTime.split(' ')[1]).getTime();
-  const now = Date.now();
-  const elapsed = Math.floor((now - startTime) / 1000);
-  
-  const hours = Math.floor(elapsed / 3600);
-  const minutes = Math.floor((elapsed % 3600) / 60);
-  const seconds = elapsed % 60;
-  
-  timerEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  const elapsed = getShiftElapsedText();
+  indicator.textContent = elapsed ? `Smena ochiq • ${elapsed}` : 'Smena ochiq';
+  indicator.classList.add('active');
+}
+
+function getShiftElapsedText() {
+  if (!STATE.shiftStartTime) return '';
+  const [datePart, timePart] = STATE.shiftStartTime.split(' ');
+  if (!datePart || !timePart) return STATE.shiftStartTime;
+  const [day, month, year] = datePart.split('.');
+  if (!day || !month || !year) return STATE.shiftStartTime;
+  const parsed = new Date(`${year}-${month}-${day}T${timePart}`);
+  if (isNaN(parsed)) return STATE.shiftStartTime;
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - parsed.getTime()) / 1000));
+  const hours = Math.floor(elapsedSeconds / 3600);
+  const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+  const seconds = elapsedSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function updateStats() {
+  const stats = STATE.stats || { b1: 0, b2: 0, ps4: 0, ps5: 0, bar: 0 };
+  setAmountText('statB1', stats.b1 || 0);
+  setAmountText('statB2', stats.b2 || 0);
+  setAmountText('statPS4', stats.ps4 || 0);
+  setAmountText('statPS5', stats.ps5 || 0);
+  setAmountText('statBar', stats.bar || 0);
+  const total = (stats.b1 || 0) + (stats.b2 || 0) + (stats.ps4 || 0) + (stats.ps5 || 0) + (stats.bar || 0);
+  setAmountText('statTotal', total);
+}
+
+function updateTopDebtors() {
+  const container = document.getElementById('topDebtorsList');
+  if (!container) return;
+
+  const topDebtors = STATE.debtors
+    .filter(d => d.totalDebt > 0)
+    .sort((a, b) => b.totalDebt - a.totalDebt)
+    .slice(0, 10);
+
+  if (topDebtors.length === 0) {
+    container.innerHTML = '<div class="text-center color-dim">Qarzdor yo\'q</div>';
+    return;
+  }
+
+  container.innerHTML = topDebtors.map((d, i) => `
+    <div class="debtor-preview-item">
+      <span class="debtor-rank">#${i + 1}</span>
+      <span class="debtor-name">${d.name}</span>
+      <span class="debtor-amount">${formatCurrency(d.totalDebt)}</span>
+    </div>
+  `).join('');
 }
 
 export function updateActiveSessions() {
-  const container = document.getElementById('activeSessionsContainer');
+  const container = document.getElementById('activeSessions');
   if (!container) return;
   
   const activeTables = Object.keys(STATE.tables).filter(key => STATE.tables[key].active);
   
   if (activeTables.length === 0) {
-    container.innerHTML = '<div class="session-card empty">Hozirda faol sessiya yo\'q</div>';
+    container.innerHTML = '<div class="text-center color-dim">Faol sessiya yo\'q</div>';
     return;
   }
   
@@ -142,12 +199,12 @@ export function updateActiveSessions() {
           </div>
           <div class="session-row">
             <span>Hozirgi narx:</span>
-            <span class="cost">${cost} so'm</span>
+            <span class="cost">${formatCurrency(cost)}</span>
           </div>
           ${barTotal > 0 ? `
             <div class="session-row">
               <span>Bar:</span>
-              <span class="cost">${barTotal} so'm</span>
+              <span class="cost">${formatCurrency(barTotal)}</span>
             </div>
           ` : ''}
         </div>

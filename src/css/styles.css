@@ -168,6 +168,12 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .session-row:hover{background:rgba(255,255,255,0.05);}
 .debtor-row{display:flex;justify-content:space-between;padding:8px;font-size:0.95rem;border-bottom:1px solid var(--border);color:var(--danger);transition:background 0.3s;}
 .debtor-row:hover{background:rgba(255,255,255,0.05);}
+.debtor-preview-item{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);transition:all 0.3s;}
+.debtor-preview-item:hover{background:rgba(239,68,68,0.1);border-radius:8px;}
+.debtor-preview-item:last-child{border-bottom:none;}
+.debtor-rank{font-weight:800;font-size:1rem;color:var(--warning);min-width:35px;}
+.debtor-name{flex:1;font-size:0.95rem;color:var(--text);}
+.debtor-amount{font-weight:700;color:var(--danger);font-size:0.95rem;}
 
 /* Game Cards */
 .game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:25px;margin-top:25px;}
@@ -298,3 +304,49 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .full-width { width: 100%; }
 .hidden { display: none; }
+.text-muted { color: #64748b; }
+.link-accent { color: #667eea; font-weight: 600; }
+.section-subtitle { color: #667eea; font-size: 1rem; margin: 15px 0 10px; }
+.flex-column-5 { display: flex; flex-direction: column; gap: 5px; }
+.club-info-banner { font-size: 0.85rem; color: var(--warning); font-weight: 600; }
+.mt-8 { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+.mb-20 { margin-bottom: 20px; }
+.stat-highlight { border-top: 2px solid var(--primary); padding-top: 10px; margin-top: 10px; }
+.icon-xl { font-size: 2rem; margin-bottom: 8px; }
+.modal-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.modal-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.modal-close-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.grid-span-full { grid-column: 1 / -1; }
+.scrollable-list { max-height: 200px; overflow-y: auto; padding-right: 10px; }
+.text-warning { color: var(--warning); }
+.text-primary { color: var(--primary); }
+.text-success { color: var(--success); }
+.color-blue { color: #3b82f6; }
+.modal-danger { background: var(--danger); }
+.text-white { color: #fff; }
+.text-xl { font-size: 1.5rem; }
+.modal-wide { max-width: 750px; }
+.grid-2col-lg { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-2col-tight { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-blue { background: #3b82f6; color: #fff; }
+.page-title { color: var(--primary); margin-bottom: 20px; }
+.text-danger { color: var(--danger); }
+.table-container { max-height: 80vh; overflow-y: auto; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.p-20 { padding: 20px; }
+.out-of-stock { background: var(--danger); opacity: 0.6; cursor: not-allowed; }
+.product-stock { font-size: 0.8rem; margin-top: 5px; color: #fff; }
+.low-stock { color: var(--warning); }
+.payment-summary { background: var(--bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+.payment-row { display: flex; justify-content: space-between; margin: 5px 0; }
+.payment-total { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--primary); }
+.total-label { font-size: 1.1rem; }
+.total-amount { font-size: 1.2rem; color: var(--success); }
+.payment-product { font-size: 1.2rem; margin-bottom: 10px; }
+.payment-total-simple { font-size: 1.4rem; color: var(--success); }
+.debtor-name-display { margin-bottom: 10px; font-size: 1.2rem; }
+.debt-total-display { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--danger); }
+.debt-amount { font-size: 1.2rem; color: var(--danger); }

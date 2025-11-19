@@ -1,30 +1,36 @@
 // ========== MAIN MODULE ==========
 // Application Initialization and Global Functions
 
-import { STATE, DEFAULT_STATE } from './config.js';
+import { STATE } from './config.js';
 import { loadData, saveData, exportData, handleImportFile } from './storage.js';
-import { 
-  autoLoginIfActive, 
-  login, 
-  register, 
-  logout, 
-  showLoginForm, 
+import {
+  autoLoginIfActive,
+  login,
+  register,
+  logout,
+  showLoginForm,
   showRegisterForm,
   updateActivity,
-  checkInactivity 
+  checkInactivity
 } from './auth.js';
-import { 
-  updateUI, 
-  showNotification, 
-  showConfirm, 
-  confirmAction, 
-  openModal, 
+import {
+  updateUI,
+  showNotification,
+  confirmAction,
+  openModal,
   closeModal,
-  closePaymentModal 
+  closePaymentModal,
+  filterReceipts,
+  filterReceiptsByType
 } from './ui.js';
-import { renderPage, getCurrentPage, selectInputType, confirmInput } from './game.js';
+import * as gameModule from './game.js';
+import * as barModule from './bar.js';
+import * as paymentModule from './payment.js';
+import * as debtorsModule from './debtors.js';
+import * as historyModule from './history.js';
 import { toggleShift } from './shift.js';
-import { decrypt } from './utils.js';
+import { decrypt, printReceipt } from './utils.js';
+import { saveNotes, syncNotesArea } from './notes.js';
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
@@ -56,6 +62,7 @@ export async function initializeApp() {
   
   // Load data
   await loadData();
+  syncNotesArea();
   
   // Auto-login if session exists
   autoLoginIfActive();
@@ -86,7 +93,7 @@ function setupEventListeners() {
       if (btn.dataset.page === 'settings') {
         openSettingsPasswordModal();
       } else {
-        renderPage(btn.dataset.page);
+        gameModule.renderPage(btn.dataset.page);
       }
     });
   });
@@ -165,40 +172,46 @@ async function saveSettings() {
   showNotification('✅ Sozlamalar saqlandi!');
 }
 
-// ========== GLOBAL EXPORTS ==========
-// Make functions available globally for onclick handlers
-window.authModule = {
-  login,
-  register,
-  logout,
-  showLoginForm,
-  showRegisterForm
-};
+function exposeGlobals() {
+  window.login = login;
+  window.register = register;
+  window.logout = logout;
+  window.showLoginForm = showLoginForm;
+  window.showRegisterForm = showRegisterForm;
+  window.toggleShift = toggleShift;
+  window.saveNotes = saveNotes;
+  window.filterReceipts = filterReceipts;
+  window.filterReceiptsByType = filterReceiptsByType;
+  window.selectInputType = gameModule.selectInputType;
+  window.confirmInput = gameModule.confirmInput;
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  window.confirmAction = confirmAction;
+  window.closePaymentModal = closePaymentModal;
+  window.selectPaymentType = paymentModule.selectPaymentType;
+  window.confirmPayment = paymentModule.confirmPayment;
+  window.finalizePayment = paymentModule.finalizePayment;
+  window.addToDebt = debtorsModule.addToDebt;
+  window.openNewDebtorModal = debtorsModule.openNewDebtorModal;
+  window.confirmDebtName = debtorsModule.confirmDebtName;
+  window.confirmPayDebt = debtorsModule.confirmPayDebt;
+  window.confirmDeleteDebtor = debtorsModule.confirmDeleteDebtor;
+  window.confirmLogExport = historyModule.confirmLogExport;
+  window.sellToCustomer = barModule.sellToCustomer;
+  window.exportData = exportData;
+  window.handleImportFile = handleImportFile;
+  window.saveSettings = saveSettings;
+  window.checkSettingsPassword = checkSettingsPassword;
+  window.printReceipt = printReceipt;
+  
+  window.gameModule = gameModule;
+  window.barModule = barModule;
+  window.paymentModule = paymentModule;
+  window.debtorsModule = debtorsModule;
+  window.historyModule = historyModule;
+}
 
-window.gameModule = await import('./game.js');
-window.barModule = await import('./bar.js');
-window.debtorsModule = await import('./debtors.js');
-window.paymentModule = await import('./payment.js');
-window.shiftModule = { toggleShift };
-window.historyModule = await import('./history.js');
-window.settingsModule = {
-  openSettingsPasswordModal,
-  checkSettingsPassword,
-  saveSettings
-};
-window.uiModule = {
-  confirmAction,
-  closeModal,
-  closePaymentModal
-};
-window.mainModule = {
-  selectInputType,
-  confirmInput
-};
-window.storageModule = {
-  exportData,
-  handleImportFile
-};
+exposeGlobals();
 
 // Initialize app when DOM is ready
 if (document.readyState === 'loading') {

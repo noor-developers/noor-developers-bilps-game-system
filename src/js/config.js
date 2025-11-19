@@ -2,15 +2,13 @@
 // Bu fayl dasturning asosiy holati va sozlamalarini boshqaradi
 
 // ========== CONSTANTS ==========
-export const CONFIG = {
-  DB_NAME: 'noor_gms_database',
-  DB_VERSION: '1.4',
-  API_URL: 'https://noor-bilps-backend.onrender.com/api',
-  USE_ONLINE_BACKUP: true,
-  AUTO_SAVE_INTERVAL: 30000, // 30 seconds
-  SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
-  ENCRYPTION_KEY: 'NOOR_' + Math.random().toString(36).substring(2, 15) + '_SECURE_KEY_' + Date.now()
-};
+export const DB_NAME = 'noor_gms_database';
+export const DB_VERSION = '1.4';
+export const API_URL = 'https://noor-bilps-backend.onrender.com/api';
+export const USE_ONLINE_BACKUP = true;
+export const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
+export const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+export const ENCRYPTION_KEY = 'NOOR_' + Math.random().toString(36).substring(2, 15) + '_SECURE_KEY_' + Date.now();
 
 // ========== DEFAULT STATE ==========
 export const DEFAULT_STATE = {
@@ -176,5 +174,3 @@ export const PERSISTENCE_KEYS = {
   TRANSFER_CARD: 'noorTransferCard',
   AUTO_LOGIN: 'noorAutoLogin'
 };
-
-export default { CONFIG, DEFAULT_STATE, STATE, resetState, updateState, getUserDataKeys, PERSISTENCE_KEYS };

@@ -1,10 +1,12 @@
 // ========== AUTHENTICATION MODULE ==========
 // Login, Registration, Logout va Session Management
 
-import { STATE, DEFAULT_STATE, API_URL, USE_ONLINE_BACKUP } from './config.js';
+import { STATE, API_URL, USE_ONLINE_BACKUP } from './config.js';
 import { saveData, loadData } from './storage.js';
-import { showNotification, openModal, closeModal, showConfirm } from './ui.js';
+import { showNotification, openModal, closeModal, showConfirm, updateUI } from './ui.js';
 import { addLog } from './utils.js';
+import { renderPage, clearSessionState } from './game.js';
+import { syncNotesArea } from './notes.js';
 
 // ========== AUTO-LOGIN (Session Restore) ==========
 export function autoLoginIfActive() {
@@ -28,6 +30,7 @@ export function autoLoginIfActive() {
         console.log(`✅ Auto-login: ${STATE.currentUser}`);
         loadData().then(() => {
           renderPage('billiard');
+          syncNotesArea();
         });
       } else {
         localStorage.removeItem('noor_session');
@@ -62,6 +65,8 @@ function logoutDueToInactivity() {
   localStorage.removeItem('noor_session');
   document.getElementById('loginScreen').style.opacity = '1';
   document.getElementById('loginScreen').style.visibility = 'visible';
+  const notesArea = document.getElementById('notesArea');
+  if (notesArea) notesArea.value = '';
   showNotification('⚠️ 30 daqiqa faollik yo\'qligi sababli tizimdan chiqildi', 5000);
 }
 
@@ -214,6 +219,7 @@ export async function login() {
     
     addLog("Tizimga kirish", `Foydalanuvchi: ${user.username}`);
     await loadData();
+    syncNotesArea();
     
     // Club ma'lumotlarini ko'rsatish
     await loadAndDisplayClubInfo(user.username);
@@ -323,6 +329,8 @@ function performLogout() {
   
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
+  const notesArea = document.getElementById('notesArea');
+  if (notesArea) notesArea.value = '';
   
   if (typeof updateUI === 'function') updateUI();
   showNotification('✅ Tizimdan chiqtingiz!', 2000);

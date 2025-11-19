@@ -13,9 +13,9 @@ export function renderDebtorsPage() {
   const debtors = STATE.debtors.filter(d => d.totalDebt > 0);
 
   content.innerHTML = `
-      <h2 style="color:var(--danger);margin-bottom:20px;">🔴 Qarzdorlar ro'yxati</h2>
+      <h2 class="page-title text-danger">🔴 Qarzdorlar ro'yxati</h2>
       <div class="debtors-list" id="debtorsList">
-          ${debtors.length === 0 ? '<div style="text-align:center;color:var(--text-dim);padding:20px;">Hozircha qarzdor yo\'q.</div>' : debtors.map(debtor => `
+          ${debtors.length === 0 ? '<div class="text-center color-dim p-20">Hozircha qarzdor yo\'q.</div>' : debtors.map(debtor => `
               <div class="debtor-card">
                   <div class="debtor-header">
                       <div class="debtor-name">${debtor.name}</div>
@@ -137,11 +137,11 @@ export function payDebt(name) {
   STATE.currentDebtorToPay = name;
   
   document.getElementById('payDebtDetails').innerHTML = `
-    <div style="background:var(--bg);padding:15px;border-radius:8px;margin-bottom:15px;">
-      <div style="margin-bottom:10px;font-size:1.2rem;"><strong>${name}</strong></div>
-      <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:2px solid var(--danger);">
-        <span style="font-size:1.1rem;">Jami qarz:</span>
-        <span style="font-size:1.2rem;color:var(--danger);"><strong>${debtor.totalDebt} so'm</strong></span>
+    <div class="payment-summary">
+      <div class="debtor-name-display"><strong>${name}</strong></div>
+      <div class="debt-total-display">
+        <span class="total-label">Jami qarz:</span>
+        <span class="debt-amount"><strong>${debtor.totalDebt} so'm</strong></span>
       </div>
     </div>
   `;

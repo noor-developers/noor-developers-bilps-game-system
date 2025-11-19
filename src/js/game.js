@@ -18,7 +18,7 @@ export function renderPage(page) {
 
   if (page === 'billiard') {
     content.innerHTML = `
-      <h2 style="color:var(--primary);margin-bottom:20px;">🎱 Billiard</h2>
+      <h2 class="page-title">🎱 Billiard</h2>
       <div class="game-grid">
         ${renderGameCard('b1')}
         ${renderGameCard('b2')}
@@ -26,7 +26,7 @@ export function renderPage(page) {
     `;
   } else if (page === 'playstation') {
     content.innerHTML = `
-      <h2 style="color:var(--primary);margin-bottom:20px;">🎮 PlayStation</h2>
+      <h2 class="page-title">🎮 PlayStation</h2>
       <div class="game-grid">
         ${renderGameCard('ps4')}
         ${renderGameCard('ps5')}
@@ -310,20 +310,20 @@ export function stopSession(key, silent = false) {
     
     document.getElementById('paymentModalHeader').textContent = `💳 To'lov (${table.name})`;
     document.getElementById('paymentDetails').innerHTML = `
-      <div style="background:var(--bg);padding:15px;border-radius:8px;margin-bottom:15px;">
-        <div style="display:flex;justify-content:space-between;margin:5px 0;">
+      <div class="payment-summary">
+        <div class="payment-row">
           <span>O'yin (${formatTime(elapsedSeconds)}):</span>
           <span><strong>${gameCost} so'm</strong></span>
         </div>
         ${barTotal > 0 ? `
-          <div style="display:flex;justify-content:space-between;margin:5px 0;">
+          <div class="payment-row">
             <span>Bar:</span>
             <span><strong>${barTotal} so'm</strong></span>
           </div>
         ` : ''}
-        <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:2px solid var(--primary);">
-          <span style="font-size:1.1rem;"><strong>JAMI:</strong></span>
-          <span style="font-size:1.2rem;color:var(--success);"><strong>${totalCost} so'm</strong></span>
+        <div class="payment-total">
+          <span class="total-label"><strong>JAMI:</strong></span>
+          <span class="total-amount"><strong>${totalCost} so'm</strong></span>
         </div>
       </div>
     `;
