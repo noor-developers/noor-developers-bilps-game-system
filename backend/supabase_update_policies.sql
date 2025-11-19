@@ -1,10 +1,36 @@
--- SUPABASE POLICIES YANGILASH (Eski policies o'chirish va yangilarini qo'shish)
+-- NOOR GMS - SUPABASE POLICIES YANGILASH
+-- Created by Noor developers
+-- Last Updated: 2025-01-19
 
--- 1. ESKI POLICIES-NI O'CHIRISH
+-- 1. BARCHA ESKI POLICIES-NI O'CHIRISH
 DROP POLICY IF EXISTS "Users can read their own game_data" ON game_data;
 DROP POLICY IF EXISTS "Users can read their own debtors" ON debtors;
 DROP POLICY IF EXISTS "Users can read their own history" ON history;
 DROP POLICY IF EXISTS "Users can read their own logs" ON logs;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON users;
+DROP POLICY IF EXISTS "Allow select for service_role" ON users;
+DROP POLICY IF EXISTS "Allow update for service_role" ON users;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON users;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow select for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow update for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow select for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow update for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON history;
+DROP POLICY IF EXISTS "Allow select for service_role" ON history;
+DROP POLICY IF EXISTS "Allow update for service_role" ON history;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON history;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow select for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow update for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow insert for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow select for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow update for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON subscriptions;
 
 -- 2. USERS jadvali RLS yoqish va policies
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -73,8 +99,24 @@ CREATE POLICY "Allow update for service_role" ON logs
 CREATE POLICY "Allow delete for service_role" ON logs 
   FOR DELETE USING (auth.role() = 'service_role');
 
--- ISHGA TUSHIRISH:
+-- 7. SUBSCRIPTIONS jadvali yangi policies
+CREATE POLICY "Allow insert for service_role" ON subscriptions 
+  FOR INSERT WITH CHECK (auth.role() = 'service_role');
+  
+CREATE POLICY "Allow select for service_role" ON subscriptions 
+  FOR SELECT USING (auth.role() = 'service_role' OR true);
+  
+CREATE POLICY "Allow update for service_role" ON subscriptions 
+  FOR UPDATE USING (auth.role() = 'service_role');
+  
+CREATE POLICY "Allow delete for service_role" ON subscriptions 
+  FOR DELETE USING (auth.role() = 'service_role');
+
+-- ISHGA TUSHIRISH YO'RIQNOMASI:
 -- 1. Supabase.com → Loyihangiz → SQL Editor
--- 2. Bu faylni copy-paste qiling
+-- 2. Bu faylni to'liq copy-paste qiling
 -- 3. RUN bosing
--- 4. ✅ Hamma policies yangilanadi!
+-- 4. ✅ Barcha policies yangilanadi va subscriptions qo'shiladi!
+
+-- ESLATMA:
+-- Agar yangi subscriptions jadvali yo'q bo'lsa, avval supabase_setup.sql faylini ishga tushiring!
