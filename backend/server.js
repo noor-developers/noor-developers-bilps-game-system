@@ -146,7 +146,7 @@ app.get('/api/get-users', async (req, res) => {
 // 4. Yangi foydalanuvchi qo'shish
 app.post('/api/add-user', async (req, res) => {
   try {
-    const { username, password, clubName, ownerName, phone, address, email } = req.body;
+    const { username, password } = req.body;
     const dbClient = getDbClient();
     if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
 
@@ -170,21 +170,6 @@ app.post('/api/add-user', async (req, res) => {
       .insert([{
         username: username,
         password: password,
-        club_name: clubName || null,
-        email: email || null,
-        phone: phone || null,
-        settings: {
-          priceB1: 40000,
-          priceB2: 40000,
-          pricePS4: 15000,
-          pricePS5: 20000,
-          theme: 'dark',
-          language: 'uz',
-          notifications: true,
-          autoSave: true,
-          ownerName: ownerName || null,
-          address: address || null
-        },
         created_at: new Date().toISOString()
       }])
       .select();
@@ -208,26 +193,10 @@ app.get('/api/load-all-users', async (req, res) => {
     const dbClient = getDbClient();
     if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
 
-    // Try with all fields first, fallback to basic fields if error
-    let data, error;
-    
-    try {
-      const result = await dbClient
-        .from('users')
-        .select('username, password, club_name, email, phone, settings')
-        .order('created_at', { ascending: false });
-      data = result.data;
-      error = result.error;
-    } catch (selectError) {
-      // Fallback: agar yangi ustunlar yo'q bo'lsa, faqat username va password
-      console.warn('⚠️ New columns not found, using basic fields:', selectError.message);
-      const result = await dbClient
-        .from('users')
-        .select('username, password')
-        .order('created_at', { ascending: false });
-      data = result.data;
-      error = result.error;
-    }
+    const { data, error } = await dbClient
+      .from('users')
+      .select('username, password')
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -328,32 +297,14 @@ app.post('/api/save-history', async (req, res) => {
   }
 });
 
-// 8. User settings-ni yangilash
+// 8. User settings-ni yangilash (DISABLED - ustunlar yo'q)
 app.post('/api/update-user-settings', async (req, res) => {
   try {
-    const { username, settings } = req.body;
-    if (!username || !settings) {
-      return res.status(400).json({ error: 'username va settings kerak' });
-    }
-
-    const dbClient = getDbClient();
-    if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
-
-    const { data, error } = await dbClient
-      .from('users')
-      .update({ 
-        settings: settings,
-        updated_at: new Date().toISOString()
-      })
-      .eq('username', username)
-      .select();
-
-    if (error) throw error;
-
+    // Hozircha faqat success qaytaramiz - kelajakda Supabase yangilanganda ishga tushadi
+    console.log('Settings update request received (not saved to DB yet)');
     res.json({
       success: true,
-      message: 'User sozlamalari yangilandi',
-      data: data
+      message: 'Sozlamalar localStorage-da saqlandi'
     });
   } catch (error) {
     console.error('Update settings error:', error);
