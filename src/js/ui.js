@@ -126,16 +126,14 @@ function updateUserProfile() {
     userProfile.classList.remove('hidden');
     if (userName) userName.textContent = STATE.currentUser;
     
-    // Set avatar emoji based on first letter
+    // Set avatar with initials
     if (userAvatar) {
-      const firstLetter = STATE.currentUser.charAt(0).toUpperCase();
-      const avatarEmojis = {
-        A: '🅰️', B: '🅱️', C: '🌊', D: '💎', E: '🌟', F: '🔥', G: '💚', H: '🏠',
-        I: 'ℹ️', J: '🎵', K: '👑', L: '💡', M: '🌙', N: '🔔', O: '⭕', P: '🎨',
-        Q: '👸', R: '🌈', S: '⭐', T: '🎯', U: '🦄', V: '✌️', W: '🌊', X: '❌',
-        Y: '✨', Z: '⚡'
-      };
-      userAvatar.textContent = avatarEmojis[firstLetter] || '👤';
+      const initials = STATE.currentUser
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join('');
+      userAvatar.textContent = initials || STATE.currentUser.charAt(0).toUpperCase();
     }
     
     // Update profile menu balances

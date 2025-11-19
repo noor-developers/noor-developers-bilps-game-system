@@ -28,7 +28,7 @@ export function openNotesModal() {
 }
 
 // Load notes list
-function loadNotesList() {
+export function loadNotesList() {
   if (!STATE.notesList) STATE.notesList = [];
   
   const notesList = document.getElementById('notesList');
