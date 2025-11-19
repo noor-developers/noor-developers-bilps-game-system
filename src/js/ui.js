@@ -104,6 +104,18 @@ export function updateTopbar() {
   }
 
   updateShiftTimerUI();
+  updateClocks();
+}
+
+function updateClocks() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
+  const loginClock = document.getElementById('loginClock');
+  if (loginClock) loginClock.textContent = timeStr;
+  
+  const mainClock = document.getElementById('mainClock');
+  if (mainClock) mainClock.textContent = timeStr;
 }
 
 function updateShiftTimerUI() {
