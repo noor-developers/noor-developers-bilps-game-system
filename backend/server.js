@@ -208,10 +208,26 @@ app.get('/api/load-all-users', async (req, res) => {
     const dbClient = getDbClient();
     if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
 
-    const { data, error } = await dbClient
-      .from('users')
-      .select('username, password, club_name, email, phone, settings')
-      .order('created_at', { ascending: false });
+    // Try with all fields first, fallback to basic fields if error
+    let data, error;
+    
+    try {
+      const result = await dbClient
+        .from('users')
+        .select('username, password, club_name, email, phone, settings')
+        .order('created_at', { ascending: false });
+      data = result.data;
+      error = result.error;
+    } catch (selectError) {
+      // Fallback: agar yangi ustunlar yo'q bo'lsa, faqat username va password
+      console.warn('⚠️ New columns not found, using basic fields:', selectError.message);
+      const result = await dbClient
+        .from('users')
+        .select('username, password')
+        .order('created_at', { ascending: false });
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) throw error;
 
