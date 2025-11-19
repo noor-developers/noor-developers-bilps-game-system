@@ -98,6 +98,14 @@
       <button data-page="log">Log</button>
     </nav>
     <div class="topbar-right">
+      <button class="notes-topbar-btn" onclick="openNotesModal()" title="Zametkalar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        <span>Zametkalar</span>
+      </button>
+      
       <div class="clock-container">
         <div class="clock" id="mainClock">00:00:00</div>
         <div class="date" id="currentDate"></div>
@@ -180,12 +188,6 @@
 
   <div class="main-container">
     <div class="left-panel">
-      <div class="notes-section">
-        <div class="section-title">📝 Zametka</div>
-        <textarea id="notesArea" placeholder="Muhim eslatmalar..."></textarea>
-        <button class="btn btn-primary full-width mt-8" onclick="saveNotes()">Saqlash</button>
-      </div>
-      
       <div class="stats-section">
         <div class="section-title">📊 Faol sessiyalar</div>
         <div class="active-sessions" id="activeSessions">
@@ -233,10 +235,13 @@
 
     <div class="right-panel">
       <div class="section-title">🧾 Cheklar</div>
-      <div class="receipt-filters">
-        <button class="filter-btn active" data-filter="today" onclick="filterReceipts('today', this)">Bugun</button>
-        <button class="filter-btn" data-filter="7days" onclick="filterReceipts('7days', this)">7 kun</button>
-        <button class="filter-btn" data-filter="all" onclick="filterReceipts('all', this)">Barchasi</button>
+      <div class="receipt-filter-container">
+        <select class="receipt-filter-dropdown" id="receiptTimeFilter" onchange="applyReceiptFilters()">
+          <option value="today" selected>Bugun</option>
+          <option value="7days">7-kunlik</option>
+          <option value="all">Barchasi</option>
+        </select>
+        <input type="date" class="receipt-date-input" id="receiptDateSearch" onchange="applyReceiptFilters()" placeholder="Sana">
       </div>
       <div class="receipt-filters">
         <button class="filter-btn active" data-type="all" onclick="filterReceiptsByType('all', this)">Barchasi</button>
@@ -491,6 +496,36 @@
     </div>
   </div>
 
+  <!-- Zametkalar Modal -->
+  <div class="modal" id="notesModal">
+    <div class="modal-content notes-modal-content">
+      <div class="modal-header">
+        <h2>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;vertical-align:middle;margin-right:8px;">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          Zametkalar
+        </h2>
+        <button class="close-btn" onclick="closeModal('notesModal')">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="notes-container">
+          <div class="notes-list" id="notesList"></div>
+          <div class="notes-editor">
+            <input type="text" id="noteTitle" class="modal-input" placeholder="Sarlavha..." />
+            <textarea id="noteContent" class="notes-textarea" placeholder="Zametka matni..."></textarea>
+            <div class="notes-actions">
+              <button class="btn btn-primary" onclick="saveNote()">Saqlash</button>
+              <button class="btn btn-secondary" onclick="clearNoteEditor()">Tozalash</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Sozlamalar Modal -->
   <div class="modal" id="settingsModal">
     <div class="modal-content settings-modal-content">
@@ -633,7 +668,7 @@
       updateLoginClock();
     </script>
 
-    <script type="module" src="src/js/main.js?v=8"></script>
+    <script type="module" src="src/js/main.js?v=9"></script>
 
 </body>
 </html>

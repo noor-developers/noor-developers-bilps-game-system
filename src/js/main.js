@@ -36,7 +36,7 @@ import * as debtorsModule from './debtors.js';
 import * as historyModule from './history.js';
 import { toggleShift } from './shift.js';
 import { decrypt, printReceipt } from './utils.js';
-import { saveNotes, syncNotesArea } from './notes.js';
+import { saveNotes, syncNotesArea, openNotesModal, saveNote, clearNoteEditor, loadNote } from './notes.js';
 
 // ========== IMMEDIATE GLOBAL EXPOSURE (for onclick handlers) ==========
 // These must be available immediately when HTML loads
@@ -46,6 +46,9 @@ window.logout = logout;
 window.showLoginForm = showLoginForm;
 window.showRegisterForm = showRegisterForm;
 window.changePassword = changePassword;
+window.openNotesModal = openNotesModal;
+window.saveNote = saveNote;
+window.clearNoteEditor = clearNoteEditor;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
@@ -206,8 +209,13 @@ function exposeGlobals() {
   window.showRegisterForm = showRegisterForm;
   window.toggleShift = toggleShift;
   window.saveNotes = saveNotes;
+  window.openNotesModal = openNotesModal;
+  window.saveNote = saveNote;
+  window.clearNoteEditor = clearNoteEditor;
+  window.notesModule = { loadNote };
   window.filterReceipts = filterReceipts;
   window.filterReceiptsByType = filterReceiptsByType;
+  window.applyReceiptFilters = () => import('./ui.js').then(m => m.applyReceiptFilters());
   window.selectInputType = gameModule.selectInputType;
   window.confirmInput = gameModule.confirmInput;
   window.openModal = openModal;

@@ -121,6 +121,7 @@ export const DEFAULT_STATE = {
   debtors: [],
   logs: [],
   notes: "",
+  notesList: [], // Multiple notes array
   stats: { b1: 0, b2: 0, ps4: 0, ps5: 0, bar: 0 },
   
   // UI volatile state (not saved)

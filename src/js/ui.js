@@ -422,43 +422,57 @@ function formatTimeForUI(seconds) {
 
 // ========== RECEIPT RENDERING ==========
 export function updateReceipts() {
-  const list = document.getElementById('receiptsList');
-  if (!list) return;
-  
-  const activeFilter = document.querySelector('.receipt-filters .filter-btn.active[data-filter]')?.dataset.filter || 'today';
-  const activeType = document.querySelector('.receipt-filters .filter-btn.active[data-type]')?.dataset.type || 'all';
-  filterReceipts(activeFilter, document.querySelector(`[data-filter="${activeFilter}"]`), activeType);
+  applyReceiptFilters();
 }
 
-export function filterReceipts(filter, activeBtn, type = 'all') {
-  document.querySelectorAll('.receipt-filters .filter-btn[data-filter]').forEach(btn => btn.classList.remove('active'));
-  if(activeBtn) activeBtn.classList.add('active');
-  
+export function applyReceiptFilters() {
   const list = document.getElementById('receiptsList');
   if (!list) return;
-
+  
+  const timeFilter = document.getElementById('receiptTimeFilter')?.value || 'today';
+  const dateSearch = document.getElementById('receiptDateSearch')?.value;
+  const activeType = document.querySelector('.receipt-filters .filter-btn.active[data-type]')?.dataset.type || 'all';
+  
   let filteredReceipts = [...STATE.receipts];
 
-  if (filter === 'today') {
-      const today = new Date().toLocaleDateString('uz-UZ');
-      filteredReceipts = STATE.receipts.filter(r => new Date(r.timestamp).toLocaleDateString('uz-UZ') === today);
-  } else if (filter === '7days') {
-      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-      filteredReceipts = STATE.receipts.filter(r => r.timestamp > sevenDaysAgo);
-  } else {
-      filteredReceipts = filteredReceipts.slice(-50);
+  // Apply date filter
+  if (dateSearch) {
+    // Search by specific date
+    const searchDate = new Date(dateSearch);
+    const searchDateStr = `${searchDate.getDate().toString().padStart(2, '0')}.${(searchDate.getMonth() + 1).toString().padStart(2, '0')}.${searchDate.getFullYear()}`;
+    filteredReceipts = filteredReceipts.filter(r => {
+      const receiptDate = new Date(r.timestamp);
+      const receiptDateStr = `${receiptDate.getDate().toString().padStart(2, '0')}.${(receiptDate.getMonth() + 1).toString().padStart(2, '0')}.${receiptDate.getFullYear()}`;
+      return receiptDateStr === searchDateStr;
+    });
+  } else if (timeFilter === 'today') {
+    const today = new Date();
+    const todayStr = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+    filteredReceipts = filteredReceipts.filter(r => {
+      const receiptDate = new Date(r.timestamp);
+      const receiptDateStr = `${receiptDate.getDate().toString().padStart(2, '0')}.${(receiptDate.getMonth() + 1).toString().padStart(2, '0')}.${receiptDate.getFullYear()}`;
+      return receiptDateStr === todayStr;
+    });
+  } else if (timeFilter === '7days') {
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    filteredReceipts = filteredReceipts.filter(r => r.timestamp > sevenDaysAgo);
   }
   
-  // Tur bo'yicha filtr
-  if (type !== 'all') {
-    filteredReceipts = filteredReceipts.filter(r => {
-      if (type === 'bar') {
-        return r.type === 'bar-customer';
-      } else {
-        return r.table && r.table.toLowerCase().includes(type.toLowerCase());
-      }
-    });
+  // Apply type filter
+  if (activeType !== 'all') {
+    filteredReceipts = filteredReceipts.filter(r => r.table === activeType);
   }
+  
+  renderReceiptsList(filteredReceipts, list);
+}
+
+// Legacy function for backward compatibility
+export function filterReceipts(filter, activeBtn, type = 'all') {
+  applyReceiptFilters();
+}
+
+function renderReceiptsList(filteredReceipts, list) {
+  if (!list) return;
   
   list.innerHTML = filteredReceipts.reverse().map(r => {
     const paymentType = r.paymentType ? `<span style="font-size:0.8rem;background:${r.paymentType === 'cash' ? '#3b82f6' : (r.paymentType === 'transfer' ? '#f97316' : 'var(--danger)')};padding:3px 8px;border-radius:5px;color:#fff;">${r.paymentType.toUpperCase()}</span>` : '';
