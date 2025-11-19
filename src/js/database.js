@@ -165,6 +165,13 @@ export function startRealtimeSync(userId) {
       }
     }
   }, (error) => {
+    // Network xatolarini ignore qilish (AdBlock/Firewall)
+    if (error.code === 'unavailable' || error.message.includes('BLOCKED')) {
+      console.warn('⚠️ Firestore connection bloklangan (AdBlock?), offline mode');
+      return;
+    }
+    
+    // Boshqa xatolarni log qilish
     console.error('❌ Real-time listener xatosi:', error);
   });
 }
