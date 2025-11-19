@@ -138,17 +138,18 @@ export function showLoginForm() {
 export async function register() {
   console.log('📝 Firebase registration boshlandi');
   
+  const username = document.getElementById('registerUsername').value.trim();
   const clubName = document.getElementById('registerClubName').value.trim();
   const ownerName = document.getElementById('registerOwnerName').value.trim();
   const phone = document.getElementById('registerPhone').value.trim();
-  const email = document.getElementById('registerEmail')?.value.trim() || `${phone}@noor-gms.uz`;
+  const email = `${username}@noor-gms.uz`;
   const password = document.getElementById('registerPassword').value;
   const confirmPassword = document.getElementById('registerConfirmPassword').value;
   const address = document.getElementById('registerAddress').value.trim();
 
   // Validate
-  if (!clubName || !ownerName || !phone) {
-    showNotification('⚠️ Klub nomi, egasi va telefon raqamini kiriting!');
+  if (!username || !clubName || !ownerName || !phone) {
+    showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
     return;
   }
 
@@ -218,14 +219,12 @@ export async function register() {
 }
 
 function clearRegisterForm() {
+  document.getElementById('registerUsername').value = '';
   document.getElementById('registerClubName').value = '';
   document.getElementById('registerPassword').value = '';
   document.getElementById('registerConfirmPassword').value = '';
   document.getElementById('registerOwnerName').value = '';
   document.getElementById('registerPhone').value = '';
-  if (document.getElementById('registerEmail')) {
-    document.getElementById('registerEmail').value = '';
-  }
   document.getElementById('registerAddress').value = '';
 }
 
@@ -233,14 +232,14 @@ function clearRegisterForm() {
 export async function login() {
   console.log('🔑 Firebase login boshlandi');
   
-  const phone = document.getElementById('loginUsername').value.trim();
+  const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
   
-  // Email formatini yaratish (telefon raqamidan)
-  const email = phone.includes('@') ? phone : `${phone}@noor-gms.uz`;
+  // Email formatini yaratish (username dan)
+  const email = username.includes('@') ? username : `${username}@noor-gms.uz`;
 
-  if (!phone || !password) {
-    showNotification('⚠️ Telefon va parolni kiriting!');
+  if (!username || !password) {
+    showNotification('⚠️ Username va parolni kiriting!');
     return;
   }
 
@@ -265,15 +264,15 @@ export async function login() {
     } else if (error.code === 'auth/wrong-password') {
       errorMessage = 'Noto\'g\'ri parol!';
     } else if (error.code === 'auth/invalid-email') {
-      errorMessage = 'Noto\'g\'ri telefon formati!';
+      errorMessage = 'Noto\'g\'ri username formati!';
     } else if (error.code === 'auth/invalid-credential') {
-      errorMessage = 'Telefon yoki parol noto\'g\'ri!';
+      errorMessage = 'Username yoki parol noto\'g\'ri!';
     } else if (error.message) {
       errorMessage = error.message;
     }
     
     showNotification(errorMessage);
-    addLog("Kirishda xatolik", `Phone: ${phone}`);
+    addLog("Kirishda xatolik", `Username: ${username}`);
   }
 }
 

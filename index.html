@@ -30,7 +30,7 @@
         <div class="login-form" id="loginFormDiv">
           <h2>🔐 Tizimga kirish</h2>
           <div class="input-group">
-            <input type="tel" id="loginUsername" placeholder="📱 Telefon raqami (+998901234567)" />
+            <input type="text" id="loginUsername" placeholder="👤 Username" />
           </div>
           <div class="input-group">
             <input type="password" id="loginPassword" placeholder="🔑 Parol" />
@@ -43,6 +43,11 @@
         </div>
         <div class="login-form hidden" id="registerFormDiv">
           <h2>📝 Ro'yxatdan o'tish</h2>
+          
+          <h3 class="section-subtitle">👤 Akkaunt</h3>
+          <div class="input-group">
+            <input type="text" id="registerUsername" placeholder="👤 Username (masalan: noor123)" />
+          </div>
           
           <h3 class="section-subtitle">🏢 Klub ma'lumotlari</h3>
           <div class="input-group">
@@ -794,7 +799,7 @@
       console.log('✅ Firebase SDK yuklandi');
     </script>
 
-    <script type="module" src="src/js/main.js?v=14"></script>
+    <script type="module" src="src/js/main.js?v=15"></script>
 
 </body>
 </html>
