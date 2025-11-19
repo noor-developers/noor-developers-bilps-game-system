@@ -4,7 +4,7 @@
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
 import { showNotification } from './ui.js';
-import { renderGamePage } from './game.js';
+import { renderPage, getCurrentPage } from './game.js';
 
 // Helper function for date/time formatting
 function formatDateTimeUz(date) {
@@ -115,8 +115,9 @@ export function addTable(type, customName = '') {
   });
 
   // Refresh game page if currently viewing
-  if (document.getElementById('contentArea').querySelector('.game-grid')) {
-    renderGamePage();
+  const currentPage = getCurrentPage();
+  if (currentPage === 'billiard' || currentPage === 'playstation') {
+    renderPage(currentPage);
   }
 
   return true;
@@ -171,8 +172,9 @@ export function removeTable(tableId) {
   });
 
   // Refresh game page if currently viewing
-  if (document.getElementById('contentArea').querySelector('.game-grid')) {
-    renderGamePage();
+  const currentPage = getCurrentPage();
+  if (currentPage === 'billiard' || currentPage === 'playstation') {
+    renderPage(currentPage);
   }
 
   return true;
