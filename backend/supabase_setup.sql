@@ -79,11 +79,22 @@ ALTER TABLE history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
+-- Eski policies-ni o'chirish (agar mavjud bo'lsa)
+DROP POLICY IF EXISTS "Allow insert for service_role" ON users;
+DROP POLICY IF EXISTS "Allow select for service_role" ON users;
+DROP POLICY IF EXISTS "Allow update for service_role" ON users;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON users;
+
 -- USERS jadvali policies
 CREATE POLICY "Allow insert for service_role" ON users FOR INSERT WITH CHECK (auth.role() = 'service_role');
 CREATE POLICY "Allow select for service_role" ON users FOR SELECT USING (auth.role() = 'service_role' OR true);
 CREATE POLICY "Allow update for service_role" ON users FOR UPDATE USING (auth.role() = 'service_role');
 CREATE POLICY "Allow delete for service_role" ON users FOR DELETE USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Allow insert for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow select for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow update for service_role" ON game_data;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON game_data;
 
 -- GAME_DATA jadvali policies
 CREATE POLICY "Allow insert for service_role" ON game_data FOR INSERT WITH CHECK (auth.role() = 'service_role');
@@ -91,11 +102,21 @@ CREATE POLICY "Allow select for service_role" ON game_data FOR SELECT USING (aut
 CREATE POLICY "Allow update for service_role" ON game_data FOR UPDATE USING (auth.role() = 'service_role');
 CREATE POLICY "Allow delete for service_role" ON game_data FOR DELETE USING (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "Allow insert for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow select for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow update for service_role" ON debtors;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON debtors;
+
 -- DEBTORS jadvali policies
 CREATE POLICY "Allow insert for service_role" ON debtors FOR INSERT WITH CHECK (auth.role() = 'service_role');
 CREATE POLICY "Allow select for service_role" ON debtors FOR SELECT USING (auth.role() = 'service_role' OR true);
 CREATE POLICY "Allow update for service_role" ON debtors FOR UPDATE USING (auth.role() = 'service_role');
 CREATE POLICY "Allow delete for service_role" ON debtors FOR DELETE USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Allow insert for service_role" ON history;
+DROP POLICY IF EXISTS "Allow select for service_role" ON history;
+DROP POLICY IF EXISTS "Allow update for service_role" ON history;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON history;
 
 -- HISTORY jadvali policies
 CREATE POLICY "Allow insert for service_role" ON history FOR INSERT WITH CHECK (auth.role() = 'service_role');
@@ -103,11 +124,21 @@ CREATE POLICY "Allow select for service_role" ON history FOR SELECT USING (auth.
 CREATE POLICY "Allow update for service_role" ON history FOR UPDATE USING (auth.role() = 'service_role');
 CREATE POLICY "Allow delete for service_role" ON history FOR DELETE USING (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "Allow insert for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow select for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow update for service_role" ON logs;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON logs;
+
 -- LOGS jadvali policies
 CREATE POLICY "Allow insert for service_role" ON logs FOR INSERT WITH CHECK (auth.role() = 'service_role');
 CREATE POLICY "Allow select for service_role" ON logs FOR SELECT USING (auth.role() = 'service_role' OR true);
 CREATE POLICY "Allow update for service_role" ON logs FOR UPDATE USING (auth.role() = 'service_role');
 CREATE POLICY "Allow delete for service_role" ON logs FOR DELETE USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Allow insert for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow select for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow update for service_role" ON subscriptions;
+DROP POLICY IF EXISTS "Allow delete for service_role" ON subscriptions;
 
 -- SUBSCRIPTIONS jadvali policies
 CREATE POLICY "Allow insert for service_role" ON subscriptions FOR INSERT WITH CHECK (auth.role() = 'service_role');
