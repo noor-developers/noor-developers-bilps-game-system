@@ -50,6 +50,9 @@ window.changePassword = changePassword;
 window.openNotesModal = openNotesModal;
 window.saveNote = saveNote;
 window.clearNoteEditor = clearNoteEditor;
+window.applyReceiptFilters = applyReceiptFilters;
+window.filterReceipts = filterReceipts;
+window.filterReceiptsByType = filterReceiptsByType;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
