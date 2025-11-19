@@ -274,7 +274,7 @@
   <div class="modal" id="inputModal">
     <div class="modal-content">
       <div class="modal-header" id="inputModalTitle"></div>
-      <input type="text" class="modal-input" id="inputModalValue" placeholder="" />
+      <input type="text" class="modal-input" id="inputModalValue" placeholder="Qiymat kiriting" title="Qiymat kiriting" />
       <div class="modal-close">
         <button class="btn btn-success" onclick="confirmInput()">Tasdiqlash</button>
         <button class="btn btn-danger" onclick="closeModal('inputModal')">Bekor qilish</button>
@@ -420,19 +420,19 @@
           <h3 class="text-success mb-15">Narxlar (so'm/soat)</h3>
           <div class="form-group">
             <label>Billiard-1:</label>
-            <input type="number" id="priceB1" value="40000">
+            <input type="number" id="priceB1" value="40000" title="Billiard 1 narxi" placeholder="40000">
           </div>
           <div class="form-group">
             <label>Billiard-2:</label>
-            <input type="number" id="priceB2" value="40000">
+            <input type="number" id="priceB2" value="40000" title="Billiard 2 narxi" placeholder="40000">
           </div>
           <div class="form-group">
             <label>PlayStation 4 Pro:</label>
-            <input type="number" id="pricePS4" value="15000">
+            <input type="number" id="pricePS4" value="15000" title="PlayStation 4 narxi" placeholder="15000">
           </div>
           <div class="form-group">
             <label>PlayStation 5 Slim:</label>
-            <input type="number" id="pricePS5" value="20000">
+            <input type="number" id="pricePS5" value="20000" title="PlayStation 5 narxi" placeholder="20000">
           </div>
         </div>
       </div>
@@ -556,7 +556,7 @@
 
   <!-- Sozlamalar Modal -->
   <div class="modal" id="settingsModal">
-    <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-content settings-modal-content">
       <div class="modal-header">
         <h2>⚙️ Sozlamalar</h2>
         <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
@@ -568,11 +568,11 @@
           <h3 class="section-title">🏢 Club ma'lumotlari</h3>
           <div class="input-group">
             <label>Club nomi</label>
-            <input type="text" id="settingsClubName" class="modal-input" readonly />
+            <input type="text" id="settingsClubName" class="modal-input" readonly title="Club nomi" placeholder="Club nomi" />
           </div>
           <div class="input-group">
             <label>Foydalanuvchi</label>
-            <input type="text" id="settingsUsername" class="modal-input" readonly />
+            <input type="text" id="settingsUsername" class="modal-input" readonly title="Foydalanuvchi" placeholder="Foydalanuvchi" />
           </div>
         </div>
 
@@ -582,19 +582,19 @@
           <div class="settings-grid">
             <div class="input-group">
               <label>🎱 Billiard 1 (soatiga)</label>
-              <input type="number" id="settingsPriceB1" class="modal-input" value="40000" />
+              <input type="number" id="settingsPriceB1" class="modal-input" value="40000" title="Billiard 1 narxi" placeholder="40000" />
             </div>
             <div class="input-group">
               <label>🎱 Billiard 2 (soatiga)</label>
-              <input type="number" id="settingsPriceB2" class="modal-input" value="40000" />
+              <input type="number" id="settingsPriceB2" class="modal-input" value="40000" title="Billiard 2 narxi" placeholder="40000" />
             </div>
             <div class="input-group">
               <label>🎮 PlayStation 4 (soatiga)</label>
-              <input type="number" id="settingsPricePS4" class="modal-input" value="15000" />
+              <input type="number" id="settingsPricePS4" class="modal-input" value="15000" title="PlayStation 4 narxi" placeholder="15000" />
             </div>
             <div class="input-group">
               <label>🎮 PlayStation 5 (soatiga)</label>
-              <input type="number" id="settingsPricePS5" class="modal-input" value="20000" />
+              <input type="number" id="settingsPricePS5" class="modal-input" value="20000" title="PlayStation 5 narxi" placeholder="20000" />
             </div>
           </div>
         </div>
