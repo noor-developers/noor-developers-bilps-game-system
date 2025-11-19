@@ -204,6 +204,13 @@ function exposeGlobals() {
   window.checkSettingsPassword = checkSettingsPassword;
   window.printReceipt = printReceipt;
   
+  // Bar management functions
+  window.openAddProductModal = barModule.openAddProductModal;
+  window.openManageProductsModal = barModule.openManageProductsModal;
+  window.closeManageModal = barModule.closeManageModal;
+  window.editProduct = barModule.editProduct;
+  window.deleteProduct = barModule.deleteProduct;
+  
   window.gameModule = gameModule;
   window.barModule = barModule;
   window.paymentModule = paymentModule;

@@ -12,6 +12,10 @@ export function renderBarPage() {
   const content = document.getElementById('contentArea');
   content.innerHTML = `
       <h2 class="page-title">🍹 Bar Mahsulotlari</h2>
+      <div style="margin-bottom: 20px;">
+        <button class="btn" onclick="window.barModule.openAddProductModal()">➕ Mahsulot Qo'shish</button>
+        <button class="btn" onclick="window.barModule.openManageProductsModal()">📝 Mahsulotlarni Boshqarish</button>
+      </div>
       <div class="bar-products-grid" id="barGrid"></div>
   `;
   updateBarGrid();
@@ -181,5 +185,271 @@ export function removeBarItem(tableKey, itemIdx) {
     updateActiveSessions();
     updateBarGrid();
     showNotification(`✅ ${item.name} mahsuloti inventarga qaytarildi.`, 1000);
+  });
+}
+
+// ========== BAR PRODUCT MANAGEMENT ==========
+export function openAddProductModal() {
+  document.getElementById('inputModalTitle').textContent = '➕ Yangi Mahsulot';
+  document.getElementById('inputModalValue').placeholder = 'Mahsulot nomi';
+  document.getElementById('inputModalValue').value = '';
+  
+  STATE.currentInputType = 'add-product-name';
+  openModal('inputModal');
+  
+  const oldConfirm = window.confirmInput;
+  window.confirmInput = function() {
+    if (STATE.currentInputType !== 'add-product-name') {
+      oldConfirm();
+      return;
+    }
+    
+    const name = document.getElementById('inputModalValue').value.trim();
+    if (!name) {
+      showNotification('⚠️ Mahsulot nomini kiriting!');
+      return;
+    }
+    
+    if (STATE.barItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
+      showNotification('⚠️ Bu mahsulot allaqachon mavjud!');
+      return;
+    }
+    
+    STATE.tempProductName = name;
+    
+    // Ask for price
+    document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
+    document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
+    document.getElementById('inputModalValue').value = '';
+    STATE.currentInputType = 'add-product-price';
+  };
+}
+
+function continueAddProduct() {
+  const oldConfirm = window.confirmInput;
+  window.confirmInput = function() {
+    if (STATE.currentInputType !== 'add-product-price') {
+      oldConfirm();
+      return;
+    }
+    
+    const price = parseInt(document.getElementById('inputModalValue').value);
+    if (isNaN(price) || price <= 0) {
+      showNotification('⚠️ To\'g\'ri narx kiriting!');
+      return;
+    }
+    
+    STATE.tempProductPrice = price;
+    
+    // Ask for stock
+    document.getElementById('inputModalTitle').textContent = '📦 Zaxira soni';
+    document.getElementById('inputModalValue').placeholder = 'Masalan: 50';
+    document.getElementById('inputModalValue').value = '';
+    STATE.currentInputType = 'add-product-stock';
+  };
+}
+
+function finishAddProduct() {
+  const oldConfirm = window.confirmInput;
+  window.confirmInput = function() {
+    if (STATE.currentInputType !== 'add-product-stock') {
+      oldConfirm();
+      return;
+    }
+    
+    const stock = parseInt(document.getElementById('inputModalValue').value);
+    if (isNaN(stock) || stock < 0) {
+      showNotification('⚠️ To\'g\'ri miqdor kiriting!');
+      return;
+    }
+    
+    STATE.barItems.push({
+      name: STATE.tempProductName,
+      price: STATE.tempProductPrice,
+      stock: stock
+    });
+    
+    addLog('Bar (Qo\'shish)', `${STATE.tempProductName} - ${STATE.tempProductPrice} so'm, ${stock} dona`);
+    saveData();
+    
+    delete STATE.tempProductName;
+    delete STATE.tempProductPrice;
+    
+    closeModal('inputModal');
+    window.confirmInput = oldConfirm;
+    
+    if (getCurrentPage() === 'bar') {
+      renderBarPage();
+    }
+    
+    showNotification(`✅ ${STATE.barItems[STATE.barItems.length - 1].name} qo'shildi!`);
+  };
+}
+
+// Update confirmInput flow
+const originalConfirmInput = window.confirmInput;
+window.confirmInput = function() {
+  if (STATE.currentInputType === 'add-product-name') {
+    const name = document.getElementById('inputModalValue').value.trim();
+    if (!name) {
+      showNotification('⚠️ Mahsulot nomini kiriting!');
+      return;
+    }
+    
+    if (STATE.barItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
+      showNotification('⚠️ Bu mahsulot allaqachon mavjud!');
+      return;
+    }
+    
+    STATE.tempProductName = name;
+    document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
+    document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
+    document.getElementById('inputModalValue').value = '';
+    STATE.currentInputType = 'add-product-price';
+  } else if (STATE.currentInputType === 'add-product-price') {
+    const price = parseInt(document.getElementById('inputModalValue').value);
+    if (isNaN(price) || price <= 0) {
+      showNotification('⚠️ To\'g\'ri narx kiriting!');
+      return;
+    }
+    
+    STATE.tempProductPrice = price;
+    document.getElementById('inputModalTitle').textContent = '📦 Zaxira soni';
+    document.getElementById('inputModalValue').placeholder = 'Masalan: 50';
+    document.getElementById('inputModalValue').value = '';
+    STATE.currentInputType = 'add-product-stock';
+  } else if (STATE.currentInputType === 'add-product-stock') {
+    const stock = parseInt(document.getElementById('inputModalValue').value);
+    if (isNaN(stock) || stock < 0) {
+      showNotification('⚠️ To\'g\'ri miqdor kiriting!');
+      return;
+    }
+    
+    STATE.barItems.push({
+      name: STATE.tempProductName,
+      price: STATE.tempProductPrice,
+      stock: stock
+    });
+    
+    addLog('Bar (Qo\'shish)', `${STATE.tempProductName} - ${STATE.tempProductPrice} so'm, ${stock} dona`);
+    saveData();
+    
+    delete STATE.tempProductName;
+    delete STATE.tempProductPrice;
+    
+    closeModal('inputModal');
+    
+    if (getCurrentPage() === 'bar') {
+      renderBarPage();
+    }
+    
+    showNotification(`✅ Mahsulot qo'shildi!`);
+  } else if (originalConfirmInput) {
+    originalConfirmInput();
+  }
+};
+
+export function openManageProductsModal() {
+  const content = document.getElementById('contentArea');
+  const modalHTML = `
+    <div class="modal show" id="manageProductsModal">
+      <div class="modal-content modal-wide">
+        <h2>📝 Mahsulotlarni Boshqarish</h2>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nomi</th>
+                <th>Narxi</th>
+                <th>Zaxira</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${STATE.barItems.map((item, idx) => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.price} so'm</td>
+                  <td>${item.stock}</td>
+                  <td>
+                    <button class="btn btn-small" onclick="window.barModule.editProduct(${idx})">✏️ Tahrirlash</button>
+                    <button class="btn btn-small modal-danger" onclick="window.barModule.deleteProduct(${idx})">🗑️ O'chirish</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn" onclick="window.barModule.closeManageModal()">Yopish</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Remove existing modal if present
+  const existing = document.getElementById('manageProductsModal');
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+export function closeManageModal() {
+  const modal = document.getElementById('manageProductsModal');
+  if (modal) modal.remove();
+  if (getCurrentPage() === 'bar') {
+    renderBarPage();
+  }
+}
+
+export function editProduct(idx) {
+  const product = STATE.barItems[idx];
+  
+  document.getElementById('inputModalTitle').textContent = `✏️ ${product.name} - Yangi zaxira`;
+  document.getElementById('inputModalValue').placeholder = `Hozirgi: ${product.stock}`;
+  document.getElementById('inputModalValue').value = product.stock;
+  
+  STATE.currentInputType = 'edit-product-stock';
+  STATE.editProductIndex = idx;
+  
+  openModal('inputModal');
+  
+  const oldConfirm = window.confirmInput;
+  window.confirmInput = function() {
+    if (STATE.currentInputType !== 'edit-product-stock') {
+      oldConfirm();
+      return;
+    }
+    
+    const newStock = parseInt(document.getElementById('inputModalValue').value);
+    if (isNaN(newStock) || newStock < 0) {
+      showNotification('⚠️ To\'g\'ri miqdor kiriting!');
+      return;
+    }
+    
+    const oldStock = STATE.barItems[STATE.editProductIndex].stock;
+    STATE.barItems[STATE.editProductIndex].stock = newStock;
+    
+    addLog('Bar (Tahrirlash)', `${product.name} - Zaxira: ${oldStock} → ${newStock}`);
+    saveData();
+    
+    closeModal('inputModal');
+    window.confirmInput = oldConfirm;
+    delete STATE.editProductIndex;
+    
+    closeManageModal();
+    showNotification(`✅ ${product.name} yangilandi!`);
+  };
+}
+
+export function deleteProduct(idx) {
+  const product = STATE.barItems[idx];
+  
+  showConfirm(`${product.name} mahsulotini o'chirish tasdiqlaysizmi?`, () => {
+    STATE.barItems.splice(idx, 1);
+    addLog('Bar (O\'chirish)', `${product.name} mahsuloti o'chirildi`);
+    saveData();
+    closeManageModal();
+    showNotification(`✅ ${product.name} o'chirildi!`);
   });
 }
