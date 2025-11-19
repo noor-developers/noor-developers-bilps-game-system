@@ -218,7 +218,7 @@ export async function saveData() {
 }
 
 // YANGI: Supabase-dan users yuklash
-async function loadUsersFromSupabase() {
+export async function loadUsersFromSupabase() {
   if (!USE_ONLINE_BACKUP) {
     console.log('⚠️ Online backup o\'chirilgan');
     return;

@@ -2,7 +2,7 @@
 // Application Initialization and Global Functions
 
 import { STATE } from './config.js';
-import { loadData, saveData, exportData, handleImportFile } from './storage.js';
+import { loadData, saveData, exportData, handleImportFile, loadUsersFromSupabase } from './storage.js';
 import {
   autoLoginIfActive,
   login,
@@ -64,6 +64,9 @@ export async function initializeApp() {
   
   // Initialize passwords
   initializePasswords();
+  
+  // Load users from Supabase FIRST
+  await loadUsersFromSupabase();
   
   // Load data
   await loadData();

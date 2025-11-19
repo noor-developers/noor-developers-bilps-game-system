@@ -4,6 +4,7 @@
 // ========== CONSTANTS ==========
 export const DB_NAME = 'noor_gms_database';
 export const DB_VERSION = '1.4';
+// API URL
 export const API_URL = 'https://noor-bilps-backend.onrender.com/api';
 export const USE_ONLINE_BACKUP = true;
 export const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
