@@ -91,21 +91,21 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 }
 
 /* Login Screen */
-.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s, visibility 0.5s;}
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s, visibility 0.5s;}
 .login-container{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;width:100%;}
-.login-header{text-align:center;margin-bottom:30px;color:white;}
-.login-header .logo{font-size:3rem;margin-bottom:10px;font-weight:900;text-shadow:0 0 10px rgba(0,0,0,0.3);}
+.login-header{text-align:center;margin-bottom:30px;color:var(--text);}
+.login-header .logo{font-size:3rem;margin-bottom:10px;font-weight:900;text-shadow:0 0 10px rgba(99,102,241,0.5);}
 .login-header h1{font-size:1.5rem;font-weight:300;opacity:0.9;}
-.login-box{background:rgba(255,255,255,0.95);padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:400px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
-.login-form h2{color:#333;margin-bottom:25px;text-align:center;font-weight:600;}
+.login-box{background:var(--panel);padding:40px;border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:400px;border:1px solid var(--border);}
+.login-form h2{color:var(--text);margin-bottom:25px;text-align:center;font-weight:600;}
 .input-group{margin-bottom:20px;}
-.input-group input{width:100%;padding:15px;border:2px solid #e2e8f0;border-radius:10px;font-size:1rem;transition:all 0.3s;background:white;}
-.input-group input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);outline:none;}
-.login-btn{width:100%;padding:15px;background:#667eea;color:white;border:none;border-radius:10px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s;}
-.login-btn:hover{background:#5a6fd8;transform:translateY(-2px);box-shadow:0 5px 15px rgba(102,126,234,0.4);}
-.login-footer{margin-top:25px;text-align:center;padding-top:20px;border-top:1px solid #e2e8f0;}
-.login-footer .clock{font-size:1.5rem;font-weight:700;color:#667eea;font-family:'Courier New',monospace;margin-bottom:5px;text-shadow:0 0 5px rgba(102,126,234,0.3);}
-.login-footer .date{font-size:0.9rem;color:#64748b;}
+.input-group input{width:100%;padding:15px;border:2px solid var(--border);border-radius:10px;font-size:1rem;transition:all 0.3s;background:var(--bg);color:var(--text);}
+.input-group input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,0.2);outline:none;}
+.login-btn{width:100%;padding:15px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s;}
+.login-btn:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 5px 15px rgba(99,102,241,0.4);}
+.login-footer{margin-top:25px;text-align:center;padding-top:20px;border-top:1px solid var(--border);}
+.login-footer .clock{font-size:1.5rem;font-weight:700;color:var(--warning);font-family:'Courier New',monospace;margin-bottom:5px;text-shadow:0 0 5px rgba(245,158,11,0.5);}
+.login-footer .date{font-size:0.9rem;color:var(--text-dim);}
 
 /* New Year Banner */
 .new-year-banner {
@@ -359,7 +359,7 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .text-muted { color: #64748b; }
 .link-accent { color: #667eea; font-weight: 600; }
 .modal-footer-center { margin-top: 20px; text-align: center; }
-.section-subtitle { color: #667eea; font-size: 1rem; margin: 15px 0 10px; }
+.section-subtitle { color: var(--primary); font-size: 1rem; margin: 15px 0 10px; }
 .flex-column-5 { display: flex; flex-direction: column; gap: 5px; }
 .club-info-banner { font-size: 0.85rem; color: var(--warning); font-weight: 600; }
 .mt-8 { margin-top: 8px; }
