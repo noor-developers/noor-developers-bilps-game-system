@@ -146,7 +146,7 @@ app.get('/api/get-users', async (req, res) => {
 // 4. Yangi foydalanuvchi qo'shish
 app.post('/api/add-user', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, clubName, ownerName, phone, address, email } = req.body;
     const dbClient = getDbClient();
     if (!dbClient) return res.status(500).json({ error: 'Supabase not configured on server' });
 
@@ -169,7 +169,22 @@ app.post('/api/add-user', async (req, res) => {
       .from('users')
       .insert([{
         username: username,
-        password: password, // SHA256 bilan encrypt qilish kerak production'da!
+        password: password,
+        club_name: clubName || null,
+        email: email || null,
+        phone: phone || null,
+        settings: {
+          priceB1: 40000,
+          priceB2: 40000,
+          pricePS4: 15000,
+          pricePS5: 20000,
+          theme: 'dark',
+          language: 'uz',
+          notifications: true,
+          autoSave: true,
+          ownerName: ownerName || null,
+          address: address || null
+        },
         created_at: new Date().toISOString()
       }])
       .select();
@@ -195,7 +210,7 @@ app.get('/api/load-all-users', async (req, res) => {
 
     const { data, error } = await dbClient
       .from('users')
-      .select('username, password')
+      .select('username, password, club_name, email, phone, settings')
       .order('created_at', { ascending: false });
 
     if (error) throw error;

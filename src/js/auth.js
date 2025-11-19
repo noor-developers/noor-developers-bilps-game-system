@@ -256,11 +256,9 @@ async function loadAndDisplayClubInfo(username) {
         console.log('✅ User ma\'lumotlari topildi:', userInfo);
         
         // STATE ga club ma'lumotlarini saqlash
-        STATE.clubName = userInfo.clubname || userInfo.club_name || '';
-        STATE.clubOwner = userInfo.ownername || '';
-        STATE.clubPhone = userInfo.phone || '';
-        STATE.clubAddress = userInfo.address || '';
+        STATE.clubName = userInfo.club_name || '';
         STATE.userEmail = userInfo.email || '';
+        STATE.clubPhone = userInfo.phone || '';
         
         // User settings-ni yuklash (agar mavjud bo'lsa)
         if (userInfo.settings) {
@@ -272,6 +270,8 @@ async function loadAndDisplayClubInfo(username) {
           STATE.priceB2 = settings.priceB2 || STATE.priceB2;
           STATE.pricePS4 = settings.pricePS4 || STATE.pricePS4;
           STATE.pricePS5 = settings.pricePS5 || STATE.pricePS5;
+          STATE.clubOwner = settings.ownerName || '';
+          STATE.clubAddress = settings.address || '';
           
           console.log('✅ User sozlamalari yuklandi:', settings);
         }
