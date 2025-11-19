@@ -101,6 +101,15 @@
       <button data-page="log">Log</button>
     </nav>
     <div class="topbar-right">
+      <button class="notes-topbar-btn" onclick="openQueueModal()" title="Navbat olish">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <polyline points="17 11 19 13 23 9"></polyline>
+        </svg>
+        <span>Navbat</span>
+      </button>
+      
       <button class="notes-topbar-btn" onclick="openNotesModal()" title="Zametkalar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -680,6 +689,56 @@
     </script>
 
     <!-- Table Management Modal -->
+    <!-- Queue Management Modal -->
+    <div class="modal" id="queueModal">
+      <div class="modal-content queue-modal">
+        <div class="modal-header">
+          <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <polyline points="17 11 19 13 23 9"></polyline>
+            </svg>
+            Navbat boshqaruvi
+          </h2>
+          <button class="close-btn" onclick="closeModal('queueModal')">×</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Add Customer Section -->
+          <div class="add-table-section">
+            <h3 class="section-subtitle">➕ Navbatga qo'shish</h3>
+            <div class="queue-add-form">
+              <input type="text" id="queueCustomerName" class="modal-input" placeholder="Mijoz ismi *" />
+              <input type="tel" id="queueCustomerPhone" class="modal-input" placeholder="Telefon (ixtiyoriy)" />
+              <select id="queueTableType" class="modal-input">
+                <option value="billiard">🎱 Billiard</option>
+                <option value="ps4">🎮 PlayStation 4</option>
+                <option value="ps5">🎮 PlayStation 5</option>
+              </select>
+              <button class="btn btn-success" onclick="addCustomerFromModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Qo'shish
+              </button>
+            </div>
+          </div>
+
+          <!-- Queue List -->
+          <div class="tables-list-section">
+            <h3 class="section-subtitle">📋 Navbat ro'yxati</h3>
+            <div id="queueListContainer" class="queue-list"></div>
+          </div>
+        </div>
+        
+        <div class="modal-footer-center">
+          <button class="btn btn-secondary" onclick="closeModal('queueModal')">Yopish</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal" id="tableManagementModal">
       <div class="modal-content table-management-modal">
         <div class="modal-header">

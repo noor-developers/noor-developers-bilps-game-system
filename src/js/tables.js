@@ -261,12 +261,16 @@ export function renderTablesList() {
     return;
   }
 
-  container.innerHTML = tables.map(table => `
+  container.innerHTML = tables.map(table => {
+    const price = STATE.prices[table.id] || 0;
+    const formattedPrice = price.toLocaleString('uz-UZ');
+    return `
     <div class="table-management-item ${table.active ? 'active' : ''} ${table.running ? 'running' : ''}">
       <div class="table-info">
         <div class="table-name">${table.name}</div>
         <div class="table-details">
           <span class="table-id">${table.id}</span>
+          <span class="table-price">💰 ${formattedPrice} so'm</span>
           ${table.active ? '<span class="badge badge-success">Faol</span>' : ''}
           ${table.running ? '<span class="badge badge-warning">Ishlamoqda</span>' : ''}
         </div>
@@ -286,7 +290,8 @@ export function renderTablesList() {
         </button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // Edit table name

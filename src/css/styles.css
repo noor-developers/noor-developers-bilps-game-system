@@ -526,3 +526,30 @@ body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;min-hei
 .btn-icon.btn-danger:hover:not(:disabled){background:var(--danger);}
 .btn-icon:disabled{opacity:0.5;cursor:not-allowed;}
 
+/* Queue Management Styles */
+.queue-modal{max-width:850px;width:95vw;}
+.queue-add-form{display:grid;grid-template-columns:2fr 1.5fr 1fr auto;gap:10px;align-items:center;}
+.queue-list{display:flex;flex-direction:column;gap:12px;max-height:450px;overflow-y:auto;}
+.queue-item{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:15px;transition:all 0.3s;}
+.queue-item:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.queue-item.waiting{border-left:4px solid var(--warning);}
+.queue-item.called{border-left:4px solid var(--primary);background:rgba(59,130,246,0.05);}
+.queue-item.served{border-left:4px solid var(--success);background:rgba(16,185,129,0.05);opacity:0.7;}
+.queue-item-header{display:flex;gap:15px;align-items:center;margin-bottom:10px;}
+.queue-number{background:var(--primary);color:#fff;font-size:1.2rem;font-weight:700;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.queue-info{flex:1;min-width:0;}
+.queue-customer-name{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.queue-details{font-size:0.75rem;color:var(--text-dim);display:flex;gap:8px;flex-wrap:wrap;}
+.queue-status{flex-shrink:0;}
+.status-badge{padding:6px 12px;border-radius:6px;font-size:0.75rem;font-weight:600;white-space:nowrap;}
+.status-waiting{background:rgba(245,158,11,0.15);color:var(--warning);border:1px solid var(--warning);}
+.status-called{background:rgba(59,130,246,0.15);color:var(--primary);border:1px solid var(--primary);}
+.status-served{background:rgba(16,185,129,0.15);color:var(--success);border:1px solid var(--success);}
+.queue-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-icon.btn-success{border-color:var(--success);}
+.btn-icon.btn-success:hover{background:var(--success);}
+.btn-icon.btn-primary{border-color:var(--primary);}
+.btn-icon.btn-primary:hover{background:var(--primary);}
+.empty-state{text-align:center;padding:40px;color:var(--text-dim);font-size:1.1rem;}
+.table-price{font-size:0.8rem;color:var(--success);font-weight:600;padding:2px 8px;background:rgba(16,185,129,0.1);border-radius:4px;}
+

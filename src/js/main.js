@@ -39,6 +39,7 @@ import { toggleShift } from './shift.js';
 import { decrypt, printReceipt } from './utils.js';
 import { saveNotes, syncNotesArea, openNotesModal, saveNote, clearNoteEditor, loadNote } from './notes.js';
 import { openTableManagementModal, addTableFromModal, renderTablesList, editTableName, confirmRemoveTable } from './tables.js';
+import { openQueueModal, addCustomerFromModal, callNext, markAsServed, removeFromQueue } from './queue.js';
 
 // ========== IMMEDIATE GLOBAL EXPOSURE (for onclick handlers) ==========
 // These must be available immediately when HTML loads
@@ -59,6 +60,11 @@ window.openTableManagementModal = openTableManagementModal;
 window.addTableFromModal = addTableFromModal;
 window.editTableName = editTableName;
 window.confirmRemoveTable = confirmRemoveTable;
+window.openQueueModal = openQueueModal;
+window.addCustomerFromModal = addCustomerFromModal;
+window.callNext = callNext;
+window.markAsServed = markAsServed;
+window.removeFromQueue = removeFromQueue;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {
