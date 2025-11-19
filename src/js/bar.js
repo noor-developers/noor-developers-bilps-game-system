@@ -189,20 +189,20 @@ export function removeBarItem(tableKey, itemIdx) {
 }
 
 // ========== BAR PRODUCT MANAGEMENT ==========
+let tempBarProductData = {};
+
 export function openAddProductModal() {
+  tempBarProductData = {};
   document.getElementById('inputModalTitle').textContent = '➕ Mahsulot nomi';
   document.getElementById('inputModalValue').placeholder = 'Masalan: Cola';
   document.getElementById('inputModalValue').value = '';
   
   STATE.currentInputType = 'add-product-name';
   openModal('inputModal');
-}
-
-// Setup global confirmInput handler for bar products
-if (typeof window !== 'undefined') {
-  const originalConfirmInput = window.confirmInput;
   
-  window.confirmInput = function() {
+  // Override confirmInput temporarily
+  const originalConfirm = window.confirmInput;
+  window.confirmInput = function handleBarProductInput() {
     if (STATE.currentInputType === 'add-product-name') {
       const name = document.getElementById('inputModalValue').value.trim();
       if (!name) {
@@ -215,52 +215,56 @@ if (typeof window !== 'undefined') {
         return;
       }
       
-      STATE.tempProductName = name;
+      tempBarProductData.name = name;
       document.getElementById('inputModalTitle').textContent = '💰 Narxi (so\'m)';
       document.getElementById('inputModalValue').placeholder = 'Masalan: 5000';
       document.getElementById('inputModalValue').value = '';
+      document.getElementById('inputModalValue').focus();
       STATE.currentInputType = 'add-product-price';
-  } else if (STATE.currentInputType === 'add-product-price') {
-    const price = parseInt(document.getElementById('inputModalValue').value);
-    if (isNaN(price) || price <= 0) {
-      showNotification('⚠️ To\'g\'ri narx kiriting!');
-      return;
+      
+    } else if (STATE.currentInputType === 'add-product-price') {
+      const price = parseInt(document.getElementById('inputModalValue').value);
+      if (isNaN(price) || price <= 0) {
+        showNotification('⚠️ To\'g\'ri narx kiriting!');
+        return;
+      }
+      
+      tempBarProductData.price = price;
+      document.getElementById('inputModalTitle').textContent = '📦 Zaxira soni';
+      document.getElementById('inputModalValue').placeholder = 'Masalan: 50';
+      document.getElementById('inputModalValue').value = '';
+      document.getElementById('inputModalValue').focus();
+      STATE.currentInputType = 'add-product-stock';
+      
+    } else if (STATE.currentInputType === 'add-product-stock') {
+      const stock = parseInt(document.getElementById('inputModalValue').value);
+      if (isNaN(stock) || stock < 0) {
+        showNotification('⚠️ To\'g\'ri miqdor kiriting!');
+        return;
+      }
+      
+      STATE.barItems.push({
+        name: tempBarProductData.name,
+        price: tempBarProductData.price,
+        stock: stock
+      });
+      
+      addLog('Bar (Qo\'shish)', `${tempBarProductData.name} - ${tempBarProductData.price} so'm, ${stock} dona`);
+      saveData();
+      
+      tempBarProductData = {};
+      closeModal('inputModal');
+      window.confirmInput = originalConfirm;
+      
+      if (getCurrentPage() === 'bar') {
+        renderBarPage();
+      }
+      
+      showNotification(`✅ Mahsulot qo'shildi!`);
+      
+    } else if (originalConfirm) {
+      originalConfirm();
     }
-    
-    STATE.tempProductPrice = price;
-    document.getElementById('inputModalTitle').textContent = '📦 Zaxira soni';
-    document.getElementById('inputModalValue').placeholder = 'Masalan: 50';
-    document.getElementById('inputModalValue').value = '';
-    STATE.currentInputType = 'add-product-stock';
-  } else if (STATE.currentInputType === 'add-product-stock') {
-    const stock = parseInt(document.getElementById('inputModalValue').value);
-    if (isNaN(stock) || stock < 0) {
-      showNotification('⚠️ To\'g\'ri miqdor kiriting!');
-      return;
-    }
-    
-    STATE.barItems.push({
-      name: STATE.tempProductName,
-      price: STATE.tempProductPrice,
-      stock: stock
-    });
-    
-    addLog('Bar (Qo\'shish)', `${STATE.tempProductName} - ${STATE.tempProductPrice} so'm, ${stock} dona`);
-    saveData();
-    
-    delete STATE.tempProductName;
-    delete STATE.tempProductPrice;
-    
-    closeModal('inputModal');
-    
-    if (getCurrentPage() === 'bar') {
-      renderBarPage();
-    }
-    
-    showNotification(`✅ Mahsulot qo'shildi!`);
-  } else if (originalConfirmInput) {
-    originalConfirmInput();
-  }
   };
 }
 
@@ -329,16 +333,15 @@ export function editProduct(idx) {
   document.getElementById('inputModalTitle').textContent = `✏️ ${product.name} - Yangi zaxira`;
   document.getElementById('inputModalValue').placeholder = `Hozirgi: ${product.stock}`;
   document.getElementById('inputModalValue').value = product.stock;
+  document.getElementById('inputModalValue').select();
   
   STATE.currentInputType = 'edit-product-stock';
-  STATE.editProductIndex = idx;
-  
   openModal('inputModal');
   
   const oldConfirm = window.confirmInput;
-  window.confirmInput = function() {
+  window.confirmInput = function handleEditStock() {
     if (STATE.currentInputType !== 'edit-product-stock') {
-      oldConfirm();
+      if (oldConfirm) oldConfirm();
       return;
     }
     
@@ -348,15 +351,14 @@ export function editProduct(idx) {
       return;
     }
     
-    const oldStock = STATE.barItems[STATE.editProductIndex].stock;
-    STATE.barItems[STATE.editProductIndex].stock = newStock;
+    const oldStock = STATE.barItems[idx].stock;
+    STATE.barItems[idx].stock = newStock;
     
     addLog('Bar (Tahrirlash)', `${product.name} - Zaxira: ${oldStock} → ${newStock}`);
     saveData();
     
     closeModal('inputModal');
     window.confirmInput = oldConfirm;
-    delete STATE.editProductIndex;
     
     closeManageModal();
     showNotification(`✅ ${product.name} yangilandi!`);
