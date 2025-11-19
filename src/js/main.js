@@ -23,6 +23,7 @@ import {
   closePaymentModal,
   filterReceipts,
   filterReceiptsByType,
+  applyReceiptFilters,
   toggleProfileMenu,
   closeProfileMenu,
   openSettingsFromProfile,
@@ -215,7 +216,7 @@ function exposeGlobals() {
   window.notesModule = { loadNote };
   window.filterReceipts = filterReceipts;
   window.filterReceiptsByType = filterReceiptsByType;
-  window.applyReceiptFilters = () => import('./ui.js').then(m => m.applyReceiptFilters());
+  window.applyReceiptFilters = applyReceiptFilters;
   window.selectInputType = gameModule.selectInputType;
   window.confirmInput = gameModule.confirmInput;
   window.openModal = openModal;
