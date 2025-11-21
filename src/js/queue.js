@@ -125,6 +125,32 @@ export function markAsServed(queueId) {
   return true;
 }
 
+// Clear entire queue
+export function clearQueue() {
+  if (!STATE.isLoggedIn) {
+    showNotification('⚠️ Avval tizimga kiring!');
+    return false;
+  }
+
+  if (!STATE.queue || STATE.queue.length === 0) {
+    showNotification('ℹ️ Navbat allaqachon bo\'sh');
+    return false;
+  }
+
+  const queueCount = STATE.queue.length;
+  
+  // Confirm before clearing
+  if (!confirm(`Haqiqatan ham barcha navbatni (${queueCount} ta mijoz) tozalamoqchimisiz?`)) {
+    return false;
+  }
+
+  STATE.queue = [];
+  saveData();
+  showNotification(`✅ Navbat tozalandi (${queueCount} ta mijoz o'chirildi)`);
+  renderQueueList();
+  return true;
+}
+
 // Open queue modal
 export function openQueueModal() {
   if (!STATE.isLoggedIn) {
