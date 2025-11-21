@@ -31,6 +31,9 @@ import {
   toggleProfileMenu,
   closeProfileMenu,
   openSettingsFromProfile,
+  saveSettings,
+  exportData,
+  clearLocalStorage,
   openSubscriptionModal,
   activateSubscription
 } from './ui.js';
@@ -246,6 +249,11 @@ function exposeGlobals() {
   window.toggleProfileMenu = toggleProfileMenu;
   window.closeProfileMenu = closeProfileMenu;
   window.openSettingsFromProfile = openSettingsFromProfile;
+  
+  // Settings functions
+  window.saveSettings = saveSettings;
+  window.exportData = exportData;
+  window.clearLocalStorage = clearLocalStorage;
   
   // Subscription functions
   window.openSubscriptionModal = openSubscriptionModal;

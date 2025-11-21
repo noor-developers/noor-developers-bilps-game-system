@@ -594,13 +594,8 @@ export function openSettingsFromProfile() {
 }
 
 export async function saveSettings() {
-  // v21.0: Sozlamalar faqat Firestore da saqlanadi
+  // v21.1: Sozlamalar faqat Firestore da saqlanadi
   // Narxlar har bir stolda individual saqlanadi
-  
-  // Local ma'lumotlarni saqlash
-  if (window.storageModule && window.storageModule.saveData) {
-    window.storageModule.saveData();
-  }
   
   showNotification('✅ Sozlamalar saqlandi!', 2000);
   closeModal('settingsModal');
@@ -647,12 +642,4 @@ export function exportData() {
 export function clearLocalStorage() {
   // localStorage YO'Q - Firebase faqat ishlatiladi
   showNotification('ℹ️ Barcha ma\'lumotlar Firebase da saqlanadi. localStorage ishlatilmaydi.', 3000);
-}
-
-// Global functions
-if (typeof window !== 'undefined') {
-  window.openSettingsFromProfile = openSettingsFromProfile;
-  window.saveSettings = saveSettings;
-  window.exportData = exportData;
-  window.clearLocalStorage = clearLocalStorage;
 }
