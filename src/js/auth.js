@@ -180,20 +180,53 @@ export async function register() {
     const uniqueId = generateUniqueId();
     console.log('🆔 Noyob ID yaratildi:', uniqueId);
     
-    // Parolni AES-256 bilan shifrlash
-    const encryptedPassword = await encryptPassword(password);
-    if (!encryptedPassword) {
-      showNotification('❌ Parolni shifrlashda xatolik yuz berdi!');
-      return;
-    }
-    console.log('🔐 Parol shifrlandi (AES-256)');
-    
     // Email formatlash (username lowercase bo'lishi kerak)
     const email = `${username}@noor-gms.uz`;
     
-    // Firebase da yangi user yaratish
+    // Firebase da yangi user yaratish (AVVAL auth, KEYIN shifrlash)
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log('✅ Firebase user yaratildi:', user.uid);
+    
+    // Parolni Vercel Serverless Function orqali shifrlash (SERVER-SIDE)
+    let encryptedPassword = null;
+    try {
+      // Firebase ID token olish (autentifikatsiya uchun)
+      const idToken = await user.getIdToken();
+      
+      // Vercel API ga request
+      const apiUrl = 'https://noor-gms-gcaeafqfk-xeopstjk14-3859s-projects.vercel.app/api/encrypt-password';
+      console.log('🔐 Vercel API ga parol yuborilmoqda...');
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password: password,
+          firebaseToken: idToken
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        encryptedPassword = result.encryptedPassword;
+        console.log('✅ Parol Vercel serverda shifrlandi (AES-256)');
+      } else {
+        throw new Error(result.error || 'Shifrlash xatosi');
+      }
+    } catch (apiError) {
+      console.warn('⚠️ Vercel API ishlamadi, local shifrlash:', apiError.message);
+      // Fallback: agar Vercel API ishlamasa, local shifrlash
+      const { encryptPassword: localEncrypt } = await import('./crypto.js');
+      encryptedPassword = await localEncrypt(password);
+    }
     
     // Display name o'rnatish
     await updateProfile(user, {
