@@ -42,7 +42,7 @@ import * as historyModule from './history.js';
 import { toggleShift } from './shift.js';
 import { decrypt, printReceipt } from './utils.js';
 import { saveNotes, syncNotesArea, openNotesModal, saveNote, clearNoteEditor, loadNote } from './notes.js';
-import { openTableManagementModal, addTableFromModal, renderTablesList, editTableName, confirmRemoveTable } from './tables.js';
+import { openTableManagementModal, addTableFromModal, renderTablesList, editTableName, editTablePrice, confirmRemoveTable } from './tables.js';
 import { openQueueModal, addCustomerFromModal, callNext, markAsServed, removeFromQueue, clearQueue } from './queue.js';
 
 // ========== IMMEDIATE GLOBAL EXPOSURE (for onclick handlers) ==========
@@ -63,6 +63,7 @@ window.filterReceiptsByType = filterReceiptsByType;
 window.openTableManagementModal = openTableManagementModal;
 window.addTableFromModal = addTableFromModal;
 window.editTableName = editTableName;
+window.editTablePrice = editTablePrice;
 window.confirmRemoveTable = confirmRemoveTable;
 window.openQueueModal = openQueueModal;
 window.addCustomerFromModal = addCustomerFromModal;
@@ -153,10 +154,6 @@ function openSettingsModal() {
   document.getElementById('settingsPassword').value = '';
   document.getElementById('settingsTransferCard').value = STATE.transferCardNumber;
   document.getElementById('usersInput').value = STATE.users.map(u => `${u.username} - ${u.pass}`).join('\n');
-  document.getElementById('priceB1').value = STATE.prices.b1;
-  document.getElementById('priceB2').value = STATE.prices.b2;
-  document.getElementById('pricePS4').value = STATE.prices.ps4;
-  document.getElementById('pricePS5').value = STATE.prices.ps5;
   document.getElementById('barItemsInput').value = STATE.barItems.map(i => `${i.name} - ${i.price} - ${i.stock}`).join('\n');
   
   openModal('settingsModal');
@@ -176,12 +173,6 @@ async function saveSettings() {
     STATE.transferCardNumber = newTransferCard;
     // localStorage YO'Q - Firebase ga saveData() orqali saqlanadi
   }
-  
-  // Update prices
-  STATE.prices.b1 = parseFloat(document.getElementById('priceB1').value) || 35000;
-  STATE.prices.b2 = parseFloat(document.getElementById('priceB2').value) || 30000;
-  STATE.prices.ps4 = parseFloat(document.getElementById('pricePS4').value) || 25000;
-  STATE.prices.ps5 = parseFloat(document.getElementById('pricePS5').value) || 30000;
   
   // Update bar items
   const barText = document.getElementById('barItemsInput').value;
@@ -220,6 +211,7 @@ function exposeGlobals() {
   window.openTableManagementModal = openTableManagementModal;
   window.addTableFromModal = addTableFromModal;
   window.editTableName = editTableName;
+  window.editTablePrice = editTablePrice;
   window.confirmRemoveTable = confirmRemoveTable;
   window.selectInputType = gameModule.selectInputType;
   window.confirmInput = gameModule.confirmInput;

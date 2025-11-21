@@ -166,7 +166,7 @@ export function confirmInput() {
   if (STATE.currentInputType === 'time') {
     secondsToAdd = parseInt(value) * 60;
   } else {
-    const pricePerHour = STATE.prices[key] * (STATE.tables[key].vip ? 1.5 : 1);
+    const pricePerHour = (STATE.tables[key].price || 0) * (STATE.tables[key].vip ? 1.5 : 1);
     const pricePerMinute = pricePerHour / 60;
     const seconds = Math.round((parseInt(value) / pricePerMinute) * 60);
     secondsToAdd = seconds;
@@ -250,7 +250,7 @@ export function startTimer(key) {
 export function calculateCost(key) {
   const table = STATE.tables[key];
   const elapsed = table.initialSeconds - table.remainingSeconds;
-  const pricePerHour = STATE.prices[key] * (table.vip ? 1.5 : 1);
+  const pricePerHour = (table.price || 0) * (table.vip ? 1.5 : 1);
   const secondsForCost = Math.max(0, elapsed);
   const cost = Math.max(0, Math.round((secondsForCost / 3600) * pricePerHour));
   return cost;

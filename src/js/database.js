@@ -71,7 +71,35 @@ export async function loadUserDataFromFirestore(userId) {
         console.log('✅ Game data yuklandi:', gameData);
         
         // STATE ni yangilash
-        if (gameData.tables) STATE.tables = gameData.tables;
+        if (gameData.tables) {
+          STATE.tables = gameData.tables;
+          
+          // Data migration: Eski stollarni yangi formatga o'zgartirish
+          let needsMigration = false;
+          Object.keys(STATE.tables).forEach(key => {
+            const table = STATE.tables[key];
+            if (table.price === undefined) {
+              // Eski STATE.prices dan yoki default narxdan olish
+              const oldPrice = gameData.prices ? gameData.prices[key] : null;
+              if (oldPrice) {
+                table.price = oldPrice;
+              } else {
+                // Default narxlar
+                if (key.startsWith('b')) table.price = 40000;
+                else if (key.startsWith('ps4')) table.price = 15000;
+                else if (key.startsWith('ps5')) table.price = 20000;
+                else table.price = 40000;
+              }
+              needsMigration = true;
+            }
+          });
+          
+          if (needsMigration) {
+            console.log('🔄 Data migration: Stollar yangilandi');
+            saveGameDataToFirestore(userId);
+          }
+        }
+        
         if (gameData.prices) STATE.prices = gameData.prices;
         if (gameData.history) STATE.history = gameData.history;
         if (gameData.stats) STATE.stats = gameData.stats;

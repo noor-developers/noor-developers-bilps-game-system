@@ -27,7 +27,7 @@ export function getTableTypes() {
 }
 
 // Add new table
-export function addTable(type, customName = '') {
+export function addTable(type, customName = '', customPrice = null) {
   if (!STATE.isLoggedIn) {
     showNotification('⚠️ Avval tizimga kiring!');
     return false;
@@ -68,21 +68,22 @@ export function addTable(type, customName = '') {
     tableName = `PlayStation 5 #${nextNumber}`;
   }
 
-  // Get default price
-  const tableTypes = getTableTypes();
-  const tableType = tableTypes.find(t => t.id === type);
-  const defaultPrice = tableType ? tableType.defaultPrice : 40000;
-
-  // Add price if not exists
-  if (!STATE.prices[tableId]) {
-    STATE.prices[tableId] = defaultPrice;
+  // Get price - use custom price if provided, otherwise default
+  let price;
+  if (customPrice !== null && customPrice !== undefined && customPrice !== '') {
+    price = parseInt(customPrice);
+  } else {
+    const tableTypes = getTableTypes();
+    const tableType = tableTypes.find(t => t.id === type);
+    price = tableType ? tableType.defaultPrice : 40000;
   }
 
-  // Create new table
+  // Create new table with price
   STATE.tables[tableId] = {
     id: tableId,
     name: tableName,
     type: type,
+    price: price,
     active: false,
     running: false,
     vip: false,
@@ -150,11 +151,6 @@ export function removeTable(tableId) {
 
   // Remove table
   delete STATE.tables[tableId];
-  
-  // Remove price
-  if (STATE.prices[tableId]) {
-    delete STATE.prices[tableId];
-  }
 
   // Remove stats
   if (STATE.stats[tableId]) {
@@ -227,12 +223,66 @@ export function renameTable(tableId, newName) {
   return true;
 }
 
+// Edit table price
+export function editTablePrice(tableId) {
+  if (!STATE.isLoggedIn) {
+    showNotification('⚠️ Avval tizimga kiring!');
+    return false;
+  }
+
+  if (!STATE.tables[tableId]) {
+    showNotification('⚠️ Stol topilmadi!');
+    return false;
+  }
+
+  const table = STATE.tables[tableId];
+  const currentPrice = table.price || 0;
+
+  showPrompt(
+    'Stol narxini o\'zgartirish',
+    `${table.name} uchun yangi narx kiriting (soatiga):`,
+    currentPrice.toString(),
+    (newPrice) => {
+      if (!newPrice || newPrice.trim() === '') {
+        showNotification('⚠️ Narx kiritilmadi!');
+        return false;
+      }
+
+      const price = parseInt(newPrice);
+      if (isNaN(price) || price < 0) {
+        showNotification('⚠️ Noto\'g\'ri narx!');
+        return false;
+      }
+
+      const oldPrice = table.price;
+      table.price = price;
+
+      saveData();
+      showNotification(`✅ Narx o'zgartirildi!`);
+
+      // Log action
+      if (!STATE.logs) STATE.logs = [];
+      STATE.logs.push({
+        timestamp: Date.now(),
+        user: STATE.currentUser,
+        action: 'EDIT_TABLE_PRICE',
+        details: `Stol narxi o'zgartirildi: ${table.name} (${tableId}) - ${oldPrice.toLocaleString('uz-UZ')} → ${price.toLocaleString('uz-UZ')} so'm`,
+        time: formatDateTimeUz(new Date())
+      });
+
+      // Refresh tables list
+      renderTablesList();
+
+      return true;
+    }
+  );
+}
+
 // Get tables list for settings UI
 export function getTablesList() {
   return Object.keys(STATE.tables).map(key => ({
     id: key,
-    ...STATE.tables[key],
-    price: STATE.prices[key] || 0
+    ...STATE.tables[key]
   })).sort((a, b) => {
     // Sort by type then by number
     const aType = a.type || (a.id.startsWith('b') ? 'billiard' : a.id.replace(/\d+/, ''));
@@ -268,7 +318,7 @@ export function renderTablesList() {
   }
 
   container.innerHTML = tables.map(table => {
-    const price = STATE.prices[table.id] || 0;
+    const price = table.price || 0;
     const formattedPrice = price.toLocaleString('uz-UZ');
     return `
     <div class="table-management-item ${table.active ? 'active' : ''} ${table.running ? 'running' : ''}">
@@ -286,6 +336,12 @@ export function renderTablesList() {
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+        <button class="btn-icon" onclick="editTablePrice('${table.id}')" title="Narxni o'zgartirish">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
           </svg>
         </button>
         <button class="btn-icon btn-danger" onclick="confirmRemoveTable('${table.id}')" title="O'chirish" ${table.active || table.running ? 'disabled' : ''}>
@@ -336,14 +392,17 @@ export function confirmRemoveTable(tableId) {
 export function addTableFromModal() {
   const typeSelect = document.getElementById('newTableType');
   const nameInput = document.getElementById('newTableName');
+  const priceInput = document.getElementById('newTablePrice');
   
   if (!typeSelect || !nameInput) return;
 
   const type = typeSelect.value;
   const customName = nameInput.value.trim();
+  const customPrice = priceInput ? priceInput.value.trim() : null;
 
-  if (addTable(type, customName)) {
+  if (addTable(type, customName, customPrice)) {
     nameInput.value = '';
+    if (priceInput) priceInput.value = '';
     renderTablesList();
   }
 }

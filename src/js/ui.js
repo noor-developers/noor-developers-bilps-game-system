@@ -428,7 +428,7 @@ export function updateActiveSessions() {
 function calculateCostForSession(key) {
   const table = STATE.tables[key];
   const elapsed = table.initialSeconds - table.remainingSeconds;
-  const pricePerHour = STATE.prices[key] * (table.vip ? 1.5 : 1);
+  const pricePerHour = (table.price || 0) * (table.vip ? 1.5 : 1);
   const secondsForCost = Math.max(0, elapsed);
   const cost = Math.max(0, Math.round((secondsForCost / 3600) * pricePerHour));
   return cost;
