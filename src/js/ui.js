@@ -590,55 +590,12 @@ export function openSettingsFromProfile() {
   document.getElementById('settingsClubName').value = STATE.clubName || '';
   document.getElementById('settingsUsername').value = STATE.currentUser || '';
   
-  // Narxlarni ko'rsatish
-  document.getElementById('settingsPriceB1').value = STATE.priceB1;
-  document.getElementById('settingsPriceB2').value = STATE.priceB2;
-  document.getElementById('settingsPricePS4').value = STATE.pricePS4;
-  document.getElementById('settingsPricePS5').value = STATE.pricePS5;
-  
   openModal('settingsModal');
 }
 
 export async function saveSettings() {
-  // Narxlarni saqlash
-  STATE.priceB1 = parseInt(document.getElementById('settingsPriceB1').value) || 40000;
-  STATE.priceB2 = parseInt(document.getElementById('settingsPriceB2').value) || 40000;
-  STATE.pricePS4 = parseInt(document.getElementById('settingsPricePS4').value) || 15000;
-  STATE.pricePS5 = parseInt(document.getElementById('settingsPricePS5').value) || 20000;
-  
-  // Backend-ga user settings-ni saqlash
-  const { API_URL, USE_ONLINE_BACKUP } = await import('./config.js');
-  
-  if (USE_ONLINE_BACKUP && STATE.currentUser) {
-    try {
-      const settingsData = {
-        priceB1: STATE.priceB1,
-        priceB2: STATE.priceB2,
-        pricePS4: STATE.pricePS4,
-        pricePS5: STATE.pricePS5,
-        theme: 'dark',
-        language: 'uz',
-        notifications: true,
-        autoSave: true
-      };
-      
-      const response = await fetch(`${API_URL}/update-user-settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: STATE.currentUser,
-          settings: settingsData
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        console.log('✅ User settings backend-ga saqlandi');
-      }
-    } catch (e) {
-      console.error('❌ Settings saqlashda xato:', e);
-    }
-  }
+  // v21.0: Sozlamalar faqat Firestore da saqlanadi
+  // Narxlar har bir stolda individual saqlanadi
   
   // Local ma'lumotlarni saqlash
   if (window.storageModule && window.storageModule.saveData) {
