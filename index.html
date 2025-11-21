@@ -732,10 +732,14 @@
 
           <!-- Queue List -->
           <div class="tables-list-section">
-            <div class="queue-header-actions">
-              <h3 class="section-subtitle">📋 Navbat ro'yxati</h3>
-              <button class="btn btn-danger btn-sm" onclick="clearQueue()">
-                🗑️ Navbatni tozalash
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 class="section-subtitle" style="margin: 0;">📋 Navbat ro'yxati</h3>
+              <button class="btn btn-danger" onclick="clearQueue()" style="padding: 8px 16px; font-size: 14px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Navbatni tozalash
               </button>
             </div>
             <div id="queueListContainer" class="queue-list"></div>
@@ -806,7 +810,7 @@
       console.log('✅ Firebase SDK yuklandi');
     </script>
 
-    <script type="module" src="src/js/main.js?v=18.3"></script>
+    <script type="module" src="src/js/main.js?v=18.4"></script>
 
 </body>
 </html>
