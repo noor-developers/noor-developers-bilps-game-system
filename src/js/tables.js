@@ -3,7 +3,7 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
-import { showNotification, openModal, closeModal } from './ui.js';
+import { showNotification, openModal, closeModal, showConfirm } from './ui.js';
 import { renderPage, getCurrentPage } from './game.js';
 
 // Helper function for date/time formatting
@@ -317,10 +317,13 @@ export function confirmRemoveTable(tableId) {
   const table = STATE.tables[tableId];
   if (!table) return;
 
-  if (confirm(`Haqiqatan ham "${table.name}" stolini o'chirmoqchimisiz?`)) {
-    removeTable(tableId);
-    renderTablesList();
-  }
+  showConfirm(
+    `<strong>Stolni o'chirish</strong><br><br>Haqiqatan ham "${table.name}" stolini o'chirmoqchimisiz?`,
+    () => {
+      removeTable(tableId);
+      renderTablesList();
+    }
+  );
 }
 
 // Add new table from modal

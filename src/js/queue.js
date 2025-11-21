@@ -3,7 +3,7 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
-import { showNotification, openModal, closeModal } from './ui.js';
+import { showNotification, openModal, closeModal, showConfirm } from './ui.js';
 
 // Helper function for date/time formatting
 function formatDateTimeUz(date) {
@@ -140,14 +140,16 @@ export function clearQueue() {
   const queueCount = STATE.queue.length;
   
   // Confirm before clearing
-  if (!confirm(`Haqiqatan ham barcha navbatni (${queueCount} ta mijoz) tozalamoqchimisiz?`)) {
-    return false;
-  }
-
-  STATE.queue = [];
-  saveData();
-  showNotification(`✅ Navbat tozalandi (${queueCount} ta mijoz o'chirildi)`);
-  renderQueueList();
+  showConfirm(
+    `<strong>Navbatni tozalash</strong><br><br>Haqiqatan ham barcha navbatni (${queueCount} ta mijoz) tozalamoqchimisiz?`,
+    () => {
+      STATE.queue = [];
+      saveData();
+      showNotification(`✅ Navbat tozalandi (${queueCount} ta mijoz o'chirildi)`);
+      renderQueueList();
+    }
+  );
+  return true;
   return true;
 }
 
