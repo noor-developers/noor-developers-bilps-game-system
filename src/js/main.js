@@ -18,7 +18,10 @@ import {
 import {
   updateUI,
   showNotification,
+  showConfirm,
   confirmAction,
+  showPrompt,
+  confirmPrompt,
   openModal,
   closeModal,
   closePaymentModal,
@@ -67,6 +70,7 @@ window.callNext = callNext;
 window.markAsServed = markAsServed;
 window.removeFromQueue = removeFromQueue;
 window.clearQueue = clearQueue;
+window.confirmPrompt = confirmPrompt;
 
 // ========== INITIALIZATION ==========
 export function initializePasswords() {

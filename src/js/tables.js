@@ -3,7 +3,7 @@
 
 import { STATE } from './config.js';
 import { saveData } from './storage.js';
-import { showNotification, openModal, closeModal, showConfirm } from './ui.js';
+import { showNotification, openModal, closeModal, showConfirm, showPrompt } from './ui.js';
 import { renderPage, getCurrentPage } from './game.js';
 
 // Helper function for date/time formatting
@@ -305,11 +305,17 @@ export function editTableName(tableId) {
   const table = STATE.tables[tableId];
   if (!table) return;
 
-  const newName = prompt(`Yangi nom kiriting (${table.name}):`, table.name);
-  if (newName !== null) {
-    renameTable(tableId, newName);
-    renderTablesList();
-  }
+  showPrompt(
+    '📝 Stol nomini o\'zgartirish',
+    `Yangi nom kiriting (${table.name}):`,
+    table.name,
+    (newName) => {
+      if (newName && newName.trim()) {
+        renameTable(tableId, newName.trim());
+        renderTablesList();
+      }
+    }
+  );
 }
 
 // Confirm remove table

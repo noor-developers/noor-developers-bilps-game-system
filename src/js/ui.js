@@ -76,6 +76,29 @@ export function confirmAction() {
   }
 }
 
+export function showPrompt(title, message, defaultValue, callback) {
+  document.getElementById('promptHeader').textContent = title;
+  document.getElementById('promptText').textContent = message;
+  document.getElementById('promptInput').value = defaultValue || '';
+  STATE.promptCallback = callback;
+  openModal('promptModal');
+  
+  // Focus input after modal opens
+  setTimeout(() => {
+    document.getElementById('promptInput').focus();
+    document.getElementById('promptInput').select();
+  }, 100);
+}
+
+export function confirmPrompt() {
+  const value = document.getElementById('promptInput').value;
+  closeModal('promptModal');
+  if (STATE.promptCallback) {
+    STATE.promptCallback(value);
+    STATE.promptCallback = null;
+  }
+}
+
 // ========== UI UPDATE ==========
 export function updateUI() {
   updateTopbar();
