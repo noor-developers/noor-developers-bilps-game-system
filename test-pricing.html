@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Per-Table Pricing</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    .test-box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h2 { color: #2563eb; }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    input, button { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #2563eb; color: white; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .result { background: #f0f9ff; padding: 15px; margin-top: 10px; border-left: 4px solid #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Per-Table Pricing System Test</h1>
+
+  <div class="test-box">
+    <h2>✅ Test 1: HTML Form Mavjudligi</h2>
+    <p>Narx maydonini tekshirish:</p>
+    <div id="htmlTest"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>✅ Test 2: JavaScript Funksiyalar</h2>
+    <p>addTableFromModal va editTablePrice funksiyalarini tekshirish:</p>
+    <div id="jsTest"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>✅ Test 3: Narx Input Simulyatsiyasi</h2>
+    <label>Stol turi:</label>
+    <select id="testType">
+      <option value="billiard">🎱 Billiard</option>
+      <option value="ps4">🎮 PS4</option>
+      <option value="ps5">🎮 PS5</option>
+    </select>
+    <br>
+    <label>Stol nomi:</label>
+    <input type="text" id="testName" placeholder="Masalan: Billiard 1">
+    <br>
+    <label>Narx (soatiga):</label>
+    <input type="number" id="testPrice" placeholder="Masalan: 35000" value="35000">
+    <br>
+    <button onclick="testAddTable()">🧪 Test Qo'shish</button>
+    <div id="testResult" class="result" style="display:none;"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>📋 Test 4: Asosiy Fayllarni Yuklash</h2>
+    <button onclick="openMainApp()">🚀 Asosiy Ilovani Ochish</button>
+  </div>
+
+  <script>
+    // Test 1: HTML mavjudligini tekshirish
+    function checkHTML() {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'index.html?t=' + Date.now(), true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const html = xhr.responseText;
+          const hasNewTablePrice = html.includes('id="newTablePrice"');
+          const hasPriceB1 = html.includes('id="priceB1"');
+          
+          let result = '<div class="' + (hasNewTablePrice ? 'success' : 'error') + '">';
+          result += hasNewTablePrice ? '✅ newTablePrice maydoni topildi!' : '❌ newTablePrice maydoni yo\'q!';
+          result += '</div>';
+          
+          result += '<div class="' + (!hasPriceB1 ? 'success' : 'error') + '">';
+          result += !hasPriceB1 ? '✅ Eski priceB1 maydoni o\'chirilgan!' : '❌ Eski priceB1 maydoni hali bor!';
+          result += '</div>';
+          
+          document.getElementById('htmlTest').innerHTML = result;
+        }
+      };
+      xhr.send();
+    }
+
+    // Test 2: JavaScript funksiyalarni tekshirish
+    function checkJS() {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'src/js/tables.js?t=' + Date.now(), true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const js = xhr.responseText;
+          const hasEditTablePrice = js.includes('export function editTablePrice');
+          const hasCustomPrice = js.includes('customPrice');
+          
+          let result = '<div class="' + (hasEditTablePrice ? 'success' : 'error') + '">';
+          result += hasEditTablePrice ? '✅ editTablePrice funksiyasi topildi!' : '❌ editTablePrice funksiyasi yo\'q!';
+          result += '</div>';
+          
+          result += '<div class="' + (hasCustomPrice ? 'success' : 'error') + '">';
+          result += hasCustomPrice ? '✅ customPrice parametri bor!' : '❌ customPrice parametri yo\'q!';
+          result += '</div>';
+          
+          document.getElementById('jsTest').innerHTML = result;
+        }
+      };
+      xhr.send();
+    }
+
+    // Test 3: Narx input simulyatsiyasi
+    function testAddTable() {
+      const type = document.getElementById('testType').value;
+      const name = document.getElementById('testName').value;
+      const price = document.getElementById('testPrice').value;
+      
+      let result = '<h3>📊 Test Natijalari:</h3>';
+      result += '<p><strong>Stol turi:</strong> ' + type + '</p>';
+      result += '<p><strong>Stol nomi:</strong> ' + (name || 'Kiritilmagan') + '</p>';
+      result += '<p><strong>Narx:</strong> ' + price + ' so\'m/soat</p>';
+      
+      if (price && parseInt(price) > 0) {
+        result += '<div class="success">✅ Narx to\'g\'ri kiritildi!</div>';
+        result += '<p>Asosiy ilovada shu ma\'lumotlar bilan stol qo\'shiladi.</p>';
+      } else {
+        result += '<div class="error">❌ Narx kiritilmagan!</div>';
+      }
+      
+      document.getElementById('testResult').style.display = 'block';
+      document.getElementById('testResult').innerHTML = result;
+    }
+
+    // Test 4: Asosiy ilovani ochish
+    function openMainApp() {
+      window.open('index.html?v=' + Date.now(), '_blank');
+    }
+
+    // Sahifa yuklanganda testlarni ishga tushirish
+    window.onload = function() {
+      checkHTML();
+      checkJS();
+    };
+  </script>
+</body>
+</html>

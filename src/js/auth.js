@@ -17,6 +17,7 @@ import { addLog, generateUniqueId } from './utils.js';
 import { renderPage, clearSessionState } from './game.js';
 import { syncNotesArea } from './notes.js';
 import { loadUserDataFromFirestore, startRealtimeSync, stopRealtimeSync } from './database.js';
+import { validateUsername, encryptPassword } from './crypto.js';
 
 // ========== FIREBASE AUTH STATE LISTENER ==========
 // Firebase avtomatik session restore qiladi
@@ -138,17 +139,23 @@ export function showLoginForm() {
 export async function register() {
   console.log('📝 Firebase registration boshlandi');
   
-  const username = document.getElementById('registerUsername').value.trim();
+  const username = document.getElementById('registerUsername').value.trim().toLowerCase();
   const clubName = document.getElementById('registerClubName').value.trim();
   const ownerName = document.getElementById('registerOwnerName').value.trim();
   const phone = document.getElementById('registerPhone').value.trim();
-  const email = `${username}@noor-gms.uz`;
   const password = document.getElementById('registerPassword').value;
   const confirmPassword = document.getElementById('registerConfirmPassword').value;
   const address = document.getElementById('registerAddress').value.trim();
 
-  // Validate
-  if (!username || !clubName || !ownerName || !phone) {
+  // Username validatsiya
+  const usernameCheck = validateUsername(username);
+  if (!usernameCheck.valid) {
+    showNotification(usernameCheck.message);
+    return;
+  }
+
+  // Boshqa maydonlarni tekshirish
+  if (!clubName || !ownerName || !phone) {
     showNotification('⚠️ Barcha maydonlarni to\'ldiring!');
     return;
   }
@@ -173,6 +180,17 @@ export async function register() {
     const uniqueId = generateUniqueId();
     console.log('🆔 Noyob ID yaratildi:', uniqueId);
     
+    // Parolni AES-256 bilan shifrlash
+    const encryptedPassword = await encryptPassword(password);
+    if (!encryptedPassword) {
+      showNotification('❌ Parolni shifrlashda xatolik yuz berdi!');
+      return;
+    }
+    console.log('🔐 Parol shifrlandi (AES-256)');
+    
+    // Email formatlash (username lowercase bo'lishi kerak)
+    const email = `${username}@noor-gms.uz`;
+    
     // Firebase da yangi user yaratish
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -184,16 +202,17 @@ export async function register() {
     
     console.log('✅ Firebase user yaratildi:', user.uid);
     
-    // Firestore da user ma'lumotlarini saqlash (uniqueId bilan)
+    // Firestore da user ma'lumotlarini saqlash (shifrlangan parol bilan)
     const { saveUserProfileToFirestore } = await import('./database.js');
     await saveUserProfileToFirestore(user.uid, {
-      uniqueId,        // Noyob 14-belgilik ID
-      username,        // Username
-      clubName,        // Klub nomi
-      ownerName,       // Egasi
-      phone,           // Telefon
-      email,           // Email
-      address,         // Manzil
+      uniqueId,                    // Noyob 14-belgilik ID
+      username,                    // Username (lowercase)
+      clubName,                    // Klub nomi
+      ownerName,                   // Egasi
+      phone,                       // Telefon
+      email,                       // Email
+      address,                     // Manzil
+      encryptedPassword,           // AES-256 shifrlangan parol
       createdAt: new Date().toISOString()
     });
     
@@ -241,16 +260,22 @@ function clearRegisterForm() {
 export async function login() {
   console.log('🔑 Firebase login boshlandi');
   
-  const username = document.getElementById('loginUsername').value.trim();
+  const username = document.getElementById('loginUsername').value.trim().toLowerCase();
   const password = document.getElementById('loginPassword').value;
   
-  // Email formatini yaratish (username dan)
-  const email = username.includes('@') ? username : `${username}@noor-gms.uz`;
-
   if (!username || !password) {
     showNotification('⚠️ Username va parolni kiriting!');
     return;
   }
+
+  // Username validatsiya (login uchun yumshoqroq - faqat format tekshiruvi)
+  if (!/^[a-z0-9_@.]+$/.test(username)) {
+    showNotification('⚠️ Username faqat kichik harflar, raqamlar va _ dan iborat bo\'lishi kerak!');
+    return;
+  }
+  
+  // Email formatini yaratish (username dan)
+  const email = username.includes('@') ? username : `${username}@noor-gms.uz`;
 
   try {
     // Firebase login

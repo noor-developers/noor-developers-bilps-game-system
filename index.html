@@ -11,8 +11,8 @@
   <meta http-equiv="Expires" content="0" />
   <title>NOOR Game Management System (v13 - Dinamik stol boshqaruvi)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <link rel="stylesheet" href="src/css/styles.css?v=19.0" />
-  <link rel="stylesheet" href="src/css/responsive.css?v=19.0" />
+  <link rel="stylesheet" href="src/css/styles.css?v=20.0" />
+  <link rel="stylesheet" href="src/css/responsive.css?v=20.0" />
   
 </head>
 <body>
@@ -30,7 +30,7 @@
         <div class="login-form" id="loginFormDiv">
           <h2>🔐 Tizimga kirish</h2>
           <div class="input-group">
-            <input type="text" id="loginUsername" placeholder="👤 Username" />
+            <input type="text" id="loginUsername" placeholder="👤 Username (kichik harflar)" style="text-transform: lowercase;" />
           </div>
           <div class="input-group">
             <input type="password" id="loginPassword" placeholder="🔑 Parol" />
@@ -46,7 +46,8 @@
           
           <h3 class="section-subtitle">👤 Akkaunt</h3>
           <div class="input-group">
-            <input type="text" id="registerUsername" placeholder="👤 Username (masalan: noor123)" />
+            <input type="text" id="registerUsername" placeholder="👤 Username: faqat a-z, 0-9, _ (masalan: noor_club_01)" pattern="[a-z0-9_]+" title="Faqat kichik harflar (a-z), raqamlar (0-9) va pastki chiziq (_) ishlatish mumkin" style="text-transform: lowercase;" />
+            <small style="color: #6b7280; font-size: 12px; margin-top: 5px; display: block;">✓ Kichik harflar: a-z | ✓ Raqamlar: 0-9 | ✓ Pastki chiziq: _</small>
           </div>
           
           <h3 class="section-subtitle">🏢 Klub ma'lumotlari</h3>
@@ -637,7 +638,7 @@
             <!-- Versiya -->
             <div class="settings-section">
               <div class="version-info">
-                <small>NOOR GMS v18 (Firebase Only) | Created by Noor developers</small>
+                <small>NOOR GMS v20.0 (Secure Auth + AES-256) | Created by Noor developers</small>
               </div>
             </div>
           </div>
@@ -795,7 +796,7 @@
       console.log('✅ Firebase SDK yuklandi');
     </script>
 
-    <script type="module" src="src/js/main.js?v=19.0"></script>
+    <script type="module" src="src/js/main.js?v=20.0"></script>
 
 </body>
 </html>
