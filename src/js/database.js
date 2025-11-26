@@ -74,6 +74,12 @@ export async function loadUserDataFromFirestore(userId) {
         if (gameData.tables) {
           STATE.tables = gameData.tables;
           
+          // MUHIM: Interval larni tozalash (Firestore dan kelgan ma'lumotlarda yo'q)
+          Object.keys(STATE.tables).forEach(key => {
+            const table = STATE.tables[key];
+            table.interval = null; // Firestore interval saqlamaydi
+          });
+          
           // Data migration: Eski stollarni yangi formatga o'zgartirish
           let needsMigration = false;
           Object.keys(STATE.tables).forEach(key => {
@@ -110,6 +116,23 @@ export async function loadUserDataFromFirestore(userId) {
         if (gameData.transferBalance !== undefined) STATE.transferBalance = gameData.transferBalance;
         if (gameData.debtBalance !== undefined) STATE.debtBalance = gameData.debtBalance;
         if (gameData.shiftOpen !== undefined) STATE.shiftOpen = gameData.shiftOpen;
+        
+        // MUHIM: Faol timerlarni qayta ishga tushirish
+        console.log('🔄 Faol timerlarni qayta ishga tushirish...');
+        Object.keys(STATE.tables).forEach(key => {
+          const table = STATE.tables[key];
+          if (table.active && table.running) {
+            // Timer ishga tushirish (dinamik import)
+            import('./game.js').then(gameModule => {
+              if (gameModule.startTimer) {
+                gameModule.startTimer(key);
+                console.log(`✅ Timer qayta ishga tushdi: ${table.name}`);
+              }
+            }).catch(err => {
+              console.error(`❌ Timer ishga tushmadi (${key}):`, err);
+            });
+          }
+        });
       } else {
         console.log('ℹ️ Game data topilmadi - yangi user');
         // Yangi user uchun boshlang'ich ma'lumotlarni saqlash

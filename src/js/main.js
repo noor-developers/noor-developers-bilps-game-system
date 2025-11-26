@@ -162,38 +162,7 @@ function openSettingsModal() {
   openModal('settingsModal');
 }
 
-async function saveSettings() {
-  const { addLog } = await import('./utils.js');
-  
-  const newPassword = document.getElementById('settingsPassword').value.trim();
-  if (newPassword) {
-    STATE.settingsPassword = newPassword;
-    // localStorage YO'Q - Firebase ga saveData() orqali saqlanadi
-  }
-  
-  const newTransferCard = document.getElementById('settingsTransferCard').value.trim();
-  if (newTransferCard) {
-    STATE.transferCardNumber = newTransferCard;
-    // localStorage YO'Q - Firebase ga saveData() orqali saqlanadi
-  }
-  
-  // Update bar items
-  const barText = document.getElementById('barItemsInput').value;
-  const barLines = barText.split('\n').filter(line => line.trim());
-  STATE.barItems = barLines.map(line => {
-    const parts = line.split('-').map(p => p.trim());
-    return {
-      name: parts[0] || 'Noma\'lum',
-      price: parseInt(parts[1]) || 0,
-      stock: parseInt(parts[2]) || 0
-    };
-  });
-  
-  addLog("Sozlamalar o'zgartirildi", "");
-  await saveData();
-  closeModal('settingsModal');
-  showNotification('✅ Sozlamalar saqlandi!');
-}
+// saveSettings funksiyasi ui.js dan import qilingan
 
 function exposeGlobals() {
   window.login = login;
