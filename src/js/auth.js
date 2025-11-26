@@ -139,13 +139,25 @@ export function showLoginForm() {
 export async function register() {
   console.log('📝 Firebase registration boshlandi');
   
-  const username = document.getElementById('registerUsername').value.trim().toLowerCase();
-  const clubName = document.getElementById('registerClubName').value.trim();
-  const ownerName = document.getElementById('registerOwnerName').value.trim();
-  const phone = document.getElementById('registerPhone').value.trim();
+  let username = document.getElementById('registerUsername').value.trim().toLowerCase();
+  let clubName = document.getElementById('registerClubName').value.trim();
+  let ownerName = document.getElementById('registerOwnerName').value.trim();
+  let phone = document.getElementById('registerPhone').value.trim();
   const password = document.getElementById('registerPassword').value;
   const confirmPassword = document.getElementById('registerConfirmPassword').value;
-  const address = document.getElementById('registerAddress').value.trim();
+  let address = document.getElementById('registerAddress').value.trim();
+
+  // Input sanitization (XSS dan himoya)
+  try {
+    const { sanitizeUsername, sanitizeInput, sanitizePhone } = await import('./sanitizer.js');
+    username = sanitizeUsername(username);
+    clubName = sanitizeInput(clubName);
+    ownerName = sanitizeInput(ownerName);
+    phone = sanitizePhone(phone);
+    address = sanitizeInput(address);
+  } catch (error) {
+    console.warn('⚠️ Sanitizer module yuklanmadi, davom etilmoqda:', error);
+  }
 
   // Username validatsiya
   const usernameCheck = validateUsername(username);
@@ -301,19 +313,45 @@ export async function login() {
     return;
   }
 
+  // Rate limiting tekshiruvi (brute-force dan himoya)
+  const { checkLoginAttempts, resetLoginAttempts } = await import('./rate-limiter.js');
+  const rateLimit = checkLoginAttempts(username);
+  
+  if (!rateLimit.allowed) {
+    showNotification(`🚫 ${rateLimit.message}`, 5000);
+    addLog("Login bloklangi", `User: ${username} - ${rateLimit.lockedMinutes} daqiqa`);
+    return;
+  }
+  
+  if (rateLimit.remaining !== undefined && rateLimit.remaining < 3) {
+    console.warn(`⚠️ ${rateLimit.remaining} urinish qoldi`);
+  }
+
+  // Username sanitization (XSS dan himoya)
+  const { sanitizeUsername } = await import('./sanitizer.js');
+  const cleanUsername = sanitizeUsername(username);
+  
+  if (!cleanUsername || cleanUsername !== username) {
+    showNotification('⚠️ Username noto\'g\'ri formatda!');
+    return;
+  }
+
   // Username validatsiya (login uchun yumshoqroq - faqat format tekshiruvi)
-  if (!/^[a-z0-9_@.]+$/.test(username)) {
+  if (!/^[a-z0-9_@.]+$/.test(cleanUsername)) {
     showNotification('⚠️ Username faqat kichik harflar, raqamlar va _ dan iborat bo\'lishi kerak!');
     return;
   }
   
   // Email formatini yaratish (username dan)
-  const email = username.includes('@') ? username : `${username}@noor-gms.uz`;
+  const email = cleanUsername.includes('@') ? cleanUsername : `${cleanUsername}@noor-gms.uz`;
 
   try {
     // Firebase login
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    
+    // Login muvaffaqiyatli - rate limit reset
+    resetLoginAttempts(cleanUsername);
     
     console.log('✅ Firebase login muvaffaqiyatli:', user.uid);
     showNotification(`✅ Xush kelibsiz, ${user.displayName || 'Foydalanuvchi'}! 👋`);
@@ -339,7 +377,13 @@ export async function login() {
     }
     
     showNotification(errorMessage);
-    addLog("Kirishda xatolik", `Username: ${username}`);
+    addLog("Kirishda xatolik", `Username: ${cleanUsername}`);
+    
+    // Login muvaffaqiyatsiz - urinishlar sanalyapti
+    const newLimit = checkLoginAttempts(cleanUsername);
+    if (newLimit.remaining !== undefined && newLimit.remaining > 0) {
+      showNotification(`⚠️ ${newLimit.remaining} urinish qoldi`, 3000);
+    }
   }
 }
 

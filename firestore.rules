@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - faqat o'z ma'lumotlarini o'qish/yozish
+    match /users/{userId} {
+      // Faqat autentifikatsiya qilingan va o'z ID si bilan mos kelgan user
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // encryptedPassword maydonini o'qishga ruxsat yo'q (ekstra xavfsizlik)
+      allow read: if request.auth != null 
+                  && request.auth.uid == userId
+                  && !('encryptedPassword' in resource.data);
+      
+      // Game data subcollection
+      match /gameData/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Boshqa hamma narsaga ruxsat yo'q
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

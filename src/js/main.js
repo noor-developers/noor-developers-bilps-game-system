@@ -2,7 +2,7 @@
 // Application Initialization and Global Functions with Firebase
 
 import { STATE } from './config.js';
-import { loadData, saveData, exportData, handleImportFile } from './storage.js';
+import { loadData, saveData, handleImportFile } from './storage.js';
 import {
   initAuth,
   autoLoginIfActive,

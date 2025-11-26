@@ -47,8 +47,20 @@ function encryptPassword(password, secretKey) {
  * Vercel Serverless Function Handler
  */
 export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS headers - faqat o'z domeniga ruxsat
+  const allowedOrigins = [
+    'https://noor-gms.web.app',
+    'https://noor-gms.firebaseapp.com',
+    'http://localhost:5000',
+    'http://localhost:3000',
+    'file://' // Local testing uchun
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || origin?.startsWith('file://')) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
