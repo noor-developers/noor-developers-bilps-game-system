@@ -54,6 +54,12 @@ export function closePaymentModal(isCancelled = false) {
 }
 
 export function showNotification(text, duration = 2000) {
+  // Login screen ko'rsatilsa notification ko'rsatmaslik
+  if (!STATE.isLoggedIn) {
+    console.log('⚠️ Notification blocked (not logged in):', text);
+    return;
+  }
+  
   document.getElementById('notificationText').innerHTML = text;
   openModal('notificationModal');
   

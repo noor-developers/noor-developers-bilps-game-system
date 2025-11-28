@@ -2,6 +2,7 @@
 // Application Initialization and Global Functions with Firebase
 
 import { STATE } from './config.js';
+import { initAppCheck } from './app-check.js';
 import { loadData, saveData, handleImportFile } from './storage.js';
 import {
   initAuth,
@@ -88,7 +89,11 @@ export async function initializeApp() {
   // Initialize passwords
   initializePasswords();
   
-  // PRIORITY 1: Firebase Authentication-ni initialize qilish
+  // PRIORITY 1: Firebase App Check (bot protection) - VAQTINCHA O'CHIRILGAN
+  // console.log('🛡️ Firebase App Check ishga tushirilmoqda...');
+  // initAppCheck();
+  
+  // PRIORITY 2: Firebase Authentication-ni initialize qilish
   console.log('🔐 Firebase auth ishga tushirilmoqda...');
   await initAuth(); // Bu avtomatik login yoki login screen-ni ko'rsatadi
   

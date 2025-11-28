@@ -84,13 +84,14 @@ function renderGameCard(key) {
       </div>
       
       ${isActive ? `
-        <div class="timer-display" id="timer-${key}">${formatTime(table.remainingSeconds)}</div>
+        <div class="timer-display" id="timer-${key}">${table.vipUnlimited ? '♾️ Unlimited' : formatTime(table.remainingSeconds)}</div>
         <div class="cost-display" id="cost-${key}">${calculateCost(key)} so'm</div>
         <div class="game-buttons">
-          <button class="btn btn-primary" onclick="window.gameModule.addTime('${key}')">➕ Vaqt/Pul</button>
+          ${!table.vipUnlimited ? `<button class="btn btn-primary" onclick="window.gameModule.addTime('${key}')">➕ Vaqt/Pul</button>` : ''}
           <button class="btn btn-success" onclick="window.gameModule.toggleTimer('${key}')" id="toggleBtn-${key}">${table.running ? '⏸️ Pauza' : '▶️ Davom'}</button>
           <button class="btn btn-danger" onclick="window.gameModule.stopSession('${key}', false)">⏹️ To'xtatish</button>
           ${!table.vip ? `<button class="btn btn-warning" onclick="window.gameModule.setVip('${key}')">⭐ VIP</button>` : `<button class="btn btn-warning" onclick="window.gameModule.removeVip('${key}')">✖️ VIP</button>`}
+          ${!table.vipUnlimited ? `<button class="btn btn-info" onclick="window.gameModule.enableUnlimitedMode('${key}')">♾️ Unlimited</button>` : ''}
         </div>
       ` : `
         <div style="text-align:center;margin:30px 0;">
@@ -210,12 +211,21 @@ export function confirmInput() {
 // ========== TIMER MANAGEMENT ==========
 export function startTimer(key) {
   const table = STATE.tables[key];
-  if (!table || table.interval) return;
+  if (!table) return;
+  
+  // Agar allaqachon interval bo'lsa, avval to'xtatish (duplicate oldini olish)
+  if (table.interval) {
+    clearInterval(table.interval);
+    table.interval = null;
+  }
 
   table.interval = setInterval(() => {
       if (!table.running) return;
       
-      table.remainingSeconds--;
+      // VIP unlimited mode - vaqt kamaymasligi
+      if (!table.vipUnlimited) {
+        table.remainingSeconds--;
+      }
       
       if (table.remainingSeconds === 30 && !table.alarmed) {
           table.alarmed = true;
@@ -232,13 +242,17 @@ export function startTimer(key) {
       
       updateActiveSessions();
       
-      if (table.remainingSeconds <= 0) {
+      // VIP unlimited mode da vaqt tugamaydi
+      if (table.remainingSeconds <= 0 && !table.vipUnlimited) {
           clearInterval(table.interval);
           table.interval = null;
           table.running = false;
           table.remainingSeconds = 0;
           updateTimerUI(key);
-          showNotification(`⏰ ${table.name} vaqti tugadi! To'lovga o'tkaziladi.`, 2000);
+          // Login screen ko'rsatilsa notification ko'rsatmaslik
+          if (STATE.isLoggedIn) {
+            showNotification(`⏰ ${table.name} vaqti tugadi! To'lovga o'tkaziladi.`, 2000);
+          }
           stopSession(key, false);
       }
       
@@ -249,6 +263,17 @@ export function startTimer(key) {
 
 export function calculateCost(key) {
   const table = STATE.tables[key];
+  
+  // Unlimited mode - boshlangan vaqtdan hozirgi vaqtgacha
+  if (table.vipUnlimited && table.unlimitedStartTime) {
+    const elapsedMs = Date.now() - table.unlimitedStartTime;
+    const elapsedSeconds = Math.floor(elapsedMs / 1000);
+    const pricePerHour = (table.price || 0) * (table.vip ? 1.5 : 1);
+    const cost = Math.max(0, Math.round((elapsedSeconds / 3600) * pricePerHour));
+    return cost;
+  }
+  
+  // Oddiy rejim
   const elapsed = table.initialSeconds - table.remainingSeconds;
   const pricePerHour = (table.price || 0) * (table.vip ? 1.5 : 1);
   const secondsForCost = Math.max(0, elapsed);
@@ -264,7 +289,16 @@ function updateTimerUI(key) {
   const costEl = document.getElementById(`cost-${key}`);
   const cardEl = document.getElementById(`card-${key}`);
 
-  if (timerEl) timerEl.textContent = formatTime(table.remainingSeconds);
+  // Unlimited mode - infinity belgisi
+  if (timerEl) {
+    if (table.vipUnlimited) {
+      const elapsedMs = Date.now() - (table.unlimitedStartTime || Date.now());
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      timerEl.textContent = `♾️ ${formatTime(elapsedSeconds)}`;
+    } else {
+      timerEl.textContent = formatTime(table.remainingSeconds);
+    }
+  }
   if (cardEl) {
       if (table.active && table.remainingSeconds < 30 && table.remainingSeconds > 0) {
           cardEl.classList.add('time-low');
@@ -366,6 +400,8 @@ export function clearSessionState(key) {
   STATE.tables[key].active = false;
   STATE.tables[key].running = false;
   STATE.tables[key].vip = false;
+  STATE.tables[key].vipUnlimited = false;
+  STATE.tables[key].unlimitedStartTime = null;
   STATE.tables[key].items = [];
   STATE.tables[key].remainingSeconds = 0;
   STATE.tables[key].initialSeconds = 0;
@@ -389,6 +425,23 @@ export function removeVip(key) {
   addLog("VIP o'chirildi", STATE.tables[key].name);
   showNotification('⭐ VIP rejim o\'chirildi! Narx qayta tiklandi.');
   if(STATE.tables[key].running) startTimer(key);
+  renderPage(getCurrentPage());
+  saveData();
+}
+
+// ========== UNLIMITED MODE ==========
+export function enableUnlimitedMode(key) {
+  const table = STATE.tables[key];
+  if (!table || !table.active) return;
+  
+  // Unlimited mode yoqish
+  table.vipUnlimited = true;
+  table.unlimitedStartTime = Date.now();
+  table.remainingSeconds = 0; // Reset vaqt
+  
+  addLog("Unlimited rejim yoqildi", table.name);
+  showNotification(`♾️ ${table.name} uchun Unlimited rejim yoqildi!`);
+  
   renderPage(getCurrentPage());
   saveData();
 }

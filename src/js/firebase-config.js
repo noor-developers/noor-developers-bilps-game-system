@@ -20,6 +20,9 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Export app for App Check
+export { app };
+
 // Expose globally for debugging
 window.firebaseAuth = auth;
 window.firebaseDb = db;
