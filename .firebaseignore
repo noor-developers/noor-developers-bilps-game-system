@@ -1,0 +1,53 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Node modules
+node_modules
+functions/node_modules
+
+# Build files
+*.log
+*.pyc
+__pycache__
+.vscode
+.idea
+
+# Python
+*.py
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment
+.env
+.env.local
+
+# Documentation
+README.md
+SECURITY.md
+FIREBASE_API_SECURITY.md
+
+# API (Vercel)
+api/
+
+# Functions
+functions/
+
+# Real folder (old files)
+real/
+
+# Backups
+*.backup
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test files
+*.test.js
+*.spec.js

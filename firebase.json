@@ -1,4 +1,32 @@
 {
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/.venv/**",
+      "**/node_modules/**",
+      "**/backend/**",
+      "functions/**",
+      "api/**",
+      "real/**",
+      "**/*.py",
+      "**/*.exe",
+      "**/*.dll",
+      "**/*.so",
+      "**/*.dylib",
+      "README.md",
+      "SECURITY.md",
+      "FIREBASE_API_SECURITY.md",
+      ".firebaseignore"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
   "functions": [
     {
       "source": "functions",
